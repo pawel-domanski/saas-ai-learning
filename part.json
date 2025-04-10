@@ -1,0 +1,16 @@
+{
+  "parts": [
+    {
+      "id": 1,
+      "name": "Podstawy AI Engineering"
+    },
+    {
+      "id": 2,
+      "name": "Zaawansowane koncepcje AI"
+    },
+    {
+      "id": 3,
+      "name": "Praktyczne zastosowania"
+    }
+  ]
+} 

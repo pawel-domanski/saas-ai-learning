@@ -31,4 +31,27 @@ export async function setSession(user: NewUser) {
 export async function clearSession() {
   const cookieStore = await cookies();
   cookieStore.delete('session');
+}
+
+// function to create session cookie
+export async function createSessionCookie(sessionId: string) {
+  const cookieStore = await cookies();
+  cookieStore.set('sid', sessionId, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: 60 * 60 * 24 * 7, // 7 days
+    path: '/',
+  });
+}
+
+// function to clear session cookie
+export async function clearSessionCookie() {
+  const cookieStore = await cookies();
+  cookieStore.delete('sid');
+}
+
+export async function getSessionId(): Promise<string | null> {
+  const cookieStore = await cookies();
+  const sessionCookie = cookieStore.get('sid');
+  return sessionCookie?.value || null;
 } 

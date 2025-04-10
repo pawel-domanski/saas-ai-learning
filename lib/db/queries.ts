@@ -1,6 +1,6 @@
 import { desc, and, eq, isNull } from 'drizzle-orm';
 import { db } from './drizzle';
-import { activityLogs, teamMembers, teams, users } from './schema';
+import { activityLogs, teamMembers, teams, userProgress, users } from './schema';
 import { getSession } from '@/lib/auth/session-server';
 
 export async function getUser() {
@@ -116,4 +116,118 @@ export async function getTeamForUser(userId: number) {
   });
 
   return result?.teamMembers[0]?.team || null;
+}
+
+export async function getUserLessonProgress(userId: number, lessonId: number) {
+  const result = await db
+    .select()
+    .from(userProgress)
+    .where(and(
+      eq(userProgress.userId, userId),
+      eq(userProgress.lessonId, lessonId)
+    ))
+    .limit(1);
+
+  return result.length > 0 ? result[0] : null;
+}
+
+export async function getAllUserProgress(userId: number) {
+  return await db
+    .select()
+    .from(userProgress)
+    .where(eq(userProgress.userId, userId))
+    .orderBy(userProgress.lessonId);
+}
+
+export async function trackLessonAccess(userId: number, lessonId: number) {
+  const existingProgress = await getUserLessonProgress(userId, lessonId);
+  
+  if (existingProgress) {
+    // Aktualizuj istniejący rekord
+    await db
+      .update(userProgress)
+      .set({
+        lastAccessed: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(and(
+        eq(userProgress.userId, userId),
+        eq(userProgress.lessonId, lessonId)
+      ));
+    
+    return existingProgress;
+  } else {
+    // Utwórz nowy rekord
+    const result = await db
+      .insert(userProgress)
+      .values({
+        userId,
+        lessonId,
+        completed: false,
+        lastAccessed: new Date(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .returning();
+    
+    return result[0];
+  }
+}
+
+export async function markLessonAsCompleted(userId: number, lessonId: number) {
+  const existingProgress = await getUserLessonProgress(userId, lessonId);
+  
+  if (existingProgress) {
+    // Aktualizuj istniejący rekord
+    await db
+      .update(userProgress)
+      .set({
+        completed: true,
+        lastAccessed: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(and(
+        eq(userProgress.userId, userId),
+        eq(userProgress.lessonId, lessonId)
+      ));
+  } else {
+    // Utwórz nowy rekord z oznaczeniem jako ukończone
+    await db
+      .insert(userProgress)
+      .values({
+        userId,
+        lessonId,
+        completed: true,
+        lastAccessed: new Date(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+  }
+  
+  // Dodaj wpis do dziennika aktywności
+  await db
+    .insert(activityLogs)
+    .values({
+      userId,
+      teamId: (await getTeamForUser(userId))?.id || 0,
+      action: 'LESSON_COMPLETED',
+      timestamp: new Date(),
+      ipAddress: '',
+    });
+  
+  return await getUserLessonProgress(userId, lessonId);
+}
+
+export async function getUserCourseProgress(userId: number, totalLessons: number) {
+  const progress = await getAllUserProgress(userId);
+  
+  const completedCount = progress.filter(p => p.completed).length;
+  const percentComplete = Math.round((completedCount / totalLessons) * 100);
+  
+  return {
+    totalLessons,
+    completedLessons: completedCount,
+    percentComplete,
+    lessonProgress: progress,
+  };
 }

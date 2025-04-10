@@ -1,0 +1,295 @@
+import fs from 'fs';
+import path from 'path';
+import { notFound, redirect } from 'next/navigation';
+import { Markdown } from '@/components/ui/markdown';
+import { getUser, getTeamForUser } from '@/lib/db/queries';
+import { Button } from '@/components/ui/button';
+import { BookOpen, CheckCircle, ArrowRight, BookType } from 'lucide-react';
+import { LessonHeader } from '@/app/(protected-app)/app/lessons/[id]/lesson-header';
+import { cookies } from 'next/headers';
+import { CookieDebug } from './cookie-debug';
+
+// Get training plan data from the JSON file
+async function getLessonPlan() {
+  const filePath = path.join(process.cwd(), 'plan.json');
+  const fileContents = fs.readFileSync(filePath, 'utf8');
+  return JSON.parse(fileContents);
+}
+
+// Get part/chapter names from part.json file
+async function getPartNames() {
+  const filePath = path.join(process.cwd(), 'part.json');
+  const fileContents = fs.readFileSync(filePath, 'utf8');
+  const data = JSON.parse(fileContents);
+  
+  // Transform the array into an object where the key is the part id
+  const partMap: {[key: number]: string} = {};
+  data.parts.forEach((part: {id: number, name: string}) => {
+    partMap[part.id] = part.name;
+  });
+  
+  return partMap;
+}
+
+export default async function LessonPage({ 
+  params,
+  searchParams 
+}: { 
+  params: { id: string };
+  searchParams: { [key: string]: string | string[] | undefined };
+}) {
+  // Fix for searchParams - await before accessing properties
+  const searchParamsResolved = await Promise.resolve(searchParams);
+  const limitReached = searchParamsResolved?.limitReached === 'true';
+  const successMessage = searchParamsResolved?.success === 'true';
+
+  // Convert params.id to a number - use await to ensure params is fully available
+  const { id } = await Promise.resolve(params);
+  const lessonId = parseInt(id);
+  
+  if (isNaN(lessonId)) {
+    return notFound();
+  }
+
+  // Get the current user
+  const user = await getUser();
+  if (!user) {
+    redirect('/sign-in');
+  }
+
+  // Get the team and check subscription
+  const team = await getTeamForUser(user.id);
+  if (!team) {
+    redirect('/dashboard');
+  }
+
+  // Check if subscription is active or in trial period
+  const hasActiveSubscription = 
+    team.subscriptionStatus === 'active' || 
+    team.subscriptionStatus === 'trialing';
+  
+  if (!hasActiveSubscription) {
+    redirect('/pricing?access=premium');
+  }
+
+  // Get the lesson plan and find the lesson
+  const plan = await getLessonPlan();
+  const lessons = plan.data;
+  
+  if (lessonId < 1 || lessonId > lessons.length) {
+    return notFound();
+  }
+  
+  const lesson = lessons[lessonId - 1];
+  
+  // Get lesson content directly from plan.json
+  const content = lesson.content;
+  if (!content) {
+    return notFound();
+  }
+  
+  // Get the course part number
+  const part = lesson.part || 1;
+  
+  // Get course part names from part.json file
+  const partNames = await getPartNames();
+  const partName = partNames[part] || `Part ${part}`;
+
+  // Temporarily disable progress tracking functionality
+  // Will be re-enabled once the user_progress table is created
+  let isCompleted = false;
+  let completedLessons = 0;
+  let percentComplete = 0;
+  let completedLessonIds: number[] = [];
+  
+  // Get information about completed lessons from cookie
+  const cookieStore = await cookies();
+  const completedLessonsCookie = cookieStore.get('completedLessons')?.value;
+  
+  console.log('Server-side completedLessons cookie:', completedLessonsCookie);
+
+  if (completedLessonsCookie) {
+    try {
+      // Make sure the cookie is properly parsed
+      const parsed = JSON.parse(completedLessonsCookie);
+      console.log('Parsed completedLessonIds:', parsed);
+      
+      // Check if we have a new format with dates or just IDs
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        if (typeof parsed[0] === 'object' && parsed[0].hasOwnProperty('id')) {
+          // New format with dates
+          completedLessonIds = parsed.map(item => item.id);
+        } else {
+          // Old format - just lesson numbers
+          completedLessonIds = parsed;
+        }
+        
+        isCompleted = completedLessonIds.includes(lessonId);
+        completedLessons = completedLessonIds.length;
+        percentComplete = Math.round((completedLessons / lessons.length) * 100);
+      }
+    } catch (e) {
+      console.error('Error parsing completedLessons cookie:', e);
+    }
+  }
+
+  // Display placeholder progress instead of trying to access the non-existent table
+  const isPreviousLessonCompleted = true; // Allow marking any lesson as completed for now
+  const showNextLessonButton = isCompleted && lessonId < lessons.length;
+  const hasNextLesson = lessonId < lessons.length;
+
+  // Check if the user has access to this lesson
+  let isAccessAllowed = false;
+  let nextAvailableLessonId = 1; // The first lesson is always available
+
+  // Find the first uncompleted lesson
+  for (let i = 0; i < lessons.length; i++) {
+    const currentLessonId = i + 1;
+    if (!completedLessonIds.includes(currentLessonId)) {
+      nextAvailableLessonId = currentLessonId;
+      break;
+    }
+  }
+
+  // The lesson is available if it's already completed or is the next one to complete
+  isAccessAllowed = isCompleted || lessonId === nextAvailableLessonId;
+
+  // Just read the cookie (don't set it)
+  const lastViewedLessonId = cookieStore.get('lastViewedLessonId')?.value || '1';
+
+  if (!isAccessAllowed) {
+    return (
+      <div className="max-w-5xl mx-auto py-8 px-4">
+        <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
+          <div className="text-center py-12">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-100 mb-6">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m0 0v2m0-2h2m-2 0H9m3-4V7a3 3 0 00-3-3H5a3 3 0 00-3 3v8a3 3 0 003 3h10a3 3 0 003-3v-4" />
+              </svg>
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">No access to this lesson</h2>
+            <p className="text-gray-600 mb-6">
+              You need to complete previous lessons before you can access this one.
+            </p>
+            <div className="flex justify-center">
+              <Button asChild className="mr-4">
+                <a href={`/app/lessons/${nextAvailableLessonId}`}>
+                  Go to next available lesson
+                </a>
+              </Button>
+              <Button asChild variant="outline">
+                <a href="/app">
+                  Return to course home
+                </a>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Modified component fragment that displays completion message or button
+  const completionSection = () => {
+    // Check if the lesson is already completed
+    if (isCompleted) {
+      return (
+        <div className="flex items-center text-teal-600 gap-2">
+          <CheckCircle size={20} />
+          <span>Completed</span>
+        </div>
+      );
+    } 
+    
+    // Check if the daily lesson limit has been reached
+    if (limitReached) {
+      return (
+        <div className="flex flex-col items-center text-amber-600 gap-2">
+          <div className="flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>Daily limit reached</span>
+          </div>
+          <p className="text-xs text-gray-500 mt-1 text-center">
+            You can complete only one lesson per day.<br />
+            Come back tomorrow to continue learning.
+          </p>
+        </div>
+      );
+    }
+    
+    // Otherwise show the button to complete the lesson
+    return (
+      <form action="/api/lessons/complete" method="POST">
+        <input type="hidden" name="lessonId" value={lessonId} />
+        <input type="hidden" name="partId" value={part} />
+        <Button type="submit">
+          Mark as completed
+        </Button>
+      </form>
+    );
+  };
+
+  return (
+    <div className="max-w-5xl mx-auto py-8 px-4">
+      <div className="mb-4 text-sm font-medium flex items-center">
+        <BookType className="mr-2 text-blue-600" size={16} />
+        <span className="text-blue-600">{partName}</span>
+      </div>
+      
+      <LessonHeader 
+        lessonNumber={lessonId}
+        title={lesson.subject}
+        isCompleted={isCompleted}
+        previousLessonId={lessonId > 1 ? lessonId - 1 : null}
+        nextLessonId={lessonId < lessons.length ? lessonId + 1 : null}
+      />
+
+      <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
+        <Markdown>{content}</Markdown>
+      </div>
+
+      {/* Success message */}
+      {successMessage && (
+        <div className="bg-green-50 text-green-700 p-4 rounded-lg mb-4 flex items-center gap-2">
+          <CheckCircle size={20} />
+          <span>Congratulations! The lesson has been marked as completed.</span>
+        </div>
+      )}
+
+      <div className="flex justify-between items-center mt-8">
+        {/* Previous lesson button - always visible if we're not on the first lesson */}
+        {lessonId > 1 ? (
+          <Button asChild variant="outline">
+            <a href={`/app/lessons/${lessonId - 1}`}>← Previous lesson</a>
+          </Button>
+        ) : (
+          <div></div>
+        )}
+
+        {/* Middle element - completion button or completion information */}
+        <div className="flex flex-col items-center space-y-2">
+          {completionSection()}
+        </div>
+
+        {/* Right element - empty div to maintain flexbox layout */}
+        <div></div>
+      </div>
+      
+      {/* Add cookie debugging component */}
+      <CookieDebug />
+      
+      {/* Server-side debug info */}
+      <div className="mt-4 p-4 bg-gray-100 rounded-lg">
+        <h3 className="text-sm font-bold mb-2">Server debug:</h3>
+        <pre className="text-xs overflow-auto max-h-32">
+          completedLessonsCookie: {completedLessonsCookie || 'none'}
+          isCompleted: {isCompleted ? 'true' : 'false'}
+          lessonId: {lessonId}
+          completedLessonIds: {JSON.stringify(completedLessonIds)}
+        </pre>
+      </div>
+    </div>
+  );
+} 

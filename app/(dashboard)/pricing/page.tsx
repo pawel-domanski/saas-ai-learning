@@ -1,12 +1,17 @@
 import { checkoutAction } from '@/lib/payments/actions';
-import { Check } from 'lucide-react';
+import { Check, AlertCircle } from 'lucide-react';
 import { getStripePrices, getStripeProducts } from '@/lib/payments/stripe';
 import { SubmitButton } from './submit-button';
+import { cookies } from 'next/headers';
 
 // Prices are fresh for one hour max
 export const revalidate = 3600;
 
-export default async function PricingPage() {
+export default async function PricingPage({
+  searchParams,
+}: {
+  searchParams: { [key: string]: string | string[] | undefined };
+}) {
   const [prices, products] = await Promise.all([
     getStripePrices(),
     getStripeProducts(),
@@ -18,8 +23,28 @@ export default async function PricingPage() {
   const basePrice = prices.find((price) => price.productId === basePlan?.id);
   const plusPrice = prices.find((price) => price.productId === plusPlan?.id);
 
+  // Check if the user was redirected from premium content
+  const needsSubscription = searchParams.access === 'premium';
+
   return (
     <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      {needsSubscription && (
+        <div className="mb-8 bg-amber-50 border border-amber-200 rounded-xl p-4 text-amber-800 shadow-sm">
+          <div className="flex items-start">
+            <div className="flex-shrink-0 rounded-full bg-amber-100 p-1 mr-3">
+              <AlertCircle className="h-5 w-5 text-amber-600" />
+            </div>
+            <div>
+              <h5 className="font-medium">Subscription Required</h5>
+              <p className="text-sm mt-1">
+                You need an active subscription to access premium features.
+                Please choose a plan below to continue.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+      
       <div className="grid md:grid-cols-2 gap-8 max-w-xl mx-auto">
         <PricingCard
           name={basePlan?.name || 'Base'}
@@ -42,8 +67,10 @@ export default async function PricingPage() {
             'Everything in Base, and:',
             'Early Access to New Features',
             '24/7 Support + Slack Access',
+            'Premium App Features Access'
           ]}
           priceId={plusPrice?.id}
+          highlighted={needsSubscription}
         />
       </div>
     </main>
@@ -57,6 +84,7 @@ function PricingCard({
   trialDays,
   features,
   priceId,
+  highlighted = false,
 }: {
   name: string;
   price: number;
@@ -64,9 +92,15 @@ function PricingCard({
   trialDays: number;
   features: string[];
   priceId?: string;
+  highlighted?: boolean;
 }) {
   return (
-    <div className="pt-6">
+    <div className={`pt-6 rounded-xl ${highlighted ? 'ring-2 ring-purple-500 p-4 bg-white shadow-lg' : ''}`}>
+      {highlighted && (
+        <div className="bg-purple-500 text-white text-xs font-semibold px-3 py-1 rounded-full inline-block mb-4">
+          Recommended
+        </div>
+      )}
       <h2 className="text-2xl font-medium text-gray-900 mb-2">{name}</h2>
       <p className="text-sm text-gray-600 mb-4">
         with {trialDays} day free trial
@@ -87,7 +121,7 @@ function PricingCard({
       </ul>
       <form action={checkoutAction}>
         <input type="hidden" name="priceId" value={priceId} />
-        <SubmitButton />
+        <SubmitButton highlighted={highlighted} />
       </form>
     </div>
   );

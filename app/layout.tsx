@@ -1,34 +1,44 @@
 import './globals.css';
 import type { Metadata, Viewport } from 'next';
-import { Manrope } from 'next/font/google';
+import { Inter } from 'next/font/google';
 import { UserProvider } from '@/lib/auth';
 import { getUser } from '@/lib/db/queries';
 
 export const metadata: Metadata = {
-  title: 'Next.js SaaS Starter',
-  description: 'Get started quickly with Next.js, Postgres, and Stripe.',
+  title: 'Modern SaaS Platform',
+  description: 'A next-generation SaaS platform with modern UI and powerful features.',
 };
 
 export const viewport: Viewport = {
   maximumScale: 1,
 };
 
-const manrope = Manrope({ subsets: ['latin'] });
+const inter = Inter({ 
+  subsets: ['latin'],
+  display: 'swap', // Ensure text is visible during load
+  variable: '--font-inter', // Assign variable to be used in CSS
+});
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  let userPromise = getUser();
+  const userPromise = getUser();
 
   return (
     <html
       lang="en"
-      className={`bg-white dark:bg-gray-950 text-black dark:text-white ${manrope.className}`}
+      className={inter.variable} // Only apply the font variable to HTML
+      suppressHydrationWarning
     >
-      <body className="min-h-[100dvh] bg-gray-50">
-        <UserProvider userPromise={userPromise}>{children}</UserProvider>
+      <body 
+        className="min-h-[100dvh] antialiased bg-gradient-to-br from-blue-50 to-green-50 dark:from-blue-950 dark:to-green-950" 
+        suppressHydrationWarning
+      >
+        <UserProvider userPromise={userPromise}>
+          {children}
+        </UserProvider>
       </body>
     </html>
   );

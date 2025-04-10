@@ -21,7 +21,7 @@ type ActionState = {
   success?: string;
 };
 
-export function InviteTeamMember() {
+export function AccountInvite() {
   const { userPromise } = useUser();
   const user = use(userPromise);
   const isOwner = user?.role === 'owner';
@@ -33,7 +33,7 @@ export function InviteTeamMember() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Invite Team Member</CardTitle>
+        <CardTitle>Account Invite</CardTitle>
       </CardHeader>
       <CardContent>
         <form action={inviteAction} className="space-y-4">

@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { notFound, redirect } from 'next/navigation';
 import { Markdown } from '@/components/ui/markdown';
-import { getUser, getTeamForUser } from '@/lib/db/queries';
+import { getUser, getTeamForUser, getAllUserProgress, trackLessonAccess } from '@/lib/db/queries';
 import { Button } from '@/components/ui/button';
 import { BookOpen, CheckCircle, ArrowRight, BookType, Book } from 'lucide-react';
 import { LessonHeader } from '@/app/(protected-app)/app/lessons/[id]/lesson-header';
@@ -96,44 +96,18 @@ export default async function LessonPage({
   const partNames = await getPartNames();
   const partName = partNames[part] || `Part ${part}`;
 
-  // Get information about completed lessons from cookie
-  const cookieStore = await cookies();
-  const completedLessonsCookie = cookieStore.get('completedLessons')?.value;
-  
-  console.log('Server-side completedLessons cookie:', completedLessonsCookie);
+  // Track that the user accessed this lesson
+  await trackLessonAccess(user.id, lessonId);
 
-  // Temporarily disable progress tracking functionality
-  // Will be re-enabled once the user_progress table is created
-  let isCompleted = false;
-  let completedLessons = 0;
-  let percentComplete = 0;
-  let completedLessonIds: number[] = [];
+  // Get user progress from the database
+  const userProgress = await getAllUserProgress(user.id);
+  const completedLessonIds = userProgress
+    .filter(progress => progress.completed)
+    .map(progress => progress.lessonId);
   
-  if (completedLessonsCookie) {
-    try {
-      // Make sure the cookie is properly parsed - decode URI component first
-      const decodedCookie = decodeURIComponent(completedLessonsCookie);
-      const parsed = JSON.parse(decodedCookie);
-      console.log('Parsed completedLessonIds:', parsed);
-      
-      // Check if we have a new format with dates or just IDs
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        if (typeof parsed[0] === 'object' && parsed[0].hasOwnProperty('id')) {
-          // New format with dates
-          completedLessonIds = parsed.map(item => item.id);
-        } else {
-          // Old format - just lesson numbers
-          completedLessonIds = parsed;
-        }
-        
-        isCompleted = completedLessonIds.includes(lessonId);
-        completedLessons = completedLessonIds.length;
-        percentComplete = Math.round((completedLessons / lessons.length) * 100);
-      }
-    } catch (e) {
-      console.error('Error parsing completedLessons cookie:', e);
-    }
-  }
+  const isCompleted = completedLessonIds.includes(lessonId);
+  const completedLessons = completedLessonIds.length;
+  const percentComplete = Math.round((completedLessons / lessons.length) * 100);
 
   // Display placeholder progress instead of trying to access the non-existent table
   const isPreviousLessonCompleted = true; // Allow marking any lesson as completed for now
@@ -170,7 +144,8 @@ export default async function LessonPage({
   // lub jest następną lekcją do ukończenia po lekcjach startowych
   isAccessAllowed = isCompleted || isInStarterLessons || lessonId === nextAvailableLessonId;
 
-  // Just read the cookie (don't set it)
+  // Get the cookie for last viewed lesson
+  const cookieStore = await cookies();
   const lastViewedLessonId = cookieStore.get('lastViewedLessonId')?.value || '1';
 
   if (!isAccessAllowed) {

@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getUser } from '@/lib/db/queries';
+import { getUser, markLessonAsCompleted, getAllUserProgress, getTeamForUser } from '@/lib/db/queries';
+import { activityLogs, ActivityType } from '@/lib/db/schema';
+import { db } from '@/lib/db/drizzle';
 
 // Struktura do przechowywania informacji o ukończonych lekcjach
 interface CompletedLesson {
@@ -25,37 +27,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid lesson ID' }, { status: 400 });
     }
 
-    // Pobierz aktualne ciasteczko z ukończonymi lekcjami
-    const completedLessonsCookie = req.cookies.get('completedLessons')?.value;
-    let completedLessons: number[] = []; // Stara struktura
-    let completedLessonsWithDates: CompletedLesson[] = []; // Nowa struktura
-    
-    if (completedLessonsCookie) {
-      try {
-        // Sprawdź, czy ciasteczko zawiera już nową strukturę (z datami)
-        // Najpierw zdekoduj URI component
-        const decodedCookie = decodeURIComponent(completedLessonsCookie);
-        const parsed = JSON.parse(decodedCookie);
-        
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          if (typeof parsed[0] === 'object' && parsed[0].hasOwnProperty('id')) {
-            // Nowy format z datami
-            completedLessonsWithDates = parsed;
-            completedLessons = parsed.map(item => item.id);
-          } else {
-            // Stary format - tylko numery lekcji
-            completedLessons = parsed;
-            // Konwertuj do nowego formatu
-            completedLessonsWithDates = parsed.map(id => ({
-              id,
-              completedAt: new Date().toISOString()
-            }));
-          }
-        }
-      } catch (e) {
-        console.error('Error parsing completedLessons cookie:', e);
-      }
-    }
+    // Pobierz wszystkie ukończone lekcje użytkownika z bazy danych
+    const userProgress = await getAllUserProgress(user.id);
+    const completedLessons = userProgress
+      .filter(progress => progress.completed)
+      .map(progress => progress.lessonId);
     
     // Sprawdź, czy lekcja została już ukończona
     const isLessonCompleted = completedLessons.includes(lessonId);
@@ -77,29 +53,27 @@ export async function POST(req: NextRequest) {
       console.log(`Lekcja ${lessonId} jest w zakresie LESSON_START (${lessonStart}), pomijam sprawdzanie limitu dziennego`);
     } else {
       // Sprawdź limit dzienny tylko dla lekcji powyżej LESSON_START
-      // Znajdź ostatnio ukończoną lekcję
-      let canCompleteToday = true;
+      // Znajdź ostatnio ukończoną lekcję z dzisiaj
       const today = new Date();
       today.setHours(0, 0, 0, 0); // Początek dzisiejszego dnia
       
-      if (completedLessonsWithDates.length > 0) {
-        // Sortuj według daty ukończenia (od najnowszej)
-        const sortedLessons = [...completedLessonsWithDates].sort((a, b) => 
-          new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime()
-        );
+      // Pobierz wszystkie lekcje ukończone dzisiaj
+      const todayCompletedLessons = userProgress.filter(progress => {
+        if (!progress.completed) return false;
         
-        const lastCompletedLesson = sortedLessons[0];
-        const lastCompletedDate = new Date(lastCompletedLesson.completedAt);
-        lastCompletedDate.setHours(0, 0, 0, 0); // Początek dnia ukończenia
-        
-        // Sprawdź, czy ostatnia lekcja została ukończona dzisiaj
-        if (lastCompletedDate.getTime() === today.getTime()) {
-          canCompleteToday = false;
-        }
-      }
+        const completedDate = new Date(progress.updatedAt);
+        completedDate.setHours(0, 0, 0, 0);
+        return completedDate.getTime() === today.getTime();
+      });
+      
+      // Jeśli istnieje jakakolwiek lekcja ukończona dzisiaj (powyżej LESSON_START), 
+      // nie pozwól na ukończenie kolejnej
+      const hasCompletedLessonToday = todayCompletedLessons.some(
+        progress => progress.lessonId > lessonStart
+      );
       
       // Jeśli nie można ukończyć dzisiaj lekcji, przekieruj z komunikatem
-      if (!canCompleteToday) {
+      if (hasCompletedLessonToday) {
         const timestamp = Date.now();
         const url = new URL(req.url);
         const origin = url.origin;
@@ -111,19 +85,19 @@ export async function POST(req: NextRequest) {
       }
     }
     
-    // Dodaj bieżącą lekcję do ukończonych z datą ukończenia
-    const now = new Date();
-    const newCompletedLesson: CompletedLesson = {
-      id: lessonId,
-      completedAt: now.toISOString()
-    };
+    // Oznacz lekcję jako ukończoną w bazie danych
+    await markLessonAsCompleted(user.id, lessonId);
     
-    completedLessonsWithDates.push(newCompletedLesson);
-    completedLessons.push(lessonId);
+    // Pobierz zespół użytkownika, aby zapisać aktywność z team_id
+    const userTeam = await getTeamForUser(user.id);
     
-    // Zapisz zaktualizowaną listę ukończonych lekcji
-    const completedLessonsJSON = JSON.stringify(completedLessonsWithDates);
-    console.log('Setting completedLessons cookie:', completedLessonsJSON);
+    // Zapisz aktywność użytkownika
+    await db.insert(activityLogs).values({
+      teamId: userTeam?.id || 0, // Use team ID or 0 if not found, but never null
+      userId: user.id,
+      action: ActivityType.LESSON_COMPLETED,
+      ipAddress: req.headers.get('x-forwarded-for') || ''
+    });
     
     // Przekieruj z powrotem do strony lekcji
     const timestamp = Date.now();
@@ -133,23 +107,12 @@ export async function POST(req: NextRequest) {
     
     const response = NextResponse.redirect(redirectUrl, { status: 303 });
     
-    // Zapisz ciasteczko z postępem ukończenia lekcji
-    response.cookies.set({
-      name: 'completedLessons',
-      value: completedLessonsJSON,
-      path: '/',
-      httpOnly: false,           // Dostępne dla JavaScript
-      secure: process.env.NODE_ENV === 'production', // Bezpieczne tylko w produkcji
-      sameSite: 'strict',        // Ograniczenie do tego samego origin
-      maxAge: 60 * 60 * 24 * 30  // 30 dni
-    });
-    
     // Ustaw ciasteczka dla ostatnio przeglądanej lekcji
     response.cookies.set({
       name: 'lastViewedLessonId',
       value: lessonId.toString(),
       path: '/',
-      httpOnly: false,
+      httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
       maxAge: 60 * 60 * 24 * 30  // 30 dni
@@ -161,7 +124,7 @@ export async function POST(req: NextRequest) {
         name: 'openPartId',
         value: partId.toString(),
         path: '/',
-        httpOnly: false,
+        httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
         maxAge: 60 * 60 * 24 * 30  // 30 dni

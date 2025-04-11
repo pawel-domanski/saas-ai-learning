@@ -179,7 +179,7 @@ export async function markLessonAsCompleted(userId: number, lessonId: number) {
   
   if (existingProgress) {
     // Aktualizuj istniejący rekord
-    await db
+    const result = await db
       .update(userProgress)
       .set({
         completed: true,
@@ -189,10 +189,13 @@ export async function markLessonAsCompleted(userId: number, lessonId: number) {
       .where(and(
         eq(userProgress.userId, userId),
         eq(userProgress.lessonId, lessonId)
-      ));
+      ))
+      .returning();
+      
+    return result[0];
   } else {
     // Utwórz nowy rekord z oznaczeniem jako ukończone
-    await db
+    const result = await db
       .insert(userProgress)
       .values({
         userId,
@@ -201,21 +204,11 @@ export async function markLessonAsCompleted(userId: number, lessonId: number) {
         lastAccessed: new Date(),
         createdAt: new Date(),
         updatedAt: new Date(),
-      });
+      })
+      .returning();
+    
+    return result[0];
   }
-  
-  // Dodaj wpis do dziennika aktywności
-  await db
-    .insert(activityLogs)
-    .values({
-      userId,
-      teamId: (await getTeamForUser(userId))?.id || 0,
-      action: 'LESSON_COMPLETED',
-      timestamp: new Date(),
-      ipAddress: '',
-    });
-  
-  return await getUserLessonProgress(userId, lessonId);
 }
 
 export async function getUserCourseProgress(userId: number, totalLessons: number) {

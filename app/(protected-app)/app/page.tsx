@@ -83,75 +83,36 @@ export default async function AppPage() {
   const plan = await getLessonPlan();
   const lessons = plan.data;
 
-  // Próbujemy pobrać postęp użytkownika - zamiast z bazy danych, z ciasteczka
-  let completedLessonIds: number[] = [];
-  let completedLessons = 0;
-  let percentComplete = 0;
-  let completedLessonsWithDates: CompletedLesson[] = [];
-  let canCompleteToday = true;
-
-  // Pobierz z cookies informacje o ukończonych lekcjach
-  const cookieStore = await cookies();
-  const completedLessonsCookie = cookieStore.get('completedLessons')?.value;
+  // Pobierz postęp użytkownika z bazy danych
+  const userProgress = await getAllUserProgress(user.id);
+  const completedLessonIds = userProgress
+    .filter(progress => progress.completed)
+    .map(progress => progress.lessonId);
   
-  console.log('Server-side completedLessons cookie (main page):', completedLessonsCookie);
-
-  if (completedLessonsCookie) {
-    try {
-      // Upewnij się, że ciasteczko jest poprawnie parsowane - najpierw zdekoduj URI
-      const decodedCookie = decodeURIComponent(completedLessonsCookie);
-      const parsed = JSON.parse(decodedCookie);
-      console.log('Parsed completedLessonIds (main page):', parsed);
-      
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        if (typeof parsed[0] === 'object' && parsed[0].hasOwnProperty('id')) {
-          // Nowy format z datami
-          completedLessonsWithDates = parsed;
-          completedLessonIds = parsed.map(item => item.id);
-        } else {
-          // Stary format - tylko id
-          completedLessonIds = parsed;
-          // Konwertuj do nowego formatu
-          completedLessonsWithDates = parsed.map(id => ({
-            id,
-            completedAt: new Date().toISOString()
-          }));
-        }
-        
-        // Sprawdź, czy można ukończyć lekcję dzisiaj
-        if (completedLessonsWithDates.length > 0) {
-          // Sortuj według daty ukończenia (od najnowszej)
-          const sortedLessons = [...completedLessonsWithDates].sort((a, b) => 
-            new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime()
-          );
-          
-          const lastCompletedLesson = sortedLessons[0];
-          const lastCompletedDate = new Date(lastCompletedLesson.completedAt);
-          
-          const today = new Date();
-          today.setHours(0, 0, 0, 0); // Początek dzisiejszego dnia
-          
-          const lastDate = new Date(lastCompletedDate);
-          lastDate.setHours(0, 0, 0, 0); // Początek dnia ukończenia
-          
-          // Sprawdź, czy ostatnia lekcja została ukończona dzisiaj
-          if (lastDate.getTime() === today.getTime()) {
-            canCompleteToday = false;
-          }
-        }
-        
-        completedLessons = completedLessonIds.length;
-        percentComplete = Math.round((completedLessons / lessons.length) * 100);
-      } else {
-        // Pusta tablica
-        console.log('Empty completedLessons array');
-      }
-    } catch (error) {
-      console.log('Error parsing completedLessons cookie:', error);
-      // Jeśli wystąpi błąd, używamy wartości domyślnych
-    }
-  } else {
-    console.log('No completedLessons cookie found (main page)');
+  const completedLessons = completedLessonIds.length;
+  const percentComplete = Math.round((completedLessons / lessons.length) * 100);
+  
+  // Sprawdź, czy można ukończyć lekcję dzisiaj (czy użytkownik już ukończył lekcję dzisiaj)
+  let canCompleteToday = true;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // Początek dzisiejszego dnia
+  
+  // Pobierz wartość LESSON_START z procesu środowiskowego
+  const lessonStartEnv = process.env.LESSON_START;
+  const lessonStart = lessonStartEnv ? parseInt(lessonStartEnv, 10) : 1;
+  console.log('LESSON_START value:', lessonStart);
+  
+  // Sprawdź, czy użytkownik ukończył jakąś lekcję dzisiaj (z wyjątkiem lekcji w zakresie LESSON_START)
+  const todayCompletedLessons = userProgress.filter(progress => {
+    if (!progress.completed) return false;
+    
+    const completedDate = new Date(progress.updatedAt);
+    completedDate.setHours(0, 0, 0, 0);
+    return completedDate.getTime() === today.getTime() && progress.lessonId > lessonStart;
+  });
+  
+  if (todayCompletedLessons.length > 0) {
+    canCompleteToday = false;
   }
 
   // Określamy, które lekcje są dostępne dla użytkownika
@@ -160,11 +121,6 @@ export default async function AppPage() {
   // 3. Dodatkowo dostępna jest pierwsza nieukończona lekcja po LESSON_START
   const availableLessonIds: number[] = [...completedLessonIds];
   let nextAvailableLessonId = 1;
-
-  // Pobierz wartość LESSON_START z procesu środowiskowego
-  const lessonStartEnv = process.env.LESSON_START;
-  const lessonStart = lessonStartEnv ? parseInt(lessonStartEnv, 10) : 1;
-  console.log('LESSON_START value:', lessonStart);
 
   // Dodaj wszystkie lekcje do LESSON_START jako dostępne
   for (let i = 1; i <= lessonStart && i <= lessons.length; i++) {
@@ -192,6 +148,9 @@ export default async function AppPage() {
 
   // Pobierz nazwy części kursu z pliku part.json
   const partDetails = await getPartDetails();
+  
+  // Pobierz cookies
+  const cookieStore = cookies();
   
   // Pobierz z cookies informację o ostatnio otwartej części kursu
   const openPartCookie = cookieStore.get('openPartId');

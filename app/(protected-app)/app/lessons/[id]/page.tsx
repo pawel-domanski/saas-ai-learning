@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { BookOpen, CheckCircle, ArrowRight, BookType, Book } from 'lucide-react';
 import { LessonHeader } from '@/app/(protected-app)/app/lessons/[id]/lesson-header';
 import { cookies } from 'next/headers';
+import SlideshowClient from './slideshow-client';
 
 // Get training plan data from the JSON file
 async function getLessonPlan() {
@@ -280,7 +281,23 @@ export default async function LessonPage({
       />
 
       <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
-        <Markdown>{content}</Markdown>
+        {lesson.lesson ? (
+          <div>
+            {/* Display main content first if available */}
+            {content && <Markdown>{content}</Markdown>}
+            
+            {/* Display sub-lessons as slides */}
+            {lesson.lesson.length > 0 && (
+              <div>
+                {/* Import the client component for the slideshow */}
+                <SlideshowClient subLessons={lesson.lesson} />
+              </div>
+            )}
+          </div>
+        ) : (
+          // Display normal content if no sub-lessons
+          <Markdown>{content}</Markdown>
+        )}
       </div>
 
       {/* Success message */}

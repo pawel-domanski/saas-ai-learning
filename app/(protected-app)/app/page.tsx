@@ -314,6 +314,14 @@ export default async function AppPage() {
                                   isNextLesson ? 'text-blue-700' : 
                                   isAvailable ? 'text-gray-800' : 'text-gray-400'}`}>
                                 {lesson.subject}
+                                {lesson.lesson && (
+                                  <span className="ml-1 text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded flex items-center gap-1 whitespace-nowrap inline-flex">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                      <path d="M8 6V18M12 6V18M16 6V18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                    </svg>
+                                    {lesson.lesson.length} steps
+                                  </span>
+                                )}
                               </h3>
                             </div>
                             

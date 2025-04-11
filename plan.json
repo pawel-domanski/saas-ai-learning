@@ -10,7 +10,22 @@
         "subject": "What is an AI Engineer?",
         "desc": "AI engineers are professionals who specialize in designing, developing, and implementing artificial intelligence (AI) systems. Their work is essential in various industries, as they create applications that enable machines to perform tasks that typically require human intelligence, such as problem-solving, learning, and decision-making.",
         "part": 1,
-        "content": "# What is an AI Engineer?\n\nAI engineers are professionals who specialize in designing, developing, and implementing artificial intelligence (AI) systems. Their work is essential in various industries, as they create applications that enable machines to perform tasks that typically require human intelligence, such as problem-solving, learning, and decision-making.\n\n## Core Competencies\n\nA successful AI Engineer combines:\n\n1. **Software Engineering Skills**: Building robust, maintainable code that meets production standards\n2. **AI Knowledge**: Understanding of machine learning, neural networks, natural language processing, and other AI domains\n3. **Domain Expertise**: Familiarity with the industry or problem space they're working in\n4. **System Design**: Ability to architect end-to-end solutions that incorporate AI components\n\n## Daily Activities\n\nAI Engineers typically spend their time:\n\n- Adapting and fine-tuning existing AI models for specific use cases\n- Developing APIs and interfaces to make AI capabilities accessible\n- Writing code to integrate AI models with applications and data pipelines\n- Testing and validating AI system performance\n- Debugging and optimizing AI implementations\n- Collaborating with stakeholders to understand requirements\n- Researching the latest AI tools and techniques\n\n## Tools of the Trade\n\nThe modern AI Engineer works with:\n\n- AI frameworks and libraries (TensorFlow, PyTorch, Hugging Face)\n- Cloud AI services (AWS SageMaker, Azure AI, Google Vertex AI)\n- Programming languages (Python, JavaScript)\n- Development environments and tools\n- Version control systems\n- CI/CD pipelines for AI systems\n\n## Career Path\n\nMany AI Engineers start with a background in:\n- Software engineering\n- Computer science\n- Data science\n- Related technical fields\n\nThey typically develop specialized knowledge in AI through formal education, online courses, hands-on projects, or mentorship from experienced practitioners.\n\nIn the next lesson, we'll explore the specific roles and responsibilities of AI Engineers in more detail."
+        "content": "# What is an AI Engineer?\n\nAI Engineers are professionals who specialize in building and implementing artificial intelligence solutions. They bridge the gap between theoretical AI research and practical applications in the real world.",
+        "lesson": [
+            {
+                "subject": "Definition and Role",
+                "desc": "Understanding the fundamental role of an AI Engineer",
+                "content": "## Definition and Role of an AI Engineer\n\nAn AI Engineer is a specialized professional who focuses on using artificial intelligence tools and techniques to solve real-world problems. Unlike AI researchers who develop new algorithms or techniques, AI Engineers primarily work with existing models and tools to create practical applications.\n\n### Key Responsibilities\n\nThe main responsibilities of an AI Engineer include:\n\n- Selecting appropriate AI models and tools for specific problems\n- Integrating AI capabilities into software applications\n- Optimizing AI models for production environments\n- Ensuring AI systems perform reliably at scale\n- Working with stakeholders to define requirements\n\n### Required Skills\n\nAI Engineers need a diverse set of skills across multiple domains:\n\n| Skill Category | Specific Skills | Importance |\n|----------------|----------------|------------|\n| Programming | Python, Java, C++ | Essential |\n| Machine Learning | Model selection, fine-tuning | High |\n| Software Engineering | API design, version control | High |\n| Data Processing | ETL, data cleaning | Medium-High |\n| Cloud Computing | AWS, Azure, GCP | Medium-High |\n| DevOps | Containerization, CI/CD | Medium |\n\nAI Engineers combine technical expertise with practical problem-solving abilities to deliver AI solutions that provide real business value."
+            },
+            {
+                "subject": "Education and Career Path",
+                "desc": "How to become an AI Engineer and career prospects"
+            },
+            {
+                "subject": "Industry Applications",
+                "desc": "How AI Engineers work across different industries"
+            }
+        ]
       },
       {
         "subject": "Roles and Responsibilities",
@@ -22,7 +37,21 @@
         "subject": "AI Engineer vs ML Engineer",
         "desc": "An AI Engineer uses pre-trained models and existing AI tools to improve user experiences. They focus on applying AI in practical ways, without building models from scratch. This is different from AI Researchers and ML Engineers, who focus more on creating new models or developing AI theory.",
         "part": 1,
-        "content": "# AI Engineer vs ML Engineer\n\nWhile the roles of AI Engineer and ML Engineer may seem similar at first glance, they have distinct focuses and responsibilities. Understanding these differences is important for both career planning and team composition in AI projects.\n\n## Focus Areas\n\n### AI Engineers:\n- **Primary Focus**: Using pre-trained models and existing AI tools to improve user experiences\n- **Approach**: Applying AI in practical ways to solve business problems\n- **Models**: Primarily use existing models rather than building from scratch\n- **Scope**: Broader focus on end-to-end AI systems and applications\n\n### ML Engineers:\n- **Primary Focus**: Building and optimizing machine learning models\n- **Approach**: Deep technical work on model architecture and performance\n- **Models**: Often develop custom models or significantly modify existing ones\n- **Scope**: Narrower focus on the model itself and its technical performance\n\n## Typical Responsibilities\n\n### AI Engineers:\n- Integrating AI capabilities into applications\n- Building user-facing AI features\n- Adapting pre-trained models to specific use cases\n- Creating APIs and interfaces for AI services\n- Ensuring AI systems work well in production environments\n\n### ML Engineers:\n- Developing novel machine learning algorithms\n- Fine-tuning model architectures\n- Optimizing training processes\n- Working on model compression and efficiency\n- Researching new approaches to machine learning problems\n\n## Skill Sets\n\n### AI Engineers emphasize:\n- Software engineering\n- Systems integration\n- API development\n- User experience design\n- Business understanding\n\n### ML Engineers emphasize:\n- Advanced mathematics and statistics\n- Deep learning architectures\n- Training optimization techniques\n- Research methodologies\n- Algorithmic efficiency\n\n## Collaboration\n\nIn many organizations, AI Engineers and ML Engineers work together as complementary roles:\n\n- ML Engineers may develop or optimize models\n- AI Engineers integrate those models into products and services\n- Both roles contribute to the overall success of AI initiatives\n\n## Career Path Considerations\n\nYour choice between these paths may depend on:\n\n- Whether you prefer practical application (AI Engineer) or theoretical development (ML Engineer)\n- Your background in mathematics and computer science\n- Your interest in user-facing applications versus backend systems\n- The types of organizations you want to work for\n\nUnderstanding these distinctions can help you chart your career path and focus your learning in the artificial intelligence field."
+        "content": "ala ma kota",
+        "lesson": [
+            {
+                "subject": "What is an AI Engineer?",
+                "desc": "część 1 lekcji"
+            },
+            {
+                "subject": "What is an AI Engineer?",
+                "desc": "część 2 lekcji"
+            },
+            {
+                "subject": "What is an AI Engineer?",
+                "desc": "część 3 lekcji"
+            }
+        ]
       },
       {
         "subject": "AI vs AGI",

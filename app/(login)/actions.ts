@@ -103,11 +103,25 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
 const signUpSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8),
+  name: z.string().min(1, 'Name is required').max(50),
   inviteId: z.string().optional(),
+  'terms-accept': z.string().optional().refine(val => val === 'on', {
+    message: "You must accept the Terms and Conditions, Privacy Policy, and Earnings Disclaimer"
+  }),
 });
 
 export const signUp = validatedAction(signUpSchema, async (data, formData) => {
-  const { email, password, inviteId } = data;
+  const { email, password, name, inviteId } = data;
+  
+  // Check if terms were accepted
+  if (!data['terms-accept']) {
+    return {
+      error: "You must accept the Terms and Conditions, Privacy Policy, and Earnings Disclaimer",
+      email,
+      password,
+      name,
+    };
+  }
 
   const existingUser = await db
     .select()
@@ -120,6 +134,7 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
       error: 'Failed to create user. Please try again.',
       email,
       password,
+      name,
     };
   }
 
@@ -127,6 +142,7 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
 
   const newUser: NewUser = {
     email,
+    name,
     passwordHash,
     role: 'owner', // Default role, will be overridden if there's an invitation
   };
@@ -138,6 +154,7 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
       error: 'Failed to create user. Please try again.',
       email,
       password,
+      name,
     };
   }
 
@@ -176,7 +193,7 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
         .where(eq(teams.id, teamId))
         .limit(1);
     } else {
-      return { error: 'Invalid or expired invitation.', email, password };
+      return { error: 'Invalid or expired invitation.', email, password, name };
     }
   } else {
     // Create a new team if there's no invitation
@@ -191,6 +208,7 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
         error: 'Failed to create team. Please try again.',
         email,
         password,
+        name,
       };
     }
 

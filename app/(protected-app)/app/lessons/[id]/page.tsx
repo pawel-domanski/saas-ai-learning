@@ -8,6 +8,7 @@ import { BookOpen, CheckCircle, ArrowRight, BookType, Book } from 'lucide-react'
 import { LessonHeader } from '@/app/(protected-app)/app/lessons/[id]/lesson-header';
 import { cookies } from 'next/headers';
 import SlideshowClient from './slideshow-client';
+import { SaveLessonView } from './save-lesson-view';
 
 // Get training plan data from the JSON file
 async function getLessonPlan() {
@@ -95,6 +96,12 @@ export default async function LessonPage({
   const partNames = await getPartNames();
   const partName = partNames[part] || `Part ${part}`;
 
+  // Get information about completed lessons from cookie
+  const cookieStore = await cookies();
+  const completedLessonsCookie = cookieStore.get('completedLessons')?.value;
+  
+  console.log('Server-side completedLessons cookie:', completedLessonsCookie);
+
   // Temporarily disable progress tracking functionality
   // Will be re-enabled once the user_progress table is created
   let isCompleted = false;
@@ -102,12 +109,6 @@ export default async function LessonPage({
   let percentComplete = 0;
   let completedLessonIds: number[] = [];
   
-  // Get information about completed lessons from cookie
-  const cookieStore = await cookies();
-  const completedLessonsCookie = cookieStore.get('completedLessons')?.value;
-  
-  console.log('Server-side completedLessons cookie:', completedLessonsCookie);
-
   if (completedLessonsCookie) {
     try {
       // Make sure the cookie is properly parsed - decode URI component first
@@ -267,6 +268,9 @@ export default async function LessonPage({
 
   return (
     <div className="max-w-5xl mx-auto py-8 px-4">
+      {/* Component to save view info using client-side JS */}
+      <SaveLessonView lessonId={lessonId} partId={part} />
+      
       <div className="mb-4 text-sm font-medium flex items-center">
         <BookType className="mr-2 text-blue-600" size={16} />
         <span className="text-blue-600">{partName}</span>

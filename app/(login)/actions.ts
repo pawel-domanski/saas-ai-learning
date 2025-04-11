@@ -97,7 +97,17 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
     return createCheckoutSession({ team: foundTeam, priceId });
   }
 
-  redirect('/dashboard');
+  // Set cookies to help with navigating to the correct part/lesson after login
+  // When the user first logs in, we don't yet know which lesson they should view
+  // This will let the app page default to showing the Next lesson's part
+  const cookies = await import('next/headers').then(mod => mod.cookies);
+  const cookieStore = cookies();
+  
+  // Reset these cookies to make sure we start fresh after login
+  await cookieStore.delete('openPartId');
+  await cookieStore.delete('lastViewedLessonId');
+
+  redirect('/app');
 });
 
 const signUpSchema = z.object({
@@ -236,7 +246,7 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
     return createCheckoutSession({ team: createdTeam, priceId });
   }
 
-  redirect('/dashboard');
+  redirect('/app');
 });
 
 export async function signOut() {

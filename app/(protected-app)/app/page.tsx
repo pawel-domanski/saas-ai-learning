@@ -195,11 +195,43 @@ export default async function AppPage() {
   
   // Pobierz z cookies informację o ostatnio otwartej części kursu
   const openPartCookie = cookieStore.get('openPartId');
-  const openPartId = openPartCookie ? parseInt(openPartCookie.value) : 1;
   
   // Czytamy też ostatnio otwartą lekcję do podświetlenia
   const lastViewedLessonIdCookie = cookieStore.get('lastViewedLessonId');
-  const lastViewedLessonId = lastViewedLessonIdCookie ? parseInt(lastViewedLessonIdCookie.value) : 1;
+  const lastViewedLessonId = lastViewedLessonIdCookie ? parseInt(lastViewedLessonIdCookie.value) : null;
+  
+  // Determine the part containing the last viewed lesson
+  let lastViewedLessonPart = null;
+  if (lastViewedLessonId !== null) {
+    const lessonIndex = lastViewedLessonId - 1;
+    if (lessonIndex >= 0 && lessonIndex < lessons.length) {
+      lastViewedLessonPart = lessons[lessonIndex].part || 1;
+    }
+  }
+  
+  // Find the part that contains the next available lesson (marked as "Next")
+  let nextLessonPart = null;
+  if (nextAvailableLessonId) {
+    const nextLessonIndex = nextAvailableLessonId - 1;
+    if (nextLessonIndex >= 0 && nextLessonIndex < lessons.length) {
+      nextLessonPart = lessons[nextLessonIndex].part || 1;
+    }
+  }
+  
+  // Determine which part to expand:
+  // 1. Use the cookie value if it exists
+  // 2. If no cookie but user has viewed a lesson, use that lesson's part
+  // 3. Otherwise, use the part containing the next lesson
+  let openPartId;
+  if (openPartCookie) {
+    openPartId = parseInt(openPartCookie.value);
+  } else if (lastViewedLessonPart !== null) {
+    openPartId = lastViewedLessonPart;
+  } else if (nextLessonPart !== null) {
+    openPartId = nextLessonPart;
+  } else {
+    openPartId = 1; // Default to first part if all else fails
+  }
   
   // Grupuj lekcje według części (part)
   const parts: { [key: number]: PartInfo } = {};
@@ -256,9 +288,9 @@ export default async function AppPage() {
               <form action={`/api/toggle-part?partId=${part.id}`} method="POST">
                 <button 
                   type="submit"
-                  className={`block w-full relative p-0 text-left ${isOpen ? 'bg-blue-50' : 'bg-white hover:bg-gray-50'}`}
+                  className={`group block w-full relative p-0 text-left cursor-pointer ${isOpen ? 'bg-blue-50' : 'bg-white hover:bg-gray-50'}`}
                 >
-                  <div className="flex items-center justify-between p-4">
+                  <div className="flex items-center justify-between p-4 hover:opacity-90 transition-opacity duration-200">
                     <div className="flex items-center">
                       <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-blue-500 flex items-center justify-center mr-4">
                         <IconComponent className="text-white" size={24} />
@@ -274,7 +306,7 @@ export default async function AppPage() {
                           <ChevronDown className="text-blue-700" size={20} />
                         </div>
                       ) : (
-                        <div className="p-2 rounded-full bg-gray-100">
+                        <div className="p-2 rounded-full bg-gray-100 group-hover:bg-blue-50 transition-colors duration-200">
                           <ChevronRight className="text-blue-600" size={20} />
                         </div>
                       )}

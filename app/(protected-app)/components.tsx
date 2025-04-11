@@ -67,7 +67,7 @@ export function Header({ user }: { user: any }) {
   return (
     <header className="border-b border-gray-100 bg-white/80 backdrop-blur-sm sticky top-0 z-30 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex justify-between items-center">
-        <Link href="/" className="flex items-center">
+        <Link href="/app" className="flex items-center">
           <CircleIcon className="h-7 w-7 text-teal-500" />
           <span className="ml-2 text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-teal-500">ACME</span>
         </Link>

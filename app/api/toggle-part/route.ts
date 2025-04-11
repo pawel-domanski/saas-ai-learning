@@ -55,8 +55,8 @@ async function handleTogglePart(req: NextRequest) {
     const currentOpenPart = openPartCookie ? parseInt(openPartCookie.value) : 1;
     console.log('[toggle-part] Current open part:', currentOpenPart);
 
-    // Toggle - jeśli kliknięto już otwartą część, zamknij ją (ustaw na 0)
-    // W przeciwnym razie otwórz klikniętą część
+    // When clicking on a chapter, if it's already open, close it (set to 0)
+    // Otherwise, open the clicked chapter and close others
     const newOpenPart = currentOpenPart === partId ? 0 : partId;
     console.log('[toggle-part] New open part:', newOpenPart);
 

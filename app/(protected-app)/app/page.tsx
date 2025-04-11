@@ -7,7 +7,6 @@ import path from 'path';
 import { Book, LockIcon, BookType, ChevronDown, ChevronRight, Brain, Code, Lightbulb, FileText, Puzzle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cookies } from 'next/headers';
-import { CookieDebug } from './cookie-debug';
 
 // Pobierz dane planu szkoleniowego z pliku JSON
 async function getLessonPlan() {
@@ -353,20 +352,6 @@ export default async function AppPage() {
             </div>
           );
         })}
-      </div>
-      
-      {/* Debug info */}
-      <div className="mt-8">
-        <CookieDebug />
-        <div className="mt-4 p-4 bg-gray-100 rounded-lg">
-          <h3 className="text-sm font-bold mb-2">Server debug (main page):</h3>
-          <pre className="text-xs overflow-auto max-h-32">
-            completedLessonsCookie: {completedLessonsCookie || 'none'}
-            completedLessonIds: {JSON.stringify(completedLessonIds)}
-            completedLessons: {completedLessons}
-            percentComplete: {percentComplete}
-          </pre>
-        </div>
       </div>
     </div>
   );

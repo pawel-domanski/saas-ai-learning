@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button';
 import { BookOpen, CheckCircle, ArrowRight, BookType, Book } from 'lucide-react';
 import { LessonHeader } from '@/app/(protected-app)/app/lessons/[id]/lesson-header';
 import { cookies } from 'next/headers';
-import { CookieDebug } from './cookie-debug';
 
 // Get training plan data from the JSON file
 async function getLessonPlan() {
@@ -325,20 +324,6 @@ export default async function LessonPage({
         ) : (
           <div></div>
         )}
-      </div>
-      
-      {/* Add cookie debugging component */}
-      <CookieDebug />
-      
-      {/* Server-side debug info */}
-      <div className="mt-4 p-4 bg-gray-100 rounded-lg">
-        <h3 className="text-sm font-bold mb-2">Server debug:</h3>
-        <pre className="text-xs overflow-auto max-h-32">
-          completedLessonsCookie: {completedLessonsCookie || 'none'}
-          isCompleted: {isCompleted ? 'true' : 'false'}
-          lessonId: {lessonId}
-          completedLessonIds: {JSON.stringify(completedLessonIds)}
-        </pre>
       </div>
     </div>
   );

@@ -17,6 +17,16 @@ export function UserMenu({ user }: { user: any }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const router = useRouter();
 
+  const getUserInitials = (user: { name?: string; email: string }) => {
+    if (user.name) {
+      return user.name
+        .split(' ')
+        .map((n) => n[0])
+        .join('');
+    }
+    return user.email[0].toUpperCase();
+  };
+
   async function handleSignOut() {
     await signOut();
     router.refresh();
@@ -29,10 +39,7 @@ export function UserMenu({ user }: { user: any }) {
         <Avatar className="cursor-pointer size-9 border-2 border-white shadow-sm">
           <AvatarImage alt={user.name || ''} />
           <AvatarFallback className="bg-gradient-to-r from-blue-100 to-teal-100 text-teal-800 font-medium">
-            {user.email
-              .split(' ')
-              .map((n) => n[0])
-              .join('')}
+            {getUserInitials(user)}
           </AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>

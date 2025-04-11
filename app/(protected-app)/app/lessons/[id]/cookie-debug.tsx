@@ -16,8 +16,20 @@ export function CookieDebug() {
   const [lastCompletedDate, setLastCompletedDate] = useState<string>('');
   const [nextAvailableTime, setNextAvailableTime] = useState<string>('');
   const [cookieValue, setCookieValue] = useState<string>('');
+  const [lessonStart, setLessonStart] = useState<number>(0);
 
   useEffect(() => {
+    // Fetch LESSON_START from environment
+    fetch('/api/env/lesson-start')
+      .then(res => res.json())
+      .then(data => {
+        setLessonStart(data.lessonStart || 0);
+        console.log('Client-side LESSON_START (lesson page):', data.lessonStart);
+      })
+      .catch(err => {
+        console.error('Error fetching LESSON_START:', err);
+      });
+      
     // Get all cookies
     const allCookies = document.cookie;
     setCookies(allCookies);
@@ -45,7 +57,9 @@ export function CookieDebug() {
     
     if (completedLessonsCookie) {
       try {
-        const parsed = JSON.parse(completedLessonsCookie);
+        // Decode URI component before parsing JSON
+        const decodedCookie = decodeURIComponent(completedLessonsCookie);
+        const parsed = JSON.parse(decodedCookie);
         console.log('Parsed client-side completedLessons:', parsed);
         
         // Check if we have the new format with dates or old with just IDs
@@ -103,6 +117,15 @@ export function CookieDebug() {
   const setCompletedLessonsCookie = () => {
     if (!lessonId) return;
     
+    const currentLessonId = parseInt(lessonId);
+    
+    // If the lesson ID is less than or equal to LESSON_START, we don't apply the daily limit
+    // Otherwise, check if a lesson can be completed today
+    if (currentLessonId > lessonStart && !canCompleteToday) {
+      alert(`Daily limit reached. Next lesson will be available in ${nextAvailableTime}.`);
+      return;
+    }
+    
     // Get current cookie
     const getCookie = (name: string) => {
       const value = `; ${document.cookie}`;
@@ -116,7 +139,9 @@ export function CookieDebug() {
     
     if (completedLessonsCookie) {
       try {
-        const parsed = JSON.parse(completedLessonsCookie);
+        // Decode URI component before parsing JSON
+        const decodedCookie = decodeURIComponent(completedLessonsCookie);
+        const parsed = JSON.parse(decodedCookie);
         
         // Check if we have the new format with dates or old with just IDs
         if (Array.isArray(parsed)) {
@@ -137,7 +162,6 @@ export function CookieDebug() {
     }
     
     // Add current lesson if not already there
-    const currentLessonId = parseInt(lessonId);
     const alreadyCompleted = completedLessons.some(lesson => lesson.id === currentLessonId);
     
     if (!alreadyCompleted) {
@@ -149,6 +173,7 @@ export function CookieDebug() {
     
     // Save cookie
     const value = JSON.stringify(completedLessons);
+    // No need to encode - the browser will handle this automatically
     document.cookie = `completedLessons=${value}; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Strict`;
     
     // Refresh displayed cookies
@@ -169,7 +194,9 @@ export function CookieDebug() {
         <div className={`text-sm ${canCompleteToday ? 'text-green-600' : 'text-amber-600'}`}>
           {canCompleteToday 
             ? 'You can complete a lesson today.' 
-            : `Daily limit reached. Next lesson available in ${nextAvailableTime}.`}
+            : parseInt(lessonId) <= lessonStart 
+              ? 'This is a starter lesson - you can complete it without daily limits.'
+              : `Daily limit reached. Next lesson available in ${nextAvailableTime}.`}
         </div>
         {lastCompletedDate && (
           <div className="text-xs text-gray-500 mt-1 mb-2">

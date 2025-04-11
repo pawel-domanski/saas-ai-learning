@@ -4,7 +4,7 @@ import { notFound, redirect } from 'next/navigation';
 import { Markdown } from '@/components/ui/markdown';
 import { getUser, getTeamForUser } from '@/lib/db/queries';
 import { Button } from '@/components/ui/button';
-import { BookOpen, CheckCircle, ArrowRight, BookType } from 'lucide-react';
+import { BookOpen, CheckCircle, ArrowRight, BookType, Book } from 'lucide-react';
 import { LessonHeader } from '@/app/(protected-app)/app/lessons/[id]/lesson-header';
 import { cookies } from 'next/headers';
 import { CookieDebug } from './cookie-debug';
@@ -110,8 +110,9 @@ export default async function LessonPage({
 
   if (completedLessonsCookie) {
     try {
-      // Make sure the cookie is properly parsed
-      const parsed = JSON.parse(completedLessonsCookie);
+      // Make sure the cookie is properly parsed - decode URI component first
+      const decodedCookie = decodeURIComponent(completedLessonsCookie);
+      const parsed = JSON.parse(decodedCookie);
       console.log('Parsed completedLessonIds:', parsed);
       
       // Check if we have a new format with dates or just IDs
@@ -142,17 +143,31 @@ export default async function LessonPage({
   let isAccessAllowed = false;
   let nextAvailableLessonId = 1; // The first lesson is always available
 
-  // Find the first uncompleted lesson
+  // Pobierz wartość LESSON_START z procesu środowiskowego
+  const lessonStartEnv = process.env.LESSON_START;
+  const lessonStart = lessonStartEnv ? parseInt(lessonStartEnv, 10) : 1;
+  console.log('LESSON_START value (lesson page):', lessonStart);
+
+  // Lekcja jest dostępna, jeśli:
+  // 1. Została już ukończona
+  // 2. Jest jedną z pierwszych LESSON_START lekcji
+  // 3. Jest pierwszą nieukończoną lekcją po LESSON_START
+  
+  // Sprawdź, czy lekcja jest automatycznie dostępna jako jedna z pierwszych
+  const isInStarterLessons = lessonId <= lessonStart;
+  
+  // Znajdź pierwszą nieukończoną lekcję po LESSON_START
   for (let i = 0; i < lessons.length; i++) {
     const currentLessonId = i + 1;
-    if (!completedLessonIds.includes(currentLessonId)) {
+    if (currentLessonId > lessonStart && !completedLessonIds.includes(currentLessonId)) {
       nextAvailableLessonId = currentLessonId;
       break;
     }
   }
 
-  // The lesson is available if it's already completed or is the next one to complete
-  isAccessAllowed = isCompleted || lessonId === nextAvailableLessonId;
+  // Lekcja jest dostępna jeśli: jest już ukończona, jest w startowych lekcjach, 
+  // lub jest następną lekcją do ukończenia po lekcjach startowych
+  isAccessAllowed = isCompleted || isInStarterLessons || lessonId === nextAvailableLessonId;
 
   // Just read the cookie (don't set it)
   const lastViewedLessonId = cookieStore.get('lastViewedLessonId')?.value || '1';
@@ -194,14 +209,33 @@ export default async function LessonPage({
     // Check if the lesson is already completed
     if (isCompleted) {
       return (
-        <div className="flex items-center text-teal-600 gap-2">
-          <CheckCircle size={20} />
-          <span>Completed</span>
+        <div className="flex items-center text-teal-600 gap-2 bg-teal-50 px-4 py-2 rounded-lg">
+          <Book size={20} />
+          <span className="font-medium">Lesson completed</span>
         </div>
       );
     } 
     
-    // Check if the daily lesson limit has been reached
+    // Check if this is a starter lesson (within LESSON_START)
+    // Starter lessons can be completed without daily limit restrictions
+    if (limitReached && lessonId <= lessonStart) {
+      return (
+        <form action="/api/lessons/complete" method="POST">
+          <input type="hidden" name="lessonId" value={lessonId} />
+          <input type="hidden" name="partId" value={part} />
+          <div className="flex flex-col items-center gap-2">
+            <Button type="submit">
+              Mark as completed
+            </Button>
+            <p className="text-xs text-gray-500 mt-1 text-center">
+              This is a starter lesson - you can complete it without daily limits.
+            </p>
+          </div>
+        </form>
+      );
+    }
+    
+    // Check if the daily lesson limit has been reached (for lessons beyond LESSON_START)
     if (limitReached) {
       return (
         <div className="flex flex-col items-center text-amber-600 gap-2">
@@ -253,7 +287,7 @@ export default async function LessonPage({
       {/* Success message */}
       {successMessage && (
         <div className="bg-green-50 text-green-700 p-4 rounded-lg mb-4 flex items-center gap-2">
-          <CheckCircle size={20} />
+          <Book size={20} />
           <span>Congratulations! The lesson has been marked as completed.</span>
         </div>
       )}
@@ -261,8 +295,13 @@ export default async function LessonPage({
       <div className="flex justify-between items-center mt-8">
         {/* Previous lesson button - always visible if we're not on the first lesson */}
         {lessonId > 1 ? (
-          <Button asChild variant="outline">
-            <a href={`/app/lessons/${lessonId - 1}`}>← Previous lesson</a>
+          <Button asChild variant="outline" className="flex items-center gap-2">
+            <a href={`/app/lessons/${lessonId - 1}`}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="m15 18-6-6 6-6"/>
+              </svg>
+              Previous lesson
+            </a>
           </Button>
         ) : (
           <div></div>
@@ -273,8 +312,19 @@ export default async function LessonPage({
           {completionSection()}
         </div>
 
-        {/* Right element - empty div to maintain flexbox layout */}
-        <div></div>
+        {/* Next lesson button - visible only if this lesson is completed and there is a next lesson */}
+        {showNextLessonButton ? (
+          <Button asChild className="flex items-center gap-2">
+            <a href={`/app/lessons/${lessonId + 1}`}>
+              Next lesson
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="m9 18 6-6-6-6"/>
+              </svg>
+            </a>
+          </Button>
+        ) : (
+          <div></div>
+        )}
       </div>
       
       {/* Add cookie debugging component */}

@@ -27,6 +27,14 @@ export function Settings({ teamData }: { teamData: TeamDataWithMembers }) {
     return user.name || user.email || 'Unknown User';
   };
 
+  const getUserInitials = (user: Pick<User, 'id' | 'name' | 'email'>) => {
+    const displayName = getUserDisplayName(user);
+    return displayName
+      .split(' ')
+      .map((n) => n[0])
+      .join('');
+  };
+
   return (
     <section className="flex-1 p-4 lg:p-8 max-w-5xl mx-auto">
       <h1 className="text-xl lg:text-3xl font-bold mb-8 text-gray-900">Account Settings</h1>
@@ -96,10 +104,7 @@ export function Settings({ teamData }: { teamData: TeamDataWithMembers }) {
                       alt={getUserDisplayName(member.user)}
                     />
                     <AvatarFallback className="bg-gradient-to-r from-blue-100 to-teal-100 text-teal-800 font-semibold text-lg">
-                      {getUserDisplayName(member.user)
-                        .split(' ')
-                        .map((n) => n[0])
-                        .join('')}
+                      {getUserInitials(member.user)}
                     </AvatarFallback>
                   </Avatar>
                   <div>

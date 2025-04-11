@@ -33,7 +33,9 @@ export async function POST(req: NextRequest) {
     if (completedLessonsCookie) {
       try {
         // Sprawdź, czy ciasteczko zawiera już nową strukturę (z datami)
-        const parsed = JSON.parse(completedLessonsCookie);
+        // Najpierw zdekoduj URI component
+        const decodedCookie = decodeURIComponent(completedLessonsCookie);
+        const parsed = JSON.parse(decodedCookie);
         
         if (Array.isArray(parsed) && parsed.length > 0) {
           if (typeof parsed[0] === 'object' && parsed[0].hasOwnProperty('id')) {
@@ -65,37 +67,48 @@ export async function POST(req: NextRequest) {
       return NextResponse.redirect(redirectUrl, { status: 303 });
     }
     
-    // Znajdź ostatnio ukończoną lekcję
-    let canCompleteToday = true;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0); // Początek dzisiejszego dnia
+    // Pobierz wartość LESSON_START z procesu środowiskowego
+    const lessonStartEnv = process.env.LESSON_START;
+    const lessonStart = lessonStartEnv ? parseInt(lessonStartEnv) : 0;
+    console.log('LESSON_START value (complete API):', lessonStart);
     
-    if (completedLessonsWithDates.length > 0) {
-      // Sortuj według daty ukończenia (od najnowszej)
-      const sortedLessons = [...completedLessonsWithDates].sort((a, b) => 
-        new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime()
-      );
+    // Jeśli lekcja jest jedną z pierwszych LESSON_START lekcji, pozwól na jej ukończenie bez limitu dziennego
+    if (lessonId <= lessonStart) {
+      console.log(`Lekcja ${lessonId} jest w zakresie LESSON_START (${lessonStart}), pomijam sprawdzanie limitu dziennego`);
+    } else {
+      // Sprawdź limit dzienny tylko dla lekcji powyżej LESSON_START
+      // Znajdź ostatnio ukończoną lekcję
+      let canCompleteToday = true;
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // Początek dzisiejszego dnia
       
-      const lastCompletedLesson = sortedLessons[0];
-      const lastCompletedDate = new Date(lastCompletedLesson.completedAt);
-      lastCompletedDate.setHours(0, 0, 0, 0); // Początek dnia ukończenia
-      
-      // Sprawdź, czy ostatnia lekcja została ukończona dzisiaj
-      if (lastCompletedDate.getTime() === today.getTime()) {
-        canCompleteToday = false;
+      if (completedLessonsWithDates.length > 0) {
+        // Sortuj według daty ukończenia (od najnowszej)
+        const sortedLessons = [...completedLessonsWithDates].sort((a, b) => 
+          new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime()
+        );
+        
+        const lastCompletedLesson = sortedLessons[0];
+        const lastCompletedDate = new Date(lastCompletedLesson.completedAt);
+        lastCompletedDate.setHours(0, 0, 0, 0); // Początek dnia ukończenia
+        
+        // Sprawdź, czy ostatnia lekcja została ukończona dzisiaj
+        if (lastCompletedDate.getTime() === today.getTime()) {
+          canCompleteToday = false;
+        }
       }
-    }
-    
-    // Jeśli nie można ukończyć dzisiaj lekcji, przekieruj z komunikatem
-    if (!canCompleteToday) {
-      const timestamp = Date.now();
-      const url = new URL(req.url);
-      const origin = url.origin;
-      // Dodaj parametr z informacją o braku możliwości ukończenia
-      const redirectUrl = `${origin}/app/lessons/${lessonId}?limitReached=true&t=${timestamp}`;
       
-      const response = NextResponse.redirect(redirectUrl, { status: 303 });
-      return response;
+      // Jeśli nie można ukończyć dzisiaj lekcji, przekieruj z komunikatem
+      if (!canCompleteToday) {
+        const timestamp = Date.now();
+        const url = new URL(req.url);
+        const origin = url.origin;
+        // Dodaj parametr z informacją o braku możliwości ukończenia
+        const redirectUrl = `${origin}/app/lessons/${lessonId}?limitReached=true&t=${timestamp}`;
+        
+        const response = NextResponse.redirect(redirectUrl, { status: 303 });
+        return response;
+      }
     }
     
     // Dodaj bieżącą lekcję do ukończonych z datą ukończenia

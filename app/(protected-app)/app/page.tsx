@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
 import fs from 'fs';
 import path from 'path';
-import { CheckCircle, LockIcon, BookType, ChevronDown, ChevronRight } from 'lucide-react';
+import { Book, LockIcon, BookType, ChevronDown, ChevronRight, Brain, Code, Lightbulb, FileText, Puzzle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cookies } from 'next/headers';
 import { CookieDebug } from './cookie-debug';
@@ -17,24 +17,38 @@ async function getLessonPlan() {
 }
 
 // Pobierz nazwy części/rozdziałów z pliku part.json
-async function getPartNames() {
+async function getPartDetails() {
   const filePath = path.join(process.cwd(), 'part.json');
   const fileContents = fs.readFileSync(filePath, 'utf8');
   const data = JSON.parse(fileContents);
   
   // Przekształć tablicę w obiekt, gdzie kluczem jest id części
-  const partMap: {[key: number]: string} = {};
-  data.parts.forEach((part: {id: number, name: string}) => {
-    partMap[part.id] = part.name;
+  const partMap: {[key: number]: {name: string, icon: string}} = {};
+  data.parts.forEach((part: {id: number, name: string, icon?: string}) => {
+    partMap[part.id] = {
+      name: part.name,
+      icon: part.icon || 'BookType' // Default icon if not specified
+    };
   });
   
   return partMap;
 }
 
+// Map string icons to actual icon components
+const iconMap = {
+  'BookType': BookType,
+  'Brain': Brain,
+  'Code': Code,
+  'Lightbulb': Lightbulb,
+  'FileText': FileText,
+  'Puzzle': Puzzle
+};
+
 // Struktura dla części kursu
 interface PartInfo {
   id: number;
   name: string;
+  icon: string;
   lessons: any[];
 }
 
@@ -85,8 +99,9 @@ export default async function AppPage() {
 
   if (completedLessonsCookie) {
     try {
-      // Upewnij się, że ciasteczko jest poprawnie parsowane
-      const parsed = JSON.parse(completedLessonsCookie);
+      // Upewnij się, że ciasteczko jest poprawnie parsowane - najpierw zdekoduj URI
+      const decodedCookie = decodeURIComponent(completedLessonsCookie);
+      const parsed = JSON.parse(decodedCookie);
       console.log('Parsed completedLessonIds (main page):', parsed);
       
       if (Array.isArray(parsed) && parsed.length > 0) {
@@ -141,15 +156,28 @@ export default async function AppPage() {
   }
 
   // Określamy, które lekcje są dostępne dla użytkownika
-  // Ukończone lekcje są zawsze dostępne
-  // Dodatkowo dostępna jest pierwsza nieukończona lekcja
+  // 1. Ukończone lekcje są zawsze dostępne
+  // 2. Lekcje do wartości LESSON_START są od razu dostępne
+  // 3. Dodatkowo dostępna jest pierwsza nieukończona lekcja po LESSON_START
   const availableLessonIds: number[] = [...completedLessonIds];
   let nextAvailableLessonId = 1;
 
-  // Znajdź pierwszą nieukończoną lekcję
+  // Pobierz wartość LESSON_START z procesu środowiskowego
+  const lessonStartEnv = process.env.LESSON_START;
+  const lessonStart = lessonStartEnv ? parseInt(lessonStartEnv, 10) : 1;
+  console.log('LESSON_START value:', lessonStart);
+
+  // Dodaj wszystkie lekcje do LESSON_START jako dostępne
+  for (let i = 1; i <= lessonStart && i <= lessons.length; i++) {
+    if (!availableLessonIds.includes(i)) {
+      availableLessonIds.push(i);
+    }
+  }
+
+  // Znajdź pierwszą nieukończoną lekcję po LESSON_START
   for (let i = 0; i < lessons.length; i++) {
     const lessonId = i + 1;
-    if (!completedLessonIds.includes(lessonId)) {
+    if (lessonId > lessonStart && !completedLessonIds.includes(lessonId)) {
       nextAvailableLessonId = lessonId;
       break;
     }
@@ -164,7 +192,7 @@ export default async function AppPage() {
   availableLessonIds.sort((a, b) => a - b);
 
   // Pobierz nazwy części kursu z pliku part.json
-  const partNames = await getPartNames();
+  const partDetails = await getPartDetails();
   
   // Pobierz z cookies informację o ostatnio otwartej części kursu
   const openPartCookie = cookieStore.get('openPartId');
@@ -184,7 +212,8 @@ export default async function AppPage() {
     if (!parts[part]) {
       parts[part] = {
         id: part,
-        name: partNames[part] || `Część ${part}`,
+        name: partDetails[part]?.name || `Część ${part}`,
+        icon: partDetails[part]?.icon || 'BookType',
         lessons: []
       };
     }
@@ -215,92 +244,116 @@ export default async function AppPage() {
         </CardContent>
       </Card>
 
-      {sortedParts.map((part) => {
-        // Sprawdź, czy ta część ma być rozwinięta
-        const isOpen = part.id === openPartId;
-        
-        return (
-          <div key={part.id} className="mb-6 border border-gray-100 rounded-lg overflow-hidden shadow-sm">
-            <form action={`/api/toggle-part?partId=${part.id}`} method="POST">
-              <Button 
-                variant="ghost" 
-                className={`w-full flex justify-between items-center p-4 text-left ${isOpen ? 'bg-blue-50' : 'bg-white'}`}
-                type="submit"
-              >
-                <div className="flex items-center">
-                  <BookType className="mr-2 text-blue-600" size={20} />
-                  <h2 className="text-xl font-bold text-blue-600">{part.name}</h2>
-                </div>
-                {isOpen ? (
-                  <ChevronDown className="text-blue-600" size={20} />
-                ) : (
-                  <ChevronRight className="text-blue-600" size={20} />
-                )}
-              </Button>
-            </form>
-            
-            {isOpen && (
-              <div className="grid grid-cols-1 gap-4 p-4 bg-gray-50">
-                {part.lessons.map((lesson) => {
-                  const lessonId = lesson.lessonId;
-                  const isCompleted = completedLessonIds.includes(lessonId);
-                  const isAvailable = availableLessonIds.includes(lessonId);
-                  const isNextLesson = lessonId === nextAvailableLessonId;
-                  const isCurrentLesson = lessonId === lastViewedLessonId;
-                  
-                  const cardContent = (
-                    <div 
-                      className={`bg-white rounded-lg shadow p-4 border border-l-4
-                      ${isCompleted ? 'border-teal-200 border-l-teal-500' : 
-                        isNextLesson ? 'border-blue-200 border-l-blue-500' : 'border-gray-200'} 
-                      ${isCurrentLesson ? 'ring-2 ring-blue-100' : ''}
-                      transition-all duration-200 
-                      ${isAvailable ? 'hover:shadow-md cursor-pointer' : 'opacity-70'}`}
-                    >
-                      <div className="flex justify-between items-start">
-                        <div className="flex items-center">
-                          <div className={`h-8 w-8 rounded-lg flex items-center justify-center text-white font-semibold mr-3 
-                            ${isNextLesson ? 'bg-blue-500' : 'bg-gradient-to-r from-blue-500 to-teal-500'}`}>
-                            {lessonId}
-                          </div>
-                          <h2 className={`font-semibold 
-                            ${isCompleted ? 'text-teal-700' : 
-                              isNextLesson ? 'text-blue-700' : 
-                              isAvailable ? 'text-gray-800' : 'text-gray-400'} 
-                            ${isCurrentLesson ? 'underline' : ''}`}>
-                            {lesson.subject}
-                          </h2>
-                        </div>
-                        {isCompleted ? (
-                          <div className="flex items-center text-teal-600 text-xs font-medium ml-2">
-                            <CheckCircle size={16} />
-                          </div>
-                        ) : isNextLesson ? (
-                          <div className="flex items-center text-blue-600 text-xs font-medium ml-2 bg-blue-50 px-2 py-1 rounded">
-                            Next
-                          </div>
-                        ) : !isAvailable ? (
-                          <div className="flex items-center text-gray-400 text-xs font-medium ml-2">
-                            <LockIcon size={16} />
-                          </div>
-                        ) : null}
+      <div className="space-y-6 mb-8">
+        {sortedParts.map((part) => {
+          // Sprawdź, czy ta część ma być rozwinięta
+          const isOpen = part.id === openPartId;
+          
+          // Get the correct icon component
+          const IconComponent = iconMap[part.icon as keyof typeof iconMap] || BookType;
+          
+          return (
+            <div key={part.id} className="rounded-lg overflow-hidden shadow-md border border-gray-200">
+              <form action={`/api/toggle-part?partId=${part.id}`} method="POST">
+                <button 
+                  type="submit"
+                  className={`block w-full relative p-0 text-left ${isOpen ? 'bg-blue-50' : 'bg-white hover:bg-gray-50'}`}
+                >
+                  <div className="flex items-center justify-between p-4">
+                    <div className="flex items-center">
+                      <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-blue-500 flex items-center justify-center mr-4">
+                        <IconComponent className="text-white" size={24} />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <h2 className="text-lg font-semibold text-blue-700 truncate">{part.name}</h2>
+                        <p className="text-sm text-blue-500">{part.lessons.length} lessons</p>
                       </div>
                     </div>
-                  );
-                  
-                  return isAvailable ? (
-                    <Link key={lessonId} href={`/app/lessons/${lessonId}`}>
-                      {cardContent}
-                    </Link>
-                  ) : (
-                    <div key={lessonId}>{cardContent}</div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        );
-      })}
+                    <div className="flex-shrink-0 ml-4">
+                      {isOpen ? (
+                        <div className="p-2 rounded-full bg-blue-100">
+                          <ChevronDown className="text-blue-700" size={20} />
+                        </div>
+                      ) : (
+                        <div className="p-2 rounded-full bg-gray-100">
+                          <ChevronRight className="text-blue-600" size={20} />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </button>
+              </form>
+              
+              {isOpen && (
+                <div className="border-t border-blue-100 bg-white">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
+                    {part.lessons.map((lesson) => {
+                      const lessonId = lesson.lessonId;
+                      const isCompleted = completedLessonIds.includes(lessonId);
+                      const isAvailable = availableLessonIds.includes(lessonId);
+                      const isNextLesson = lessonId === nextAvailableLessonId;
+                      const isCurrentLesson = lessonId === lastViewedLessonId;
+                      
+                      const cardContent = (
+                        <div 
+                          className={`bg-white rounded-lg shadow h-full border-l-4
+                          ${isCompleted ? 'border-l-teal-500' : 
+                            isNextLesson ? 'border-l-blue-500' : 'border-l-gray-200'} 
+                          border border-gray-200
+                          ${isCurrentLesson ? 'ring-2 ring-blue-100' : ''}
+                          transition-all duration-200 
+                          ${isAvailable ? 'hover:shadow-md cursor-pointer' : 'opacity-70'}`}
+                        >
+                          <div className="p-3 h-full flex flex-col">
+                            <div className="flex items-start">
+                              <div className={`h-6 w-6 rounded-full flex items-center justify-center text-white font-semibold mr-2 flex-shrink-0
+                                ${isNextLesson ? 'bg-blue-500' : 'bg-gradient-to-r from-blue-500 to-teal-500'}`}>
+                                {lessonId}
+                              </div>
+                              <h3 className={`font-medium text-sm truncate
+                                ${isCompleted ? 'text-teal-700' : 
+                                  isNextLesson ? 'text-blue-700' : 
+                                  isAvailable ? 'text-gray-800' : 'text-gray-400'}`}>
+                                {lesson.subject}
+                              </h3>
+                            </div>
+                            
+                            <div className="mt-auto pt-2">
+                              {isCompleted ? (
+                                <div className="flex items-center text-teal-600 text-xs">
+                                  <Book size={12} className="mr-1 flex-shrink-0" />
+                                  <span>Lesson completed</span>
+                                </div>
+                              ) : isNextLesson ? (
+                                <div className="inline-flex items-center text-blue-600 text-xs bg-blue-50 px-1.5 py-0.5 rounded">
+                                  <span>Next</span>
+                                </div>
+                              ) : !isAvailable ? (
+                                <div className="flex items-center text-gray-400 text-xs">
+                                  <LockIcon size={12} className="mr-1 flex-shrink-0" />
+                                  <span>Locked</span>
+                                </div>
+                              ) : null}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                      
+                      return isAvailable ? (
+                        <Link key={lessonId} href={`/app/lessons/${lessonId}`} className="block h-full">
+                          {cardContent}
+                        </Link>
+                      ) : (
+                        <div key={lessonId} className="h-full">{cardContent}</div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
       
       {/* Debug info */}
       <div className="mt-8">

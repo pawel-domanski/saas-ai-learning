@@ -2,15 +2,18 @@
   "parts": [
     {
       "id": 1,
-      "name": "Podstawy AI Engineering"
+      "name": "Podstawy AI Engineering",
+      "icon": "BookType"
     },
     {
       "id": 2,
-      "name": "Zaawansowane koncepcje AI"
+      "name": "Zaawansowane koncepcje AI",
+      "icon": "Brain"
     },
     {
       "id": 3,
-      "name": "Praktyczne zastosowania"
+      "name": "Praktyczne zastosowania",
+      "icon": "Code"
     }
   ]
 } 

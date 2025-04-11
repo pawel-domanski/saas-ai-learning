@@ -15,8 +15,20 @@ export function CookieDebug() {
   const [canCompleteToday, setCanCompleteToday] = useState<boolean>(true);
   const [lastCompletedDate, setLastCompletedDate] = useState<string>('');
   const [nextAvailableTime, setNextAvailableTime] = useState<string>('');
+  const [lessonStart, setLessonStart] = useState<number>(0);
 
   useEffect(() => {
+    // Fetch LESSON_START from environment
+    fetch('/api/env/lesson-start')
+      .then(res => res.json())
+      .then(data => {
+        setLessonStart(data.lessonStart || 0);
+        console.log('Client-side LESSON_START:', data.lessonStart);
+      })
+      .catch(err => {
+        console.error('Error fetching LESSON_START:', err);
+      });
+
     // Get all cookies
     const allCookies = document.cookie;
     setCookies(allCookies);
@@ -108,7 +120,8 @@ export function CookieDebug() {
 
   // Function to manually add a lesson to completed
   const addLessonToCookie = (lessonId: number) => {
-    if (!canCompleteToday) {
+    // If the lesson ID is less than or equal to LESSON_START, we don't apply the daily limit
+    if (lessonId > lessonStart && !canCompleteToday) {
       alert(`Daily limit reached. Next lesson will be available in ${nextAvailableTime}.`);
       return;
     }

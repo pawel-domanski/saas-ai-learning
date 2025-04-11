@@ -42,6 +42,71 @@ export function Markdown({ children }: MarkdownProps) {
     // Zamiana poziomych linii
     processedText = processedText.replace(/^---$/gm, '<hr class="my-6 border-t border-gray-300" />');
     
+    // Obsługa tabel
+    const processTable = (text: string) => {
+      // Szukaj tabel w formacie Markdown (linie zawierające |)
+      const tableRegex = /(^\|.+\|\s*$\n)(^\|[-:\|\s]+\|\s*$\n)(^\|.+\|\s*$\n?)+/gm;
+      
+      return text.replace(tableRegex, (table) => {
+        // Podziel tabelę na wiersze
+        const rows = table.trim().split('\n');
+        
+        // Pierwszy wiersz to nagłówek
+        const headerRow = rows[0];
+        
+        // Drugi wiersz to separator (ignorujemy, ale sprawdzamy wyrównanie)
+        const separatorRow = rows[1];
+        const alignments = separatorRow.split('|').filter(Boolean).map(cell => {
+          if (cell.trim().startsWith(':') && cell.trim().endsWith(':')) return 'center';
+          if (cell.trim().endsWith(':')) return 'right';
+          return 'left';
+        });
+        
+        // Pozostałe wiersze to dane
+        const dataRows = rows.slice(2);
+        
+        // Tworzenie HTML dla nagłówka
+        const headerHTML = headerRow
+          .split('|')
+          .filter(Boolean)
+          .map((cell, index) => {
+            const align = alignments[index] || 'left';
+            return `<th class="p-2 bg-gray-100 border border-gray-300 text-${align}" align="${align}">${cell.trim()}</th>`;
+          })
+          .join('');
+        
+        // Tworzenie HTML dla danych
+        const dataHTML = dataRows
+          .map(row => {
+            return row
+              .split('|')
+              .filter(Boolean)
+              .map((cell, index) => {
+                const align = alignments[index] || 'left';
+                return `<td class="p-2 border border-gray-300 text-${align}" align="${align}">${cell.trim()}</td>`;
+              })
+              .join('');
+          })
+          .map(row => `<tr>${row}</tr>`)
+          .join('');
+        
+        // Złożenie całej tabeli
+        return `<div class="overflow-x-auto my-6">
+          <table class="min-w-full border-collapse border border-gray-300">
+            <thead>
+              <tr>${headerHTML}</tr>
+            </thead>
+            <tbody>
+              ${dataHTML}
+            </tbody>
+          </table>
+        </div>`;
+      });
+    };
+    
+    // Przetwórz tabele przed paragrafami
+    processedText = processTable(processedText);
+    
     // Zamiana akapitów (musi być na końcu)
     // Pomijaj linie, które już są tagami HTML
     const paragraphs = processedText.split('\n');

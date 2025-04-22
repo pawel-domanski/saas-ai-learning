@@ -26,10 +26,8 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
   return (
     <div className="min-h-[100dvh] flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-50 to-green-50">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="flex justify-center">
-          <div className="h-14 w-14 rounded-full bg-gradient-to-r from-blue-500 to-teal-500 flex items-center justify-center text-white shadow-md">
-            <BookOpen className="h-7 w-7" />
-          </div>
+        <div className="flex justify-center mb-8">
+          <img src="/Logo_all.svg" alt="Logo" className="h-40 w-40" />
         </div>
         <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">
           {mode === 'signin'

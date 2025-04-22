@@ -79,6 +79,15 @@
   body {
     font-family: var(--font-inter), system-ui, sans-serif;
   }
+  @keyframes drift-pixel {
+    0%, 100% { top: 0; left: 0; }
+    25% { top: 0; left: calc(100% - 4px); }
+    50% { top: calc(100% - 4px); left: calc(100% - 4px); }
+    75% { top: calc(100% - 4px); left: 0; }
+  }
+  .animate-drift-pixel {
+    animation: drift-pixel 3s linear infinite;
+  }
 }
 
 @layer base {
@@ -271,5 +280,19 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer components {
+  .card-drift {
+    @apply relative overflow-visible;
+  }
+  .card-drift::before {
+    content: "";
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    background-color: #111827;
+    animation: drift-pixel 3s linear infinite;
   }
 }

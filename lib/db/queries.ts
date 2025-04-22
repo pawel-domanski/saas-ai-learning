@@ -1,6 +1,6 @@
 import { desc, and, eq, isNull } from 'drizzle-orm';
 import { db } from './drizzle';
-import { activityLogs, teamMembers, teams, userProgress, users } from './schema';
+import { activityLogs, teamMembers, teams, userProgress, users, prompts } from './schema';
 import { getSession } from '@/lib/auth/session-server';
 
 export async function getUser() {
@@ -200,7 +200,7 @@ export async function markLessonAsCompleted(userId: number, lessonId: number) {
       .values({
         userId,
         lessonId,
-        completed: true,
+        completed: false,
         lastAccessed: new Date(),
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -223,4 +223,15 @@ export async function getUserCourseProgress(userId: number, totalLessons: number
     percentComplete,
     lessonProgress: progress,
   };
+}
+
+// Fetch prompt content by content_date (date string yyyy-mm-dd)
+export async function getPromptByDate(contentDate: string) {
+  const dateObj = new Date(contentDate);
+  const result = await db
+    .select()
+    .from(prompts)
+    .where(eq(prompts.content_date, dateObj))
+    .limit(1);
+  return result.length > 0 ? result[0] : null;
 }

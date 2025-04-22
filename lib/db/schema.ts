@@ -133,6 +133,30 @@ export const userProgressRelations = relations(userProgress, ({ one }) => ({
   }),
 }));
 
+// Define prompts table for daily prompt content
+export const prompts = pgTable('prompts', {
+  id: serial('id').primaryKey(),
+  paragraph_content: text('paragraph_content'),
+  code_content: text('code_content'),
+  content_date: timestamp('content_date').notNull(),
+});
+
+// Define tools table for dynamic tools
+export const tools = pgTable('tool', {
+  id: serial('id').primaryKey(),
+  type: varchar('type', { length: 50 }),
+  code_content: varchar('code_content', { length: 255 }),
+  paragraph_content: text('paragraph_content'),
+  content_date: timestamp('content_date').notNull(),
+  icon: text('icon'),
+  link: text('link'),
+  tags: text('tags'),
+  price_model: text('price_model'),
+  price: text('price'),
+  billing: text('billing'),
+  refund: text('refund'),
+});
+
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 export type Team = typeof teams.$inferSelect;
@@ -165,3 +189,6 @@ export enum ActivityType {
   ACCEPT_INVITATION = 'ACCEPT_INVITATION',
   LESSON_COMPLETED = 'LESSON_COMPLETED',
 }
+
+export type Prompt = typeof prompts.$inferSelect;
+export type Tool = typeof tools.$inferSelect;

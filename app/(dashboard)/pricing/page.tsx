@@ -23,6 +23,10 @@ export default async function PricingPage({
   const basePrice = prices.find((price) => price.productId === basePlan?.id);
   const plusPrice = prices.find((price) => price.productId === plusPlan?.id);
 
+  const orderedProducts = ['Base', 'Plus', 'Master']
+    .map((name) => products.find((p) => p.name === name))
+    .filter((p): p is typeof products[number] => !!p);
+
   // Check if the user was redirected from premium content
   const needsSubscription = searchParams.access === 'premium';
 
@@ -45,33 +49,59 @@ export default async function PricingPage({
         </div>
       )}
       
-      <div className="grid md:grid-cols-2 gap-8 max-w-xl mx-auto">
+      {/* Header Section */}
+      <div className="text-center mb-8">
+        <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
+          Start Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-teal-500">Smart Learning</span> Journey Today
+        </h1>
+        <p className="mt-4 text-lg text-gray-600 max-w-3xl mx-auto">
+          Transform Curiosity into Expertise: Where Knowledge Meets Opportunity
+        </p>
+      </div>
+      {/* Pricing Grid (dynamic from Stripe) */}
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {orderedProducts.map((product) => {
+          const planPrice = prices.find((p) => p.productId === product.id);
+          return (
         <PricingCard
-          name={basePlan?.name || 'Base'}
-          price={basePrice?.unitAmount || 800}
-          interval={basePrice?.interval || 'month'}
-          trialDays={basePrice?.trialPeriodDays || 7}
-          features={[
-            'Unlimited Usage',
-            'Unlimited Workspace Members',
-            'Email Support',
-          ]}
-          priceId={basePrice?.id}
-        />
-        <PricingCard
-          name={plusPlan?.name || 'Plus'}
-          price={plusPrice?.unitAmount || 1200}
-          interval={plusPrice?.interval || 'month'}
-          trialDays={plusPrice?.trialPeriodDays || 7}
-          features={[
-            'Everything in Base, and:',
-            'Early Access to New Features',
-            '24/7 Support + Slack Access',
-            'Premium App Features Access'
-          ]}
-          priceId={plusPrice?.id}
-          highlighted={needsSubscription}
-        />
+              key={product.id}
+              name={product.name}
+              price={planPrice?.unitAmount || 0}
+              interval={planPrice?.interval || 'month'}
+              trialDays={planPrice?.trialPeriodDays || 0}
+              features={
+                product.name === 'Base'
+                  ? ['Unlimited Usage', 'Unlimited Workspace Members', 'Email Support']
+                  : product.name === 'Plus'
+                  ? ['Everything in Base', 'Early Access to New Features', '24/7 Support + Slack Access']
+                  : []
+              }
+              priceId={planPrice?.id}
+              highlighted={product.name === 'Plus'}
+            />
+          );
+        })}
+      </div>
+      <div className="text-center mt-12 mb-8">
+        <p className="text-gray-600 max-w-4xl mx-auto">
+          We've applied special pricing to our subscription plans.
+        </p>
+        <p className="text-gray-600 max-w-4xl mx-auto mt-2">
+          (<strong>€6.99/week</strong>), (<strong>€19.99/month - save 28% compared to weekly billing</strong>), (<strong>€39.99/quarter - save 33% compared to monthly billing</strong>)
+        </p>
+        <p className="text-gray-600 max-w-4xl mx-auto mt-2">
+          By clicking <strong>'Get Started'</strong>, you agree to automatic subscription renewal until you cancel. You can cancel anytime in your account settings.
+        </p>
+      </div>
+      {/* Disclaimer Section */}
+      <div className="bg-white border border-gray-200 rounded-xl p-6 mb-8">
+        <p className="text-lg font-bold mb-2">Disclaimer</p>
+        <p>
+          Focus your AI serves exclusively as an educational platform and explicitly does not provide any financial, investment, or career advice under any circumstances. All content is presented for informational and educational purposes only. Prior to making any career or financial decisions, we strongly urge you to consult with qualified professional advisors. Focus your AI maintains absolute neutrality and has no bias whatsoever towards or against any stocks, companies, or entities mentioned throughout this platform. Nothing contained within this site should be interpreted as a recommendation or endorsement of any kind.
+        </p>
+      </div>
+      <div className="text-center text-gray-500 text-sm mt-4">
+        Product by DexterLab 2025 ©All Rights Reserved.
       </div>
     </main>
   );

@@ -1,10 +1,13 @@
 import { redirect } from 'next/navigation';
 import { getUser, getTeamForUser, getAllUserProgress } from '@/lib/db/queries';
+import { db } from '@/lib/db/drizzle';
+import { tools, prompts } from '@/lib/db/schema';
+import { eq } from 'drizzle-orm';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
 import fs from 'fs';
 import path from 'path';
-import { Book, LockIcon, BookType, ChevronDown, ChevronRight, Brain, Code, Lightbulb, FileText, Puzzle } from 'lucide-react';
+import { Book, LockIcon, BookType, ChevronDown, ChevronRight, Brain, Code, Lightbulb, FileText, Puzzle, DollarSign, Tag, Calendar, RefreshCw, Music } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cookies } from 'next/headers';
 
@@ -150,7 +153,7 @@ export default async function AppPage() {
   const partDetails = await getPartDetails();
   
   // Pobierz cookies
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   
   // Pobierz z cookies informację o ostatnio otwartej części kursu
   const openPartCookie = cookieStore.get('openPartId');
@@ -195,7 +198,7 @@ export default async function AppPage() {
   // Grupuj lekcje według części (part)
   const parts: { [key: number]: PartInfo } = {};
   
-  lessons.forEach((lesson, index) => {
+  lessons.forEach((lesson: any, index: number) => {
     const lessonId = index + 1;
     const part = lesson.part || 1;
     
@@ -217,6 +220,16 @@ export default async function AppPage() {
   // Sortuj części według numeru
   const sortedParts = Object.values(parts).sort((a, b) => a.id - b.id);
 
+  // Fetch prompt content for today from prompts table
+  const todayDate = new Date();
+  const promptResult = await db.select().from(prompts).where(eq(prompts.content_date, todayDate)).limit(1);
+  const prompt = promptResult.length > 0 ? promptResult[0] : null;
+  const codeContent = prompt?.code_content || '';
+  const paragraphContent = prompt?.paragraph_content || '';
+  // Fetch tool content for today from tools table
+  const toolResult = await db.select().from(tools).where(eq(tools.content_date, todayDate)).limit(1);
+  const tool = toolResult.length > 0 ? toolResult[0] : null;
+
   return (
     <div className="flex-1 p-4 lg:p-8 max-w-6xl mx-auto">
       <Card className="mb-8 border-0 shadow-lg rounded-2xl overflow-hidden bg-white py-0">
@@ -228,11 +241,125 @@ export default async function AppPage() {
           </div>
         </CardHeader>
         <CardContent className="p-6">
-          <p className="text-gray-700">
+          <p className="text-gray-700 -mt-2">
             Welcome to the AI Engineering course! Below you'll find available lessons. Each one will help you understand key aspects of working as an AI Engineer.
           </p>
         </CardContent>
       </Card>
+
+      {/* Additional Course Cards */}
+      <Card className="mb-8 border-0 shadow-lg rounded-2xl overflow-hidden bg-white py-0">
+        <CardHeader className="bg-gradient-to-r from-blue-500 to-teal-500 px-6 py-6 rounded-t-2xl m-0">
+          <div className="flex justify-between items-center">
+            <CardTitle className="text-white font-semibold flex items-center">
+              Today Prompt
+            </CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent className="p-6">
+          {codeContent && (
+            <pre className="-mt-6 bg-black text-green-200 font-mono p-4 rounded-lg text-sm overflow-auto mb-4 whitespace-pre-wrap break-words">
+              {codeContent}
+            </pre>
+          )}
+          {paragraphContent && (
+            <pre className="bg-gray-100 text-gray-800 font-mono p-4 rounded-lg text-sm overflow-auto whitespace-pre-wrap break-words">
+              {paragraphContent}
+            </pre>
+          )}
+        </CardContent>
+      </Card>
+      {/* Dynamic Tool Card */}
+      {tool && (
+        <Card className="mb-8 border-0 shadow-lg rounded-2xl overflow-hidden bg-white py-0">
+          <CardHeader className="bg-gradient-to-r from-blue-500 to-teal-500 px-6 py-6 rounded-t-2xl m-0">
+            <CardTitle className="text-white font-semibold">
+              Today AI tool
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            {tool.icon && (
+              <div className="-mt-6 mb-4 flex items-center space-x-4">
+                <img src={tool.icon ?? ''} alt={tool.code_content ?? ''} className="max-h-24 object-contain" />
+                <div className="flex flex-col">
+                  <span className="self-start text-2xl font-semibold text-gray-800">{tool.code_content}</span>
+                  {tool.type && (
+                    <span className="mt-2 inline-flex items-center space-x-1 text-sm text-gray-700 bg-gray-100 border border-gray-300 rounded-full px-3 py-1">
+                     
+                      <span>{tool.type}</span>
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
+            <p className="text-gray-700">
+              {tool.paragraph_content}
+            </p>
+            {tool.link && (
+              <a href={tool.link} target="_blank" rel="noopener noreferrer" className="mt-4 inline-block text-blue-500 hover:underline">
+                Open Link
+              </a>
+            )}
+            {tool.tags && (
+              <div className="mt-2 flex flex-wrap gap-2">
+                {(
+                  Array.isArray(tool.tags)
+                    ? tool.tags
+                    : typeof tool.tags === 'string'
+                    ? tool.tags.trim().startsWith('[')
+                      ? (JSON.parse(tool.tags) as string[])
+                      : tool.tags.split(',').map((t) => t.trim())
+                    : []
+                ).map((tag) => (
+                  <span key={tag} className="inline-block bg-blue-100 text-blue-700 text-xs font-medium px-2 py-0.5 rounded">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
+            {(tool.price_model || tool.price || tool.billing || tool.refund) && (
+              <div className="mt-4 flex justify-between border-t pt-4">
+                {tool.price_model && (
+                  <div className="flex items-center space-x-2">
+                    <DollarSign className="text-blue-500" size={20} />
+                    <div>
+                      <p className="text-xs text-gray-500">Pricing model</p>
+                      <p className="text-sm font-medium">{tool.price_model}</p>
+                    </div>
+                  </div>
+                )}
+                {tool.price && (
+                  <div className="flex items-center space-x-2">
+                    <Tag className="text-blue-500" size={20} />
+                    <div>
+                      <p className="text-xs text-gray-500">Paid options</p>
+                      <p className="text-sm font-medium">{tool.price}</p>
+                    </div>
+                  </div>
+                )}
+                {tool.billing && (
+                  <div className="flex items-center space-x-2">
+                    <Calendar className="text-blue-500" size={20} />
+                    <div>
+                      <p className="text-xs text-gray-500">Billing frequency</p>
+                      <p className="text-sm font-medium">{tool.billing}</p>
+                    </div>
+                  </div>
+                )}
+                {tool.refund && (
+                  <div className="flex items-center space-x-2">
+                    <RefreshCw className="text-blue-500" size={20} />
+                    <div>
+                      <p className="text-xs text-gray-500">Refund policy</p>
+                      <p className="text-sm font-medium">{tool.refund}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       <div className="space-y-6 mb-8">
         {sortedParts.map((part) => {

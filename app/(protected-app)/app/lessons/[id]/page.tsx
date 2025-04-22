@@ -9,6 +9,7 @@ import { LessonHeader } from '@/app/(protected-app)/app/lessons/[id]/lesson-head
 import { cookies } from 'next/headers';
 import SlideshowClient from './slideshow-client';
 import { SaveLessonView } from './save-lesson-view';
+import ConfettiEffect from './confetti';
 
 // Get training plan data from the JSON file
 async function getLessonPlan() {
@@ -246,6 +247,9 @@ export default async function LessonPage({
       {/* Component to save view info using client-side JS */}
       <SaveLessonView lessonId={lessonId} partId={part} />
       
+      {/* Confetti effect only shows when success=true in URL */}
+      <ConfettiEffect />
+      
       <div className="mb-4 text-sm font-medium flex items-center">
         <BookType className="mr-2 text-blue-600" size={16} />
         <span className="text-blue-600">{partName}</span>
@@ -278,14 +282,6 @@ export default async function LessonPage({
           <Markdown>{content}</Markdown>
         )}
       </div>
-
-      {/* Success message */}
-      {successMessage && (
-        <div className="bg-green-50 text-green-700 p-4 rounded-lg mb-4 flex items-center gap-2">
-          <Book size={20} />
-          <span>Congratulations! The lesson has been marked as completed.</span>
-        </div>
-      )}
 
       <div className="flex justify-between items-center mt-8">
         {/* Previous lesson button - always visible if we're not on the first lesson */}

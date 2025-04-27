@@ -62,7 +62,7 @@ export function withTeam<T>(action: ActionWithTeamFunction<T>) {
   return async (formData: FormData): Promise<T> => {
     const user = await getUser();
     if (!user) {
-      redirect('/sign-in');
+      redirect('/login/sign-in');
     }
 
     const team = await getTeamForUser(user.id);
@@ -83,7 +83,7 @@ export function withSubscription<T>(action: SubscribedActionFunction<T>) {
   return async (formData: FormData): Promise<T> => {
     const user = await getUser();
     if (!user) {
-      redirect('/sign-in');
+      redirect('/login/sign-in');
     }
 
     const team = await getTeamForUser(user.id);

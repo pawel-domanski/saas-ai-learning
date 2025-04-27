@@ -10,6 +10,8 @@ import path from 'path';
 import { Book, LockIcon, BookType, ChevronDown, ChevronRight, Brain, Code, Lightbulb, FileText, Puzzle, DollarSign, Tag, Calendar, RefreshCw, Music } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cookies } from 'next/headers';
+import { CollapsibleText } from './components/CollapsibleText';
+import PartList from './components/PartList';
 
 // Pobierz dane planu szkoleniowego z pliku JSON
 async function getLessonPlan() {
@@ -64,7 +66,7 @@ export default async function AppPage() {
   // Get the current user
   const user = await getUser();
   if (!user) {
-    redirect('/sign-in');
+    redirect('/login/sign-in');
   }
 
   // Get the team and check subscription
@@ -231,8 +233,8 @@ export default async function AppPage() {
   const tool = toolResult.length > 0 ? toolResult[0] : null;
 
   return (
-    <div className="flex-1 p-4 lg:p-8 max-w-6xl mx-auto">
-      <Card className="mb-8 border-0 shadow-lg rounded-2xl overflow-hidden bg-white py-0">
+    <div className="flex-1 p-4 lg:p-8 max-w-3xl mx-auto w-full overflow-hidden">
+      <Card className="mb-8 border-0 shadow-lg rounded-2xl overflow-hidden bg-white py-0 w-full">
         <CardHeader className="bg-gradient-to-r from-blue-500 to-teal-500 px-6 py-6 rounded-t-2xl m-0">
           <div className="flex justify-between items-center">
             <CardTitle className="text-white font-semibold flex items-center">
@@ -248,7 +250,7 @@ export default async function AppPage() {
       </Card>
 
       {/* Additional Course Cards */}
-      <Card className="mb-8 border-0 shadow-lg rounded-2xl overflow-hidden bg-white py-0">
+      <Card className="mb-8 border-0 shadow-lg rounded-2xl overflow-hidden bg-white py-0 w-full">
         <CardHeader className="bg-gradient-to-r from-blue-500 to-teal-500 px-6 py-6 rounded-t-2xl m-0">
           <div className="flex justify-between items-center">
             <CardTitle className="text-white font-semibold flex items-center">
@@ -271,7 +273,7 @@ export default async function AppPage() {
       </Card>
       {/* Dynamic Tool Card */}
       {tool && (
-        <Card className="mb-8 border-0 shadow-lg rounded-2xl overflow-hidden bg-white py-0">
+        <Card className="mb-8 border-0 shadow-lg rounded-2xl overflow-hidden bg-white py-0 w-full">
           <CardHeader className="bg-gradient-to-r from-blue-500 to-teal-500 px-6 py-6 rounded-t-2xl m-0">
             <CardTitle className="text-white font-semibold">
               Today AI tool
@@ -292,9 +294,13 @@ export default async function AppPage() {
                 </div>
               </div>
             )}
-            <p className="text-gray-700">
-              {tool.paragraph_content}
-            </p>
+            
+            <CollapsibleText 
+              text={tool.paragraph_content || ''} 
+              maxLength={180} 
+              className="text-gray-700"
+            />
+            
             {tool.link && (
               <a href={tool.link} target="_blank" rel="noopener noreferrer" className="mt-4 inline-block text-blue-500 hover:underline">
                 Open Link
@@ -361,124 +367,15 @@ export default async function AppPage() {
         </Card>
       )}
 
-      <div className="space-y-6 mb-8">
-        {sortedParts.map((part) => {
-          // Sprawdź, czy ta część ma być rozwinięta
-          const isOpen = part.id === openPartId;
-          
-          // Get the correct icon component
-          const IconComponent = iconMap[part.icon as keyof typeof iconMap] || BookType;
-          
-          return (
-            <div key={part.id} className="rounded-lg overflow-hidden shadow-md border border-gray-200">
-              <form action={`/api/toggle-part?partId=${part.id}`} method="POST">
-                <button 
-                  type="submit"
-                  className={`group block w-full relative p-0 text-left cursor-pointer ${isOpen ? 'bg-blue-50' : 'bg-white hover:bg-gray-50'}`}
-                >
-                  <div className="flex items-center justify-between p-4 hover:opacity-90 transition-opacity duration-200">
-                    <div className="flex items-center">
-                      <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-blue-500 flex items-center justify-center mr-4">
-                        <IconComponent className="text-white" size={24} />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <h2 className="text-lg font-semibold text-blue-700 truncate">{part.name}</h2>
-                        <p className="text-sm text-blue-500">{part.lessons.length} lessons</p>
-                      </div>
-                    </div>
-                    <div className="flex-shrink-0 ml-4">
-                      {isOpen ? (
-                        <div className="p-2 rounded-full bg-blue-100">
-                          <ChevronDown className="text-blue-700" size={20} />
-                        </div>
-                      ) : (
-                        <div className="p-2 rounded-full bg-gray-100 group-hover:bg-blue-50 transition-colors duration-200">
-                          <ChevronRight className="text-blue-600" size={20} />
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </button>
-              </form>
-              
-              {isOpen && (
-                <div className="border-t border-blue-100 bg-white">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
-                    {part.lessons.map((lesson) => {
-                      const lessonId = lesson.lessonId;
-                      const isCompleted = completedLessonIds.includes(lessonId);
-                      const isAvailable = availableLessonIds.includes(lessonId);
-                      const isNextLesson = lessonId === nextAvailableLessonId;
-                      const isCurrentLesson = lessonId === lastViewedLessonId;
-                      
-                      const cardContent = (
-                        <div 
-                          className={`bg-white rounded-lg shadow h-full border-l-4
-                          ${isCompleted ? 'border-l-teal-500' : 
-                            isNextLesson ? 'border-l-blue-500' : 'border-l-gray-200'} 
-                          border border-gray-200
-                          ${isCurrentLesson ? 'ring-2 ring-blue-100' : ''}
-                          transition-all duration-200 
-                          ${isAvailable ? 'hover:shadow-md cursor-pointer' : 'opacity-70'}`}
-                        >
-                          <div className="p-3 h-full flex flex-col">
-                            <div className="flex items-start">
-                              <div className={`h-6 w-6 rounded-full flex items-center justify-center text-white font-semibold mr-2 flex-shrink-0
-                                ${isNextLesson ? 'bg-blue-500' : 'bg-gradient-to-r from-blue-500 to-teal-500'}`}>
-                                {lessonId}
-                              </div>
-                              <h3 className={`font-medium text-sm truncate
-                                ${isCompleted ? 'text-teal-700' : 
-                                  isNextLesson ? 'text-blue-700' : 
-                                  isAvailable ? 'text-gray-800' : 'text-gray-400'}`}>
-                                {lesson.subject}
-                                {lesson.lesson && (
-                                  <span className="ml-1 text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded flex items-center gap-1 whitespace-nowrap inline-flex">
-                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                      <path d="M8 6V18M12 6V18M16 6V18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                    </svg>
-                                    {lesson.lesson.length} steps
-                                  </span>
-                                )}
-                              </h3>
-                            </div>
-                            
-                            <div className="mt-auto pt-2">
-                              {isCompleted ? (
-                                <div className="flex items-center text-teal-600 text-xs">
-                                  <Book size={12} className="mr-1 flex-shrink-0" />
-                                  <span>Lesson completed</span>
-                                </div>
-                              ) : isNextLesson ? (
-                                <div className="inline-flex items-center text-blue-600 text-xs bg-blue-50 px-1.5 py-0.5 rounded">
-                                  <span>Next</span>
-                                </div>
-                              ) : !isAvailable ? (
-                                <div className="flex items-center text-gray-400 text-xs">
-                                  <LockIcon size={12} className="mr-1 flex-shrink-0" />
-                                  <span>Locked</span>
-                                </div>
-                              ) : null}
-                            </div>
-                          </div>
-                        </div>
-                      );
-                      
-                      return isAvailable ? (
-                        <Link key={lessonId} href={`/app/lessons/${lessonId}`} className="block h-full">
-                          {cardContent}
-                        </Link>
-                      ) : (
-                        <div key={lessonId} className="h-full">{cardContent}</div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
+      {/* Client-side part list to preserve scroll and focus */}
+      <PartList
+        sortedParts={sortedParts}
+        initialOpenPartId={openPartId}
+        completedLessonIds={completedLessonIds}
+        availableLessonIds={availableLessonIds}
+        nextAvailableLessonId={nextAvailableLessonId}
+        lastViewedLessonId={lastViewedLessonId}
+      />
     </div>
   );
 } 

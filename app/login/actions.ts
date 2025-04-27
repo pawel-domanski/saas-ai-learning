@@ -15,6 +15,7 @@ import {
   type NewActivityLog,
   ActivityType,
   invitations,
+  passwordResetTokens,
 } from '@/lib/db/schema';
 import { comparePasswords, hashPassword } from '@/lib/auth/session';
 import { setSession, clearSession } from '@/lib/auth/session-server';
@@ -25,6 +26,10 @@ import {
   validatedAction,
   validatedActionWithUser,
 } from '@/lib/auth/middleware';
+// @ts-ignore: missing type declarations for nodemailer
+import nodemailer from 'nodemailer';
+import crypto from 'crypto';
+import { cookies } from 'next/headers';
 
 async function logActivity(
   teamId: number | null | undefined,
@@ -97,15 +102,12 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
     return createCheckoutSession({ team: foundTeam, priceId });
   }
 
-  // Set cookies to help with navigating to the correct part/lesson after login
-  // When the user first logs in, we don't yet know which lesson they should view
-  // This will let the app page default to showing the Next lesson's part
-  const cookies = await import('next/headers').then(mod => mod.cookies);
-  const cookieStore = cookies();
-  
-  // Reset these cookies to make sure we start fresh after login
-  await cookieStore.delete('openPartId');
-  await cookieStore.delete('lastViewedLessonId');
+  // Reset cookies to ensure fresh state after login
+  const cookieStore = (await cookies()) as any;
+  // @ts-ignore: delete exists at runtime on cookieStore
+  cookieStore.delete('openPartId');
+  // @ts-ignore: delete exists at runtime on cookieStore
+  cookieStore.delete('lastViewedLessonId');
 
   redirect('/app');
 });
@@ -345,7 +347,7 @@ export const deleteAccount = validatedActionWithUser(
     }
 
     await clearSession();
-    redirect('/sign-in');
+    redirect('/login/sign-in');
   },
 );
 
@@ -471,3 +473,118 @@ export const inviteTeamMember = validatedActionWithUser(
     return { success: 'Invitation sent successfully' };
   },
 );
+
+// Schema and action for requesting password reset
+const requestPasswordResetSchema = z.object({
+  email: z.string().email(),
+});
+export const requestPasswordReset = validatedAction(requestPasswordResetSchema, async (data) => {
+  const { email } = data;
+  // Find user by email
+  const [user] = await db.select().from(users).where(eq(users.email, email)).limit(1);
+  // Always respond success to avoid email enumeration
+  if (!user) {
+    return { success: true };
+  }
+  // Generate token
+  const token = crypto.randomUUID();
+  const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+  // Store in database
+  await db.insert(passwordResetTokens).values({ userId: user.id, token, expiresAt });
+  // Send email
+  const transporter = nodemailer.createTransport({
+    host: process.env.SMTP_HOST,
+    port: Number(process.env.SMTP_PORT),
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS,
+    },
+  });
+  const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/login/reset-password/${token}`;
+  await transporter.sendMail({
+    from: process.env.SMTP_FROM,
+    to: email,
+    subject: 'Reset your password',
+    html: `<p>Click <a href="${resetUrl}">here</a> to reset your password. This link expires in one hour.</p>`,
+  });
+  return { success: true };
+});
+
+// Schema and action for resetting password
+const resetPasswordSchema = z
+  .object({
+    token: z.string(),
+    password: z.string().min(8),
+    confirmPassword: z.string().min(8),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: 'Passwords must match',
+    path: ['confirmPassword'],
+  });
+export const resetPassword = validatedAction(resetPasswordSchema, async (data) => {
+  const { token, password } = data;
+   
+  // Input validation
+  if (!token || typeof token !== 'string' || token.length < 10) {
+    console.error('Invalid token format provided:', token);
+    return { error: 'This password reset link is invalid or has expired. You can request a new password reset link.' };
+  }
+ 
+  // Find valid token
+  const [row] = await db
+    .select()
+    .from(passwordResetTokens)
+    .where(
+      and(
+        eq(passwordResetTokens.token, token),
+        eq(passwordResetTokens.used, false),
+        sql`${passwordResetTokens.expiresAt} > NOW()`
+      )
+    )
+    .limit(1);
+     
+  console.log('Token lookup result:', row ? 'Found' : 'Not found', 'for token:', token);
+   
+  if (!row) {
+    return { error: 'This password reset link is invalid or has expired. You can request a new password reset link.' };
+  }
+  
+  // Double check token validity
+  if (row.used) {
+    console.error('Used token accessed:', token);
+    return { error: 'This password reset token has already been used. You can request a new password reset link.' };
+  }
+  
+  const now = new Date();
+  if (row.expiresAt < now) {
+    console.error('Expired token accessed:', token, 'expired at:', row.expiresAt, 'current time:', now);
+    return { error: 'The password reset link has expired. You can request a new password reset link.' };
+  }
+
+  try {
+    // Update user password
+    const passwordHash = await hashPassword(password);
+    await db
+      .update(users)
+      .set({ passwordHash, updatedAt: new Date() })
+      .where(eq(users.id, row.userId));
+    
+    // Mark token used
+    await db
+      .update(passwordResetTokens)
+      .set({ used: true })
+      .where(eq(passwordResetTokens.id, row.id));
+       
+    console.log('Password reset successful for user ID:', row.userId, 'with token:', token);
+    
+    // Log activity
+    await logActivity(null, row.userId, ActivityType.UPDATE_PASSWORD);
+    
+  } catch (error) {
+    console.error('Error updating password:', error);
+    return { error: 'An error occurred while changing your password. Please try again.' };
+  }
+  
+  // Redirect to sign-in page (outside of try/catch)
+  redirect('/login/sign-in?resetSuccess=true');
+});

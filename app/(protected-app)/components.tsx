@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Home, LogOut } from 'lucide-react';
+import { Home, LogOut, Menu } from 'lucide-react';
 import { useState } from 'react';
 import {
   DropdownMenu,
@@ -10,21 +10,31 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { signOut } from '@/app/(login)/actions';
+import { signOut } from '@/app/login/actions';
 import { useRouter } from 'next/navigation';
 
 export function UserMenu({ user }: { user: any }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const router = useRouter();
 
-  const getUserInitials = (user: { name?: string; email: string }) => {
+  if (!user) {
+    return (
+      <Link href="/login/sign-in">
+        <button className="px-4 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors">
+          Sign In
+        </button>
+      </Link>
+    );
+  }
+
+  const getUserInitials = (user: { name?: string; email?: string }) => {
     if (user.name) {
       return user.name
         .split(' ')
         .map((n) => n[0])
         .join('');
     }
-    return user.email[0].toUpperCase();
+    return user.email && user.email[0] ? user.email[0].toUpperCase() : 'U';
   };
 
   async function handleSignOut() {
@@ -36,10 +46,10 @@ export function UserMenu({ user }: { user: any }) {
   return (
     <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
       <DropdownMenuTrigger>
-        <Avatar className="cursor-pointer size-9 border-2 border-white shadow-sm">
-          <AvatarImage alt={user.name || ''} />
+        <Avatar className="cursor-pointer h-9 w-9 border-2 border-white shadow-sm">
+          <AvatarImage alt={user?.name || 'User'} />
           <AvatarFallback className="bg-gradient-to-r from-blue-100 to-teal-100 text-teal-800 font-medium">
-            {getUserInitials(user)}
+            {getUserInitials(user || { email: '' })}
           </AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
@@ -64,15 +74,25 @@ export function UserMenu({ user }: { user: any }) {
 }
 
 export function Header({ user }: { user: any }) {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  
   return (
     <header className="border-b border-gray-100 bg-white/80 backdrop-blur-sm sticky top-0 z-30 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex justify-between items-center">
         <Link href="/app" className="flex items-center">
           <img src="/Logo_all.svg" alt="Logo" className="h-7 w-7" />
-          <span className="ml-2 text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-teal-500">Focus your AI</span>
+          <span className="ml-2 text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-teal-500 truncate">Focus your AI</span>
         </Link>
         <div className="flex items-center space-x-4">
-          <UserMenu user={user} />
+          {user ? (
+            <UserMenu user={user} />
+          ) : (
+            <Link href="/login/sign-in">
+              <button className="px-4 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors">
+                Sign In
+              </button>
+            </Link>
+          )}
         </div>
       </div>
     </header>

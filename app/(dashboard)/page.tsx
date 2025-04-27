@@ -1,5 +1,7 @@
 import { Button } from '@/components/ui/button';
-import { ArrowRight, CreditCard, Database, Sparkles, Shield, Zap, Clock, BookOpen, Smartphone, Info } from 'lucide-react';
+import { ArrowRight, Info, Clock, BookOpen, Smartphone, Zap, Target, Shield } from 'lucide-react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faWrench, faPenNib, faHandshake, faMoneyBillWave, faBrain, faBullhorn } from '@fortawesome/free-solid-svg-icons';
 
 export default function HomePage() {
   return (
@@ -22,22 +24,20 @@ export default function HomePage() {
               Master artificial intelligence, double your income, and revolutionize your everyday life!
               Would you like me to create a few more alternatives with different angles or emphases?
               </p>
-              <div className="mt-10 flex flex-col sm:flex-row sm:justify-center lg:justify-start gap-4">
+              <div className="mt-10 flex flex-col sm:justify-center lg:justify-start">
                 <a
-                  href="https://vercel.com/templates/next.js/next-js-saas-starter"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  href="/quiz"
                 >
                   <Button
                     size="lg"
-                    className="text-white bg-gradient-to-r from-blue-600 to-teal-500 hover:from-blue-700 hover:to-teal-600 rounded-full shadow-md hover:shadow-lg transition-all duration-200 px-8"
+                    className="text-white bg-gradient-to-r from-blue-600 to-teal-500 hover:from-blue-700 hover:to-teal-600 rounded-full shadow-md hover:shadow-lg transition-all duration-200 px-6"
                   >
                     Get Started
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                 </a>
                 {/* Trust avatars */}
-                <div className="mt-6 flex items-center space-x-4">
+                <div className="mt-4 flex items-center space-x-4">
                   <div className="flex -space-x-2">
                     <div className="h-10 w-10 bg-gray-300 rounded-full border-2 border-white"></div>
                     <div className="h-10 w-10 bg-gray-300 rounded-full border-2 border-white"></div>
@@ -45,7 +45,7 @@ export default function HomePage() {
                     <div className="h-10 w-10 bg-gray-300 rounded-full border-2 border-white"></div>
                     <div className="h-10 w-10 bg-gray-300 rounded-full border-2 border-white"></div>
                   </div>
-                  <span className="text-white text-lg font-medium">More than 3000+ people joined</span>
+                  <span className="text-blue-900 text-lg font-medium">More than 3000+ people joined</span>
                 </div>
               </div>
             </div>
@@ -81,32 +81,44 @@ export default function HomePage() {
 
           <div className="grid md:grid-cols-3 gap-8">
             <div className="card-drift bg-white p-8 rounded-2xl shadow-md border border-gray-100 transition-transform hover:-translate-y-1 hover:shadow-lg">
-              <div className="flex items-center justify-center h-12 w-12 rounded-xl bg-gradient-to-r from-blue-100 to-teal-100 text-teal-600 mb-6 text-2xl">🔧</div>
+              <div className="flex items-center justify-center h-12 w-12 rounded-xl bg-gradient-to-r from-blue-100 to-teal-100 mb-6">
+                <FontAwesomeIcon icon={faWrench} className="h-6 w-6 text-teal-600" />
+              </div>
               <h3 className="text-xl font-semibold text-gray-900">AI Productivity</h3>
               <p className="mt-4 text-gray-600 leading-relaxed">Boost your daily efficiency with AI tools designed to simplify routine tasks, automate repetitive actions, and help you stay focused. Whether you're managing projects, handling emails, or organizing your schedule – AI can help you save time and stay in control.</p>
             </div>
             <div className="card-drift bg-white p-8 rounded-2xl shadow-md border border-gray-100 transition-transform hover:-translate-y-1 hover:shadow-lg">
-              <div className="flex items-center justify-center h-12 w-12 rounded-xl bg-gradient-to-r from-blue-100 to-teal-100 text-teal-600 mb-6 text-2xl">✍️</div>
+              <div className="flex items-center justify-center h-12 w-12 rounded-xl bg-gradient-to-r from-blue-100 to-teal-100 mb-6">
+                <FontAwesomeIcon icon={faPenNib} className="h-6 w-6 text-teal-600" />
+              </div>
               <h3 className="text-xl font-semibold text-gray-900">AI Content Creation</h3>
               <p className="mt-4 text-gray-600 leading-relaxed">Effortlessly create engaging, high-quality content for your blog, website, or social media channels. AI writing assistants can help you brainstorm ideas, draft articles, generate headlines, and even optimize content for SEO – giving you more time to focus on your creativity.</p>
             </div>
             <div className="card-drift bg-white p-8 rounded-2xl shadow-md border border-gray-100 transition-transform hover:-translate-y-1 hover:shadow-lg">
-              <div className="flex items-center justify-center h-12 w-12 rounded-xl bg-gradient-to-r from-blue-100 to-teal-100 text-teal-600 mb-6 text-2xl">🤝</div>
+              <div className="flex items-center justify-center h-12 w-12 rounded-xl bg-gradient-to-r from-blue-100 to-teal-100 mb-6">
+                <FontAwesomeIcon icon={faHandshake} className="h-6 w-6 text-teal-600" />
+              </div>
               <h3 className="text-xl font-semibold text-gray-900">AI Affiliate Marketing</h3>
               <p className="mt-4 text-gray-600 leading-relaxed">Use the power of AI to find profitable affiliate products, create compelling promotional content, and automate your marketing strategies. With the right tools, you can increase your affiliate income with less manual work and smarter targeting.</p>
             </div>
             <div className="card-drift bg-white p-8 rounded-2xl shadow-md border border-gray-100 transition-transform hover:-translate-y-1 hover:shadow-lg">
-              <div className="flex items-center justify-center h-12 w-12 rounded-xl bg-gradient-to-r from-blue-100 to-teal-100 text-teal-600 mb-6 text-2xl">💰</div>
+              <div className="flex items-center justify-center h-12 w-12 rounded-xl bg-gradient-to-r from-blue-100 to-teal-100 mb-6">
+                <FontAwesomeIcon icon={faMoneyBillWave} className="h-6 w-6 text-teal-600" />
+              </div>
               <h3 className="text-xl font-semibold text-gray-900">AI Income Streams</h3>
               <p className="mt-4 text-gray-600 leading-relaxed">Discover how to generate new online income streams by using AI tools to build digital products, automate services, or create scalable content. Whether you're just getting started or looking to grow your online business, AI can help you do more with less effort.</p>
             </div>
             <div className="card-drift bg-white p-8 rounded-2xl shadow-md border border-gray-100 transition-transform hover:-translate-y-1 hover:shadow-lg">
-              <div className="flex items-center justify-center h-12 w-12 rounded-xl bg-gradient-to-r from-blue-100 to-teal-100 text-teal-600 mb-6 text-2xl">🧠</div>
+              <div className="flex items-center justify-center h-12 w-12 rounded-xl bg-gradient-to-r from-blue-100 to-teal-100 mb-6">
+                <FontAwesomeIcon icon={faBrain} className="h-6 w-6 text-teal-600" />
+              </div>
               <h3 className="text-xl font-semibold text-gray-900">AI-Powered Business</h3>
               <p className="mt-4 text-gray-600 leading-relaxed">Transform your business with AI-driven automation and analytics. From managing customer data to optimizing workflows and predicting trends, AI helps you make faster, smarter decisions that reduce costs and unlock growth opportunities.</p>
             </div>
             <div className="card-drift bg-white p-8 rounded-2xl shadow-md border border-gray-100 transition-transform hover:-translate-y-1 hover:shadow-lg">
-              <div className="flex items-center justify-center h-12 w-12 rounded-xl bg-gradient-to-r from-blue-100 to-teal-100 text-teal-600 mb-6 text-2xl">📣</div>
+              <div className="flex items-center justify-center h-12 w-12 rounded-xl bg-gradient-to-r from-blue-100 to-teal-100 mb-6">
+                <FontAwesomeIcon icon={faBullhorn} className="h-6 w-6 text-teal-600" />
+              </div>
               <h3 className="text-xl font-semibold text-gray-900">AI Marketing</h3>
               <p className="mt-4 text-gray-600 leading-relaxed">Take your marketing to the next level using AI tools for ad creation, audience targeting, performance tracking, and social media automation. With real-time data and intelligent suggestions, you can connect with the right people and boost your sales more effectively.</p>
             </div>
@@ -121,12 +133,14 @@ export default function HomePage() {
             <div className="md:w-1/2">
               <h2 className="text-3xl font-bold text-gray-900">Increase your income potential with Focus your AI</h2>
               <p className="mt-4 text-lg text-gray-600">Master essential digital skills and AI tools to work smarter, grow faster, and earn more.</p>
-              <div className="mt-6">
-                <Button size="lg" className="bg-blue-600 text-white hover:bg-blue-700 rounded-full px-6 py-3 shadow-md">
-                  Get Started <ArrowRight className="ml-2 h-5 w-5" />
+              <div className="mt-6 flex flex-col">
+                <Button size="lg" className="text-white bg-gradient-to-r from-blue-600 to-teal-500 hover:from-blue-700 hover:to-teal-600 rounded-full shadow-md hover:shadow-lg transition-all duration-200 px-6 py-3">
+                  <a href="/quiz" className="flex items-center">
+                    Get Started <ArrowRight className="ml-2 h-5 w-5" />
+                  </a>
                 </Button>
                 {/* Trust avatars */}
-                <div className="mt-6 flex items-center space-x-4">
+                <div className="mt-4 flex items-center space-x-4">
                   <div className="flex -space-x-2">
                     <div className="h-10 w-10 bg-gray-300 rounded-full border-2 border-white"></div>
                     <div className="h-10 w-10 bg-gray-300 rounded-full border-2 border-white"></div>
@@ -210,21 +224,21 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-3 gap-8">
             <div className="flex items-start gap-4">
-              <div className="h-16 w-16 bg-gray-200 rounded-full flex-shrink-0" />
+              <Target className="h-16 w-16 text-teal-500 flex-shrink-0" />
               <div>
                 <h3 className="text-xl font-semibold text-gray-900">Step 1: Define your goals, unlock your path</h3>
                 <p className="mt-1 text-gray-600">You set the direction—we'll take care of the roadmap. Once you define your learning goals, we build a personalized plan filled with the most relevant AI tools and skills to help you grow efficiently and stay inspired.</p>
               </div>
             </div>
             <div className="flex items-start gap-4">
-              <div className="h-16 w-16 bg-gray-200 rounded-full flex-shrink-0" />
+              <BookOpen className="h-16 w-16 text-teal-500 flex-shrink-0" />
               <div>
                 <h3 className="text-xl font-semibold text-gray-900">Step 2: Build real, useful skills</h3>
                 <p className="mt-1 text-gray-600">Our lessons are built for action—not just theory. You'll learn by doing, using real tools and solving real problems that align with your personal learning path.</p>
               </div>
             </div>
             <div className="flex items-start gap-4">
-              <div className="h-16 w-16 bg-gray-200 rounded-full flex-shrink-0" />
+              <Shield className="h-16 w-16 text-teal-500 flex-shrink-0" />
               <div>
                 <h3 className="text-xl font-semibold text-gray-900">Step 3: Use AI with confidence</h3>
                 <p className="mt-1 text-gray-600">With the right tools and a clear plan, you'll start putting AI into action—confidently and creatively. Whether it's content creation, automation, or decision-making, you'll know exactly how to make AI work for you.</p>
@@ -249,7 +263,7 @@ export default function HomePage() {
               <p className="text-lg text-blue-100 max-w-2xl mb-10">
                 Start your AI journey today – it only takes 15 minutes a day. With short, focused lessons and hands-on tools, you'll quickly build practical skills that fit your goals, your schedule, and your pace.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex flex-col">
                 <Button
                   size="lg"
                   className="bg-blue-600 text-white hover:bg-blue-500 hover:scale-105 transition-all duration-200 rounded-full shadow-lg px-8 py-6 font-medium border border-blue-400"
@@ -257,7 +271,7 @@ export default function HomePage() {
                   View Pricing
                 </Button>
                 {/* Trust avatars */}
-                <div className="mt-6 flex items-center space-x-4">
+                <div className="mt-4 flex items-center space-x-4">
                   <div className="flex -space-x-2">
                     <div className="h-10 w-10 bg-gray-300 rounded-full border-2 border-white"></div>
                     <div className="h-10 w-10 bg-gray-300 rounded-full border-2 border-white"></div>
@@ -265,7 +279,7 @@ export default function HomePage() {
                     <div className="h-10 w-10 bg-gray-300 rounded-full border-2 border-white"></div>
                     <div className="h-10 w-10 bg-gray-300 rounded-full border-2 border-white"></div>
                   </div>
-                  <span className="text-blue-900 text-lg font-medium">More than 3000+ people joined</span>
+                  <span className="text-white text-lg font-medium">More than 3000+ people joined</span>
                 </div>
               </div>
             </div>

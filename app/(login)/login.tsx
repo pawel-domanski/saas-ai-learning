@@ -115,6 +115,15 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
               </div>
             </div>
 
+            {/* Forgot password link only for sign-in mode */}
+            {mode === 'signin' && (
+              <div className="text-right mt-1">
+                <Link href="/forgot-password" className="text-sm text-blue-600 hover:underline">
+                  Forgot password?
+                </Link>
+              </div>
+            )}
+
             {/* Terms acceptance checkbox - only show in signup mode */}
             {mode === 'signup' && (
               <div className="flex items-start mt-4">
@@ -187,7 +196,7 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
 
             <div className="mt-6">
               <Link
-                href={`${mode === 'signin' ? '/sign-up' : '/sign-in'}${
+                href={`${mode === 'signin' ? '/login/sign-up' : '/login/sign-in'}${
                   redirect ? `?redirect=${redirect}` : ''
                 }${priceId ? `&priceId=${priceId}` : ''}`}
                 className="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-full shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors"

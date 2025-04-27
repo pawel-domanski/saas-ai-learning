@@ -27,8 +27,9 @@ export default async function PricingPage({
     .map((name) => products.find((p) => p.name === name))
     .filter((p): p is typeof products[number] => !!p);
 
-  // Check if the user was redirected from premium content
-  const needsSubscription = searchParams.access === 'premium';
+  // Await searchParams promise to access its properties safely
+  const { access } = await searchParams;
+  const needsSubscription = access === 'premium';
 
   return (
     <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -82,14 +83,20 @@ export default async function PricingPage({
           );
         })}
       </div>
-      <div className="text-center mt-12 mb-8">
-        <p className="text-gray-600 max-w-4xl mx-auto">
-          We've applied special pricing to our subscription plans.
-        </p>
-        <p className="text-gray-600 max-w-4xl mx-auto mt-2">
-          (<strong>€6.99/week</strong>), (<strong>€19.99/month - save 28% compared to weekly billing</strong>), (<strong>€39.99/quarter - save 33% compared to monthly billing</strong>)
-        </p>
-        <p className="text-gray-600 max-w-4xl mx-auto mt-2">
+      <div className="text-center mt-12 mb-8 space-y-4">
+        <p className="text-lg text-gray-700">We've applied special pricing to our subscription plans:</p>
+        <div className="flex flex-col md:flex-row justify-center items-center space-y-2 md:space-y-0 md:space-x-12 text-gray-800 font-medium">
+          <div className="px-4 py-2 bg-gray-100 rounded-lg">
+            €6.99 <span className="text-sm text-gray-600">/ week</span>
+          </div>
+          <div className="px-4 py-2 bg-gray-100 rounded-lg">
+            €19.99 <span className="text-sm text-green-600">/ month</span><span className="text-sm text-gray-500"> (save 28%)</span>
+          </div>
+          <div className="px-4 py-2 bg-gray-100 rounded-lg">
+            €39.99 <span className="text-sm text-green-600">/ quarter</span><span className="text-sm text-gray-500"> (save 33%)</span>
+          </div>
+        </div>
+        <p className="text-sm text-gray-600">
           By clicking <strong>'Get Started'</strong>, you agree to automatic subscription renewal until you cancel. You can cancel anytime in your account settings.
         </p>
       </div>
@@ -125,9 +132,9 @@ function PricingCard({
   highlighted?: boolean;
 }) {
   return (
-    <div className={`pt-6 rounded-xl ${highlighted ? 'ring-2 ring-purple-500 p-4 bg-white shadow-lg' : ''}`}>
+    <div className={`pt-6 rounded-xl ${highlighted ? 'ring-2 ring-teal-500 p-4 bg-white shadow-lg' : ''}`}>
       {highlighted && (
-        <div className="bg-purple-500 text-white text-xs font-semibold px-3 py-1 rounded-full inline-block mb-4">
+        <div className="bg-gradient-to-r from-blue-600 to-teal-500 text-white text-xs font-semibold px-3 py-1 rounded-full inline-block mb-4">
           Recommended
         </div>
       )}

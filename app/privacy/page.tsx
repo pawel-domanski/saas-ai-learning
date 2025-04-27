@@ -22,7 +22,7 @@ export default function PrivacyPolicyPage() {
           </Button>
           
           <Button asChild variant="outline" className="gap-2">
-            <Link href="/sign-in">
+            <Link href="/login/sign-in">
               Back to Sign In
             </Link>
           </Button>

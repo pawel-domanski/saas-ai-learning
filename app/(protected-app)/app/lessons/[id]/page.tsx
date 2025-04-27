@@ -10,6 +10,7 @@ import { cookies } from 'next/headers';
 import SlideshowClient from './slideshow-client';
 import { SaveLessonView } from './save-lesson-view';
 import ConfettiEffect from './confetti';
+import Quiz from '@/components/Quiz';
 
 // Get training plan data from the JSON file
 async function getLessonPlan() {
@@ -56,7 +57,7 @@ export default async function LessonPage({
   // Get the current user
   const user = await getUser();
   if (!user) {
-    redirect('/sign-in');
+    redirect('/login/sign-in');
   }
 
   // Get the team and check subscription
@@ -151,7 +152,7 @@ export default async function LessonPage({
 
   if (!isAccessAllowed) {
     return (
-      <div className="max-w-5xl mx-auto py-8 px-4">
+      <div className="max-w-3xl mx-auto py-8 px-4">
         <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
           <div className="text-center py-12">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-100 mb-6">
@@ -242,8 +243,40 @@ export default async function LessonPage({
     );
   };
 
+  // After fetching the lesson variable, before rendering, map quiz data
+  const quizData = lesson.quiz && lesson.quiz[0];
+  const quizQuestions = quizData
+    ? quizData.questions.map((q: any, idx: number) => {
+        // Determine if this is multi-choice: either 'correct' or 'correctIndexes' is an array
+        const isMulti = Array.isArray(q.correct) || Array.isArray(q.correctIndexes);
+        return {
+          id: idx,
+          // Determine question type based on JSON data
+          type: isMulti ? 'multi_choice' : 'single_choice',
+          question: q.question,
+          hint: q.hint,
+          if_wrong: q.if_wrong,
+          // preserve explanation for single-choice feedback
+          explanation: q.explanation,
+          options: q.answers.map((ans: string, i: number) => ({ label: ans, value: i.toString() })),
+          ...(isMulti
+            ? {
+                // Support both q.correct and q.correctIndexes for multi-choice
+                correctIndexes: (Array.isArray(q.correct)
+                  ? q.correct
+                  : q.correctIndexes || [])
+                  .map((i: number) => i.toString())
+              }
+            : (q.correct !== undefined
+              ? { correctIndex: q.correct.toString() }
+              : {})
+          )
+        };
+      })
+    : [];
+
   return (
-    <div className="max-w-5xl mx-auto py-8 px-4">
+    <div className="max-w-3xl mx-auto py-8 px-4">
       {/* Component to save view info using client-side JS */}
       <SaveLessonView lessonId={lessonId} partId={part} />
       
@@ -282,6 +315,17 @@ export default async function LessonPage({
           <Markdown>{content}</Markdown>
         )}
       </div>
+
+      {/* Render quiz if available in the lesson data */}
+      {quizQuestions.length > 0 && (
+        <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
+          <div className="max-w-xl mx-auto space-y-2">
+            <h2 className="text-xl font-bold">{quizData.subject}</h2>
+            <p className="text-gray-600">{quizData.desc}</p>
+            <Quiz questions={quizQuestions} initialStepIndex={0} />
+          </div>
+        </div>
+      )}
 
       <div className="flex justify-between items-center mt-8">
         {/* Previous lesson button - always visible if we're not on the first lesson */}

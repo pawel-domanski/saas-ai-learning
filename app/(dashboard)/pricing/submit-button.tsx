@@ -12,7 +12,7 @@ export function SubmitButton({ highlighted = false }: { highlighted?: boolean })
       type="submit"
       disabled={pending}
       variant={highlighted ? "default" : "outline"} 
-      className={`w-full rounded-full ${highlighted ? 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white' : ''}`}
+      className={`w-full rounded-full ${highlighted ? 'bg-gradient-to-r from-blue-600 to-teal-500 hover:from-blue-700 hover:to-teal-600 text-white' : ''}`}
     >
       {pending ? (
         <>

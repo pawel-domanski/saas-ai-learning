@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useUser } from '@/lib/auth';
-import { signOut } from '@/app/(login)/actions';
+import { signOut } from '@/app/login/actions';
 import { useRouter } from 'next/navigation';
 
 function UserMenu() {
@@ -47,7 +47,7 @@ function UserMenu() {
           Pricing
         </Link>
         <Button asChild className="rounded-full bg-gradient-to-r from-blue-600 to-teal-500 hover:from-blue-700 hover:to-teal-600 text-white shadow-sm">
-          <Link href="/sign-up">Sign Up</Link>
+          <Link href="/login/sign-up">Sign Up</Link>
         </Button>
       </>
     );

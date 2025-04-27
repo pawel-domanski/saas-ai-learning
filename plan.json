@@ -4,7 +4,59 @@
         "subject": "Introduction",
         "desc": "AI Engineering is the process of designing and implementing AI systems using pre-trained models and existing AI tools to solve practical problems. AI Engineers focus on applying AI in real-world scenarios, improving user experiences, and automating tasks, without developing new models from scratch. They work to ensure AI systems are efficient, scalable, and can be seamlessly integrated into business applications, distinguishing their role from AI Researchers and ML Engineers, who concentrate more on creating new models or advancing AI theory.",
         "part": 1,
-        "content": "# Introduction to AI Engineering\n\nAI Engineering is the process of designing and implementing AI systems using pre-trained models and existing AI tools to solve practical problems. This field represents an important evolution in how organizations and developers approach artificial intelligence.\n\n## Key Concepts\n\nAI Engineers focus on applying AI in real-world scenarios, improving user experiences, and automating tasks, without developing new models from scratch. They work at the intersection of software engineering and artificial intelligence, taking theoretical AI concepts and turning them into practical applications.\n\n## The Role of AI Engineers\n\nUnlike researchers who push the boundaries of what's possible with AI, engineers focus on implementation and integration. They work to ensure AI systems are:\n\n- Efficient and performant\n- Scalable for production use\n- Seamlessly integrated into business applications\n- Reliable and maintainable\n- Cost-effective\n\n## Distinction from Other Roles\n\nAI Engineers are distinct from:\n\n- **AI Researchers**: Scientists who develop new algorithms and advance the theoretical understanding of AI\n- **ML Engineers**: Specialists who focus specifically on building and optimizing machine learning models\n- **Data Scientists**: Professionals who extract insights from data and may develop predictive models\n\n## Importance in Today's Tech Landscape\n\nAs pre-trained models become more powerful and accessible, the role of AI Engineers grows increasingly important. They bridge the gap between cutting-edge AI capabilities and practical business problems, making artificial intelligence useful in everyday applications.\n\nIn the following lessons, we'll explore the specific skills, responsibilities, and best practices for successful AI Engineering."
+        "content": "# Introduction to AI Engineering\n\nAI Engineering is the process of designing and implementing AI systems using pre-trained models and existing AI tools to solve practical problems. This field represents an important evolution in how organizations and developers approach artificial intelligence.\n\n## Key Concepts\n\nAI Engineers focus on applying AI in real-world scenarios, improving user experiences, and automating tasks, without developing new models from scratch. They work at the intersection of software engineering and artificial intelligence, taking theoretical AI concepts and turning them into practical applications.\n\n## The Role of AI Engineers\n\nUnlike researchers who push the boundaries of what's possible with AI, engineers focus on implementation and integration. They work to ensure AI systems are:\n\n- Efficient and performant\n- Scalable for production use\n- Seamlessly integrated into business applications\n- Reliable and maintainable\n- Cost-effective\n\n## Distinction from Other Roles\n\nAI Engineers are distinct from:\n\n- **AI Researchers**: Scientists who develop new algorithms and advance the theoretical understanding of AI\n- **ML Engineers**: Specialists who focus specifically on building and optimizing machine learning models\n- **Data Scientists**: Professionals who extract insights from data and may develop predictive models\n\n## Importance in Today's Tech Landscape\n\nAs pre-trained models become more powerful and accessible, the role of AI Engineers grows increasingly important. They bridge the gap between cutting-edge AI capabilities and practical business problems, making artificial intelligence useful in everyday applications.\n\nIn the following lessons, we'll explore the specific skills, responsibilities, and best practices for successful AI Engineering.",
+        "quiz": [
+            {
+                "subject": "Quiz 1",
+                "desc": "Quiz 1 description",
+                
+                "questions": [
+                    {
+                        "id": 0,
+                        "question": "What is AI Engineering?",
+                        "type": "multi_choice",
+                        "hint": "Focus on the option that represents a ratio or percentage of completed actions relative to total opportunities.",
+                        "if_wrong": " to jest if_wrong",
+                        "explanation": "AI Engineering is the process of designing and implementing AI systems using pre-trained models and existing AI tools to solve practical problems.",
+                        "correctIndexes": [1,2],
+                        "answers": [
+                            "AI Engineering is the process of designing and implementing AI systems using pre-trained models and existing AI tools to solve practical problems.",
+                            "AI Engineering is the process of creating new AI models from scratch.",
+                            "AI Engineering is the process of using AI to solve theoretical problems."
+                        ]
+                    },
+                    {
+                      "id": 1,
+                      "question": "What is AI Engineering?",
+                      "type": "single_choice",
+                      "hint": "Focus on the option that represents a ratio or percentage of completed actions relative to total opportunities.",
+                      "if_wrong": " to jest if_wrong",
+                      "explanation": "AI Engineering is the process of designing and implementing AI systems using pre-trained models and existing AI tools to solve practical problems.",
+                      "correct": 1,
+                      "answers": [
+                          "AI Engineering is the process of designing and implementing AI systems using pre-trained models and existing AI tools to solve practical problems.",
+                          "AI Engineering is the process of creating new AI models from scratch.",
+                          "AI Engineering is the process of using AI to solve theoretical problems."
+                      ]
+                  },
+                  {
+                    "id": 3,
+                    "question": "What is AI Engineering 1 ?",
+                    "type": "single_choice",
+                    "hint": "1 Focus on the option that represents a ratio or percentage of completed actions relative to total opportunities.",
+                    "if_wrong": " to jest if_wrong",
+                    "explanation": "AI Engineering is the process of designing and implementing AI systems using pre-trained models and existing AI tools to solve practical problems.",
+                    "correct": 1,
+                    "answers": [
+                        "AI Engineering is the process of designing and implementing AI systems using pre-trained models and existing AI tools to solve practical problems.",
+                        "AI Engineering is the process of creating new AI models from scratch.",
+                        "AI Engineering is the process of using AI to solve theoretical problems."
+                    ]
+                }
+                ]
+            }
+            
+        ]
       },
       {
         "subject": "What is an AI Engineer?",

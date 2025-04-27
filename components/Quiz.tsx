@@ -1,11 +1,13 @@
 // This component renders a step-by-step quiz; supports single_choice question types
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { ChevronRight, ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import confetti from 'canvas-confetti';
 import { ProgressBarsStep } from '@/components/ProgressBars';
+import { cn } from '@/lib/utils';
+import { motion } from 'framer-text';
 
 interface Option {
   label: string;
@@ -42,14 +44,67 @@ interface Question {
 }
 
 interface QuizProps {
+  title?: string;
+  subtitle?: string;
   questions: Question[];
-  /** Initial step index; use 0 to start directly on first question */
-  initialStepIndex?: number;
+  footerHtml?: string;
+  initialData?: Record<string, any>;
+  cardClassName?: string;
+  onSubmit?: (data: Record<string, any>) => void;
+  onComplete?: (data: Record<string, any>) => void;
 }
 
-export default function Quiz({ questions, initialStepIndex = -1 }: QuizProps) {
-  const [stepIndex, setStepIndex] = useState(initialStepIndex);
-  const [answers, setAnswers] = useState<Record<number, string | string[]>>({});
+export default function Quiz({
+  title,
+  subtitle,
+  questions,
+  footerHtml,
+  initialData = {},
+  cardClassName,
+  onSubmit,
+  onComplete,
+}: QuizProps) {
+  // Current step index
+  const [stepIndex, setStepIndex] = useState(0);
+
+  // All answers given so far
+  const [answers, setAnswers] = useState<Record<string, any>>(initialData);
+
+  // Whether to show the hint for the current question
+  const [showHint, setShowHint] = useState(false);
+  
+  // Whether the answer has been checked for multi-choice questions
+  const [isAnswerChecked, setIsAnswerChecked] = useState(false);
+
+  // Reset the hint visibility when changing questions
+  useEffect(() => {
+    setShowHint(false);
+    setIsAnswerChecked(false);
+  }, [stepIndex]);
+
+  // The current question
+  const current = questions[stepIndex];
+
+  // Save data when needed
+  useEffect(() => {
+    if (Object.keys(answers).length > 0 && onSubmit) {
+      onSubmit(answers);
+    }
+  }, [answers, onSubmit]);
+
+  // Finishing
+  const handleFinish = useCallback(() => {
+    if (onComplete) {
+      onComplete(answers);
+    }
+  }, [answers, onComplete]);
+
+  // Animation settings for the fade-in/out transition
+  const variants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1 },
+  };
+
   const [youP] = useState(() => Math.floor(Math.random() * (29 - 21 + 1)) + 21);
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [quizSessionId, setQuizSessionId] = useState<string | null>(null);
@@ -59,9 +114,6 @@ export default function Quiz({ questions, initialStepIndex = -1 }: QuizProps) {
   const formInputStep = questions.length + 1;
   const finalConfettiStep = questions.length + 2;
   const isFinalStep = stepIndex === finalConfettiStep;
-  const [selectedOption, setSelectedOption] = useState<string | null>(null);
-  const [isAnswered, setIsAnswered] = useState<boolean>(false);
-  const [showHint, setShowHint] = useState<boolean>(false);
 
   useEffect(() => {
     setQuizSessionId(`quiz_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`);
@@ -187,15 +239,6 @@ export default function Quiz({ questions, initialStepIndex = -1 }: QuizProps) {
     }
   }, [isFinalStep]);
 
-  // Reset selection on step change
-  useEffect(() => {
-    setSelectedOption(null);
-    setIsAnswered(false);
-    setShowHint(false);
-  }, [stepIndex]);
-
-  const current = stepIndex >= 0 && stepIndex < questions.length ? questions[stepIndex] : null;
-
   const handleBegin = () => {
     setStepIndex(0);
   };
@@ -276,26 +319,50 @@ export default function Quiz({ questions, initialStepIndex = -1 }: QuizProps) {
       return;
     }
     
-    // For single choice, record answer and mark as answered
+    // For single choice, record answer
     setAnswers(prev => ({ ...prev, [current.id]: value }));
-    setSelectedOption(value);
-    setIsAnswered(true);
+
+    // If a correctIndex is defined, immediately show feedback
+    if (current.correctIndex !== undefined) {
+      setIsAnswerChecked(true);
+      return;
+    }
+
+    // Otherwise, auto-advance after a short delay
+    setTimeout(() => {
+      const next = stepIndex + 1;
+      if (next < questions.length) {
+        setStepIndex(next);
+      } else {
+        console.log('Quiz complete:', answers);
+      }
+    }, 500);
   };
   
   const handleMultiChoiceNext = () => {
-    console.log('handleMultiChoiceNext called', { stepIndex, isAnswered, answers });
-    if (!isAnswered) {
-      // First click: show feedback
-      console.log('Setting isAnswered to true');
-      setIsAnswered(true);
+    // Skip check and go straight to next if no correctIndexes defined
+    const correctIdxs = current.correctIndexes || [];
+    if (correctIdxs.length === 0) {
+      const next = stepIndex + 1;
+      if (next < questions.length) {
+        setStepIndex(next);
+      } else {
+        console.log('Quiz complete:', answers);
+      }
       return;
     }
-    // After feedback, advance
-    const next = stepIndex + 1;
-    if (next < questions.length) {
-      setStepIndex(next);
+    console.log('handleMultiChoiceNext called', { stepIndex, answers, isAnswerChecked });
+    if (!isAnswerChecked) {
+      // First click: check answers and show feedback
+      setIsAnswerChecked(true);
     } else {
-      console.log('Quiz complete:', answers);
+      // Second click: proceed to next question
+      const next = stepIndex + 1;
+      if (next < questions.length) {
+        setStepIndex(next);
+      } else {
+        console.log('Quiz complete:', answers);
+      }
     }
   };
   
@@ -349,7 +416,9 @@ export default function Quiz({ questions, initialStepIndex = -1 }: QuizProps) {
       </div>
     );
   } else if (current?.type === 'single_choice') {
-    const correctValue = current.correctIndex?.toString();
+    // Determine whether the selected answer is correct
+    const userAnswer = answers[current.id];
+    const isSingleCorrect = userAnswer === current.correctIndex;
     content = (
       <div>
         {/* Progress Header */}
@@ -378,96 +447,83 @@ export default function Quiz({ questions, initialStepIndex = -1 }: QuizProps) {
           </div>
           <div className="w-5" />
         </div>
+        {/* Question */}
         <div className="flex items-center justify-center space-x-4 mb-6">
-          {current.iconClass && (
-            <i className={`${current.iconClass} text-3xl text-gray-500`} />
-          )}
+          {current.iconClass && <i className={`${current.iconClass} text-3xl text-gray-500`} />}
           <h2 className="text-2xl font-semibold text-center">{current.question}</h2>
         </div>
         {/* Options */}
         <div className="space-y-4 max-w-xl mx-auto">
-          {(current.options ?? []).map(opt => {
-            const isCorrect = isAnswered && opt.value === correctValue;
-            const isWrong = isAnswered && opt.value === selectedOption && opt.value !== correctValue;
-            return (
-              <button
-                key={opt.value}
-                onClick={() => handleSelect(opt.value)}
-                disabled={isAnswered}
-                className={`w-full border rounded-lg p-4 flex items-center shadow-sm transition cursor-pointer disabled:cursor-not-allowed
-                  ${isAnswered ? '' : 'hover:bg-gray-50 hover:shadow'}
-                  ${isCorrect ? 'bg-green-50 border-green-500' : ''}
-                  ${isWrong ? 'bg-red-50 border-red-500' : ''}`}
-              >
-                {opt.iconPNG ? (
-                  <div className="flex-shrink-0 w-12 h-12 mr-4">
-                    <img src={opt.iconPNG} alt={opt.label} className="w-full h-full object-contain" />
-                  </div>
-                ) : opt.imageUrl ? (
-                  <div className="flex-shrink-0 w-12 h-12 mr-4 overflow-hidden bg-gray-100 rounded-lg">
-                    <img
-                      src={opt.imageUrl}
-                      alt={opt.label}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                ) : opt.iconClass ? (
-                  <div className={`flex-shrink-0 w-12 h-12 mr-4 flex items-center justify-center ${isCorrect ? 'bg-green-100' : isWrong ? 'bg-red-100' : 'bg-gray-100'} rounded-lg`}>
-                    <i className={`${opt.iconClass} text-3xl ${isCorrect ? 'text-green-600' : isWrong ? 'text-red-600' : 'text-gray-600'}`} />
-                  </div>
-                ) : null}
-                <span className={`text-gray-700 font-medium ${isCorrect ? 'text-green-700' : isWrong ? 'text-red-700' : ''}`}>{opt.label}</span>
-              </button>
-            );
-          })}
+          {(current.options ?? []).map(opt => (
+            <button
+              key={opt.value}
+              onClick={() => handleSelect(opt.value)}
+              className={`w-full border rounded-lg p-4 flex items-center shadow-sm transition cursor-pointer hover:bg-gray-50 hover:shadow ${userAnswer === opt.value ? 'bg-blue-50 border-blue-300' : 'bg-white border-gray-200'}`}
+            >
+              {opt.iconPNG && (
+                <div className="flex-shrink-0 w-12 h-12 mr-4">
+                  <img src={opt.iconPNG} alt={opt.label} className="w-full h-full object-contain" />
+                </div>
+              )}
+              {opt.imageUrl && (
+                <div className="flex-shrink-0 w-12 h-12 mr-4 overflow-hidden bg-gray-100 rounded-lg">
+                  <img src={opt.imageUrl} alt={opt.label} className="w-full h-full object-cover" />
+                </div>
+              )}
+              {opt.iconClass && (
+                <div className={`flex-shrink-0 w-12 h-12 mr-4 flex items-center justify-center ${userAnswer === opt.value ? 'bg-blue-100' : 'bg-gray-100'} rounded-lg`}>
+                  <i className={`${opt.iconClass} text-3xl ${userAnswer === opt.value ? 'text-blue-600' : 'text-gray-600'}`} />
+                </div>
+              )}
+              <span className={`font-medium ${userAnswer === opt.value ? 'text-blue-700' : 'text-gray-700'}`}>{opt.label}</span>
+            </button>
+          ))}
         </div>
-        {/* Controls: Hint toggle and Next button */}
-        <div className="mt-6 max-w-xl mx-auto flex justify-between items-center">
-          {current.hint && (
-            <Button variant="outline" onClick={() => setShowHint(prev => !prev)}>
-              Hint
-            </Button>
-          )}
-          {/* Only show Next on non-last question */}
-          {isAnswered && stepIndex < questions.length - 1 && (
+        {/* For single-choice with feedback, show Next button after checking */}
+        {current.correctIndex !== undefined && isAnswerChecked && (
+          <div className="mt-6 max-w-xl mx-auto flex justify-between items-center">
+            {current.hint && (
+              <Button variant="outline" onClick={() => setShowHint(prev => !prev)}>
+                Hint
+              </Button>
+            )}
             <Button
               onClick={() => {
                 const next = stepIndex + 1;
-                if (next < questions.length) {
-                  setStepIndex(next);
-                }
+                if (next < questions.length) setStepIndex(next);
+                else console.log('Quiz complete:', answers);
               }}
-              className="px-6 py-2 bg-blue-600 text-white rounded-md"
+              className="px-8 py-3 bg-gradient-to-r from-blue-500 to-teal-500 text-white rounded-md"
             >
               Next
             </Button>
-          )}
-        </div>
-        {/* Show hint content under controls for single_choice */}
+          </div>
+        )}
+        {/* Show hint content below controls */}
         {showHint && current.hint && (
-          <div className="max-w-xl mx-auto border-l-4 border-blue-500 bg-blue-50 p-4 rounded mt-4">
-            <p className="text-gray-600">{current.hint}</p>
+          <div className="max-w-xl mx-auto border-l-4 border-blue-500 bg-blue-50 p-4 rounded mb-6 mt-4">
+            <p className="text-gray-700 italic">{current.hint}</p>
           </div>
         )}
-        {/* Feedback: Correct answer */}
-        {isAnswered && selectedOption === correctValue && current.explanation && (
-          <div className="mt-6 mb-6 max-w-xl mx-auto border-l-4 border-green-500 bg-green-50 p-4 rounded">
-            <div className="flex items-center">
-              <i className="fa-solid fa-circle-check text-green-500 mr-2" />
-              <span className="text-green-700 font-semibold">Correct answer</span>
+        {/* Feedback: Correct or Incorrect for single-choice */}
+        {isAnswerChecked && (
+          isSingleCorrect ? current.explanation && (
+            <div className="mt-6 mb-6 max-w-xl mx-auto border-l-4 border-green-500 bg-green-50 p-4 rounded">
+              <div className="flex items-center">
+                <i className="fa-solid fa-circle-check text-green-500 mr-2" />
+                <span className="text-green-700 font-semibold">Correct answer</span>
+              </div>
+              <p className="mt-2 text-gray-700">{current.explanation}</p>
             </div>
-            <p className="mt-2 text-gray-700">{current.explanation}</p>
-          </div>
-        )}
-        {/* Wrong answer feedback at bottom */}
-        {isAnswered && selectedOption !== correctValue && current.if_wrong && (
-          <div className="mt-6 mb-6 max-w-xl mx-auto border-l-4 border-red-500 bg-red-50 p-4 rounded">
-            <div className="flex items-center">
-              <i className="fa-solid fa-circle-xmark text-red-500 mr-2" />
-              <span className="text-red-700 font-semibold">Incorrect answer</span>
+          ) : current.if_wrong && (
+            <div className="mt-6 mb-6 max-w-xl mx-auto border-l-4 border-red-500 bg-red-50 p-4 rounded">
+              <div className="flex items-center">
+                <i className="fa-solid fa-circle-xmark text-red-500 mr-2" />
+                <span className="text-red-700 font-semibold">Incorrect answer</span>
+              </div>
+              <p className="mt-2 text-gray-700">{current.if_wrong}</p>
             </div>
-            <p className="mt-2 text-gray-700">{current.if_wrong}</p>
-          </div>
+          )
         )}
       </div>
     );
@@ -475,8 +531,7 @@ export default function Quiz({ questions, initialStepIndex = -1 }: QuizProps) {
     // Determine multi-choice correctness
     const correctIndexes = current.correctIndexes || [];
     const selectedAnswers = (answers[current.id] as string[]) || [];
-    const isMultiCorrect = isAnswered &&
-      correctIndexes.length === selectedAnswers.length &&
+    const isMultiCorrect = selectedAnswers.length === correctIndexes.length &&
       correctIndexes.every(ci => selectedAnswers.includes(ci));
     content = (
       <div>
@@ -516,16 +571,11 @@ export default function Quiz({ questions, initialStepIndex = -1 }: QuizProps) {
           {(current.options ?? []).map(opt => {
             const selected = isOptionSelected(opt.value);
             let baseClasses = selected ? 'bg-blue-50 border-blue-300' : 'bg-white border-gray-200';
-            if (isAnswered) {
-              const correct = current.correctIndexes?.includes(opt.value);
-              if (correct) baseClasses = 'bg-green-50 border-green-500';
-              else if (selected) baseClasses = 'bg-red-50 border-red-500';
-            }
+            if (selected) baseClasses = 'bg-blue-50 border-blue-300';
             return (
               <button
                 key={opt.value}
                 onClick={() => handleSelect(opt.value)}
-                disabled={isAnswered}
                 className={`w-full cursor-pointer ${baseClasses} hover:bg-gray-50 border rounded-lg p-4 flex items-center shadow-sm transition`}
               >
                 {opt.iconPNG ? (
@@ -537,38 +587,42 @@ export default function Quiz({ questions, initialStepIndex = -1 }: QuizProps) {
                     <img src={opt.imageUrl} alt={opt.label} className="w-full h-full object-cover" />
                   </div>
                 ) : opt.iconClass ? (
-                  <div className={`flex-shrink-0 w-12 h-12 mr-4 flex items-center justify-center ${isAnswered && current.correctIndexes?.includes(opt.value) ? 'bg-green-100' : selected && isAnswered ? 'bg-red-100' : 'bg-gray-100'} rounded-lg`}>
-                    <i className={`${opt.iconClass} text-3xl ${isAnswered && current.correctIndexes?.includes(opt.value) ? 'text-green-600' : selected && isAnswered ? 'text-red-600' : 'text-gray-600'}`} />
+                  <div className={`flex-shrink-0 w-12 h-12 mr-4 flex items-center justify-center ${selected ? 'bg-blue-100' : 'bg-gray-100'} rounded-lg`}>
+                    <i className={`${opt.iconClass} text-3xl ${selected ? 'text-blue-600' : 'text-gray-600'}`} />
                   </div>
                 ) : null}
-                <span className={`font-medium ${isAnswered ? (current.correctIndexes?.includes(opt.value) ? 'text-green-700' : selected ? 'text-red-700' : 'text-gray-700') : (selected ? 'text-blue-700' : 'text-gray-700')}`}>{opt.label}</span>
+                <span className={`font-medium ${selected ? 'text-blue-700' : 'text-gray-700'}`}>{opt.label}</span>
               </button>
             );
           })}
         </div>
         {/* Controls: Hint toggle and Check/Next for multi-choice */}
-        <div className="mt-6 max-w-xl mx-auto flex justify-between items-center">
-          {current.hint && (
-            <Button variant="outline" onClick={() => setShowHint(prev => !prev)}>
-              Hint
+        {stepIndex < questions.length - 1 && (
+          <div className="mt-6 max-w-xl mx-auto flex justify-between items-center">
+            {current.hint && (
+              <Button variant="outline" onClick={() => setShowHint(prev => !prev)}>
+                Hint
+              </Button>
+            )}
+            <Button
+              onClick={handleMultiChoiceNext}
+              disabled={!Array.isArray(answers[current.id]) || (answers[current.id] as string[]).length === 0}
+              className="px-8 py-3 bg-gradient-to-r from-blue-500 to-teal-500 text-white rounded-md disabled:opacity-50"
+            >
+              {(current.correctIndexes?.length ?? 0) > 0 ? (isAnswerChecked ? 'Next' : 'Check') : 'Next'}
             </Button>
-          )}
-          <Button
-            onClick={handleMultiChoiceNext}
-            disabled={!Array.isArray(answers[current.id]) || (answers[current.id] as string[]).length === 0}
-            className="px-8 py-3 bg-gradient-to-r from-blue-500 to-teal-500 text-white rounded-md disabled:opacity-50"
-          >
-            {isAnswered ? 'Next' : 'Check'}
-          </Button>
-        </div>
+          </div>
+        )}
+        
         {/* Show hint content below controls */}
         {showHint && current.hint && (
           <div className="max-w-xl mx-auto border-l-4 border-blue-500 bg-blue-50 p-4 rounded mb-6 mt-4">
             <p className="text-gray-700 italic">{current.hint}</p>
           </div>
         )}
+        
         {/* Feedback: Correct or Incorrect for multi-choice */}
-        {isAnswered && (
+        {isAnswerChecked && (
           isMultiCorrect ? current.explanation && (
             <div className="mt-6 mb-6 max-w-xl mx-auto border-l-4 border-green-500 bg-green-50 p-4 rounded">
               <div className="flex items-center">

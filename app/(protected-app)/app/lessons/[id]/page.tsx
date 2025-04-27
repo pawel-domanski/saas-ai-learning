@@ -11,6 +11,7 @@ import SlideshowClient from './slideshow-client';
 import { SaveLessonView } from './save-lesson-view';
 import ConfettiEffect from './confetti';
 import Quiz from '@/components/Quiz';
+import LessonRatingTrigger from './lesson-rating-trigger';
 
 // Get training plan data from the JSON file
 async function getLessonPlan() {
@@ -84,6 +85,9 @@ export default async function LessonPage({
   }
   
   const lesson = lessons[lessonId - 1];
+  
+  // Determine if this lesson has rating enabled in plan.json
+  const shouldRate = lesson.ocena === true;
   
   // Get lesson content directly from plan.json
   const content = lesson.content;
@@ -244,36 +248,54 @@ export default async function LessonPage({
   };
 
   // After fetching the lesson variable, before rendering, map quiz data
-  const quizData = lesson.quiz && lesson.quiz[0];
-  const quizQuestions = quizData
-    ? quizData.questions.map((q: any, idx: number) => {
-        // Determine if this is multi-choice: either 'correct' or 'correctIndexes' is an array
-        const isMulti = Array.isArray(q.correct) || Array.isArray(q.correctIndexes);
-        return {
-          id: idx,
-          // Determine question type based on JSON data
-          type: isMulti ? 'multi_choice' : 'single_choice',
-          question: q.question,
-          hint: q.hint,
-          if_wrong: q.if_wrong,
-          // preserve explanation for single-choice feedback
-          explanation: q.explanation,
-          options: q.answers.map((ans: string, i: number) => ({ label: ans, value: i.toString() })),
-          ...(isMulti
-            ? {
-                // Support both q.correct and q.correctIndexes for multi-choice
-                correctIndexes: (Array.isArray(q.correct)
-                  ? q.correct
-                  : q.correctIndexes || [])
-                  .map((i: number) => i.toString())
-              }
-            : (q.correct !== undefined
-              ? { correctIndex: q.correct.toString() }
-              : {})
-          )
-        };
-      })
+  // Support both 'test' and 'questions' arrays and nested 'ask' property
+  const rawTests = Array.isArray(lesson.test)
+    ? lesson.test
+    : Array.isArray(lesson.questions)
+    ? lesson.questions
     : [];
+  const quizData = rawTests.length > 0 ? rawTests[0] : null;
+  console.log('DEBUG - Quiz data found:', {
+    hasTest: rawTests.length > 0,
+    quizData,
+    nestedQuestions: (quizData?.questions ?? quizData?.ask)?.length,
+  });
+  
+  const rawQuestions = quizData
+    ? Array.isArray(quizData.questions)
+      ? quizData.questions
+      : Array.isArray(quizData.ask)
+      ? quizData.ask
+      : []
+    : [];
+  const quizQuestions = rawQuestions.map((q: any, idx: number) => {
+    // Determine if this is multi-choice: either 'correct' or 'correctIndexes' is an array
+    const isMulti = Array.isArray(q.correct) || Array.isArray(q.correctIndexes);
+    return {
+      id: idx,
+      // Determine question type based on JSON data
+      type: isMulti ? 'multi_choice' : 'single_choice',
+      question: q.question,
+      hint: q.hint,
+      if_wrong: q.if_wrong,
+      // preserve explanation for single-choice feedback
+      explanation: q.explanation,
+      options: Array.isArray(q.answers) ? q.answers.map((ans: string, i: number) => ({ label: ans, value: i.toString() })) : [],
+      ...(isMulti
+        ? {
+            // Support both q.correct and q.correctIndexes for multi-choice
+            correctIndexes: (Array.isArray(q.correct)
+              ? q.correct
+              : Array.isArray(q.correctIndexes) ? q.correctIndexes : [])
+              .map((i: number) => i.toString())
+          }
+        : {
+            // For single-choice, use 'correctIndex' as that's what the Quiz component expects
+            correctIndex: q.correct !== undefined ? q.correct.toString() : undefined
+          }
+      )
+    };
+  });
 
   return (
     <div className="max-w-3xl mx-auto py-8 px-4">
@@ -282,6 +304,11 @@ export default async function LessonPage({
       
       {/* Confetti effect only shows when success=true in URL */}
       <ConfettiEffect />
+      
+      {/* Show rating dialog only for lessons with ocena:true */}
+      {shouldRate && (
+        <LessonRatingTrigger lessonId={lessonId} trigger={successMessage} />
+      )}
       
       <div className="mb-4 text-sm font-medium flex items-center">
         <BookType className="mr-2 text-blue-600" size={16} />
@@ -322,7 +349,7 @@ export default async function LessonPage({
           <div className="max-w-xl mx-auto space-y-2">
             <h2 className="text-xl font-bold">{quizData.subject}</h2>
             <p className="text-gray-600">{quizData.desc}</p>
-            <Quiz questions={quizQuestions} initialStepIndex={0} />
+            <Quiz questions={quizQuestions} />
           </div>
         </div>
       )}

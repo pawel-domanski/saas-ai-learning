@@ -148,6 +148,18 @@ export const quizResults = pgTable('quiz_results', {
   device: text('device'),
 });
 
+// Add lessonRatings table to store lesson ratings
+export const lessonRatings = pgTable('lesson_ratings', {
+  id: serial('id').primaryKey(),
+  userId: integer('user_id').notNull().references(() => users.id),
+  lessonId: integer('lesson_id').notNull(),
+  userName: varchar('user_name', { length: 255 }).notNull(),
+  ipAddress: varchar('ip_address', { length: 45 }).notNull(),
+  rating: integer('rating').notNull(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
 export const teamsRelations = relations(teams, ({ many }) => ({
   teamMembers: many(teamMembers),
   activityLogs: many(activityLogs),

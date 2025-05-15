@@ -38,19 +38,19 @@ export function LessonHeader({
         
         <div className="flex gap-2">
           {previousLessonId && (
-            <Button asChild variant="outline" size="sm" className="flex items-center gap-1">
-              <Link href={`/app/lessons/${previousLessonId}`}>
-                <ChevronLeft size={16} />
-                <span className="hidden sm:inline">Previous</span>
+            <Button asChild className="flex items-center gap-1 px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded-full shadow-sm hover:bg-gray-50 disabled:opacity-50">
+              <Link href={`/app/lessons/${previousLessonId}`}> 
+                <ChevronLeft className="w-4 h-4" />
+                <span className="hidden sm:inline ml-1">Previous</span>
               </Link>
             </Button>
           )}
           
           {nextLessonId && isCompleted && (
-            <Button asChild size="sm" className="flex items-center gap-1">
-              <Link href={`/app/lessons/${nextLessonId}`}>
-                <span className="hidden sm:inline">Next</span>
-                <ChevronRight size={16} />
+            <Button asChild className="flex items-center gap-1 px-4 py-2 bg-blue-600 text-white rounded-full shadow-sm hover:bg-blue-700 disabled:opacity-50">
+              <Link href={`/app/lessons/${nextLessonId}`}> 
+                <span className="hidden sm:inline mr-1">Next</span>
+                <ChevronRight className="w-4 h-4" />
               </Link>
             </Button>
           )}

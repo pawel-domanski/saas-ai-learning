@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Markdown } from '@/components/ui/markdown';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import posthog from 'posthog-js';
 
 export default function SlideshowClient({ subLessons }) {
   const [currentSlide, setCurrentSlide] = useState(1);
@@ -19,12 +20,24 @@ export default function SlideshowClient({ subLessons }) {
 
   const handlePrevious = () => {
     if (currentSlide > 1) {
+      // Capture slide navigation event
+      posthog.capture('slideshow navigate', {
+        direction: 'previous',
+        from_step: currentSlide,
+        to_step: currentSlide - 1,
+      });
       goToSlide(currentSlide - 1);
     }
   };
 
   const handleNext = () => {
     if (currentSlide < totalSlides) {
+      // Capture slide navigation event
+      posthog.capture('slideshow navigate', {
+        direction: 'next',
+        from_step: currentSlide,
+        to_step: currentSlide + 1,
+      });
       goToSlide(currentSlide + 1);
     }
   };
@@ -32,92 +45,72 @@ export default function SlideshowClient({ subLessons }) {
   if (!subLessons || !subLessons.length) return null;
 
   return (
-    <div className="mt-8 border-t pt-8">
-      <h2 className="text-2xl font-bold mb-6">Step by Step Guide</h2>
-      
-      {/* Enhanced slides container */}
-      <div className="slides-container">
-        {/* Modern nav controls */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
-          <div className="text-sm font-medium text-gray-600">
-            Select a step:
+    <div className="mt-8 pt-8">
+      <div className="bg-white border border-gray-200 rounded-xl shadow-lg p-8 mb-8">
+        {/* Card header with navigation */}
+        <div className="flex items-center mb-4">
+          <button
+            onClick={handlePrevious}
+            disabled={currentSlide === 1}
+            className="w-8 h-8 flex items-center justify-center bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 rounded-full shadow-sm disabled:opacity-50"
+            aria-label="Previous step"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+          <div className="relative flex-grow h-1 mx-4 bg-gray-200 rounded-full overflow-hidden">
+            <div
+              className="absolute left-0 top-0 bottom-0 bg-gradient-to-r from-blue-500 to-teal-400 transition-all duration-300 rounded-r-full"
+              style={{ width: `${(currentSlide / totalSlides) * 100}%` }}
+            />
           </div>
-          
-          <div className="flex items-center gap-3">
-            <button 
-              onClick={handlePrevious}
-              disabled={currentSlide === 1}
-              className="group relative inline-flex items-center justify-center px-4 py-2 overflow-hidden font-medium text-blue-600 bg-blue-50 rounded-md shadow-md transition-all hover:bg-blue-100 disabled:opacity-50 disabled:cursor-not-allowed"
-              aria-label="Previous step"
-            >
-              <ChevronLeft className="h-4 w-4 mr-1" />
-              <span>Previous</span>
-            </button>
-            
-            <div className="text-sm font-medium text-gray-700 min-w-[60px] text-center">
-              {currentSlide} of {totalSlides}
-            </div>
-            
-            <button 
-              onClick={handleNext}
-              disabled={currentSlide === totalSlides}
-              className="group relative inline-flex items-center justify-center px-4 py-2 overflow-hidden font-medium text-white bg-blue-600 rounded-md shadow-md transition-all hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-              aria-label="Next step"
-            >
-              <span>Next</span>
-              <ChevronRight className="h-4 w-4 ml-1" />
-            </button>
-          </div>
+          <button
+            onClick={handleNext}
+            disabled={currentSlide === totalSlides}
+            className="w-8 h-8 flex items-center justify-center bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 rounded-full shadow-sm disabled:opacity-50"
+            aria-label="Next step"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </button>
         </div>
-        
-        {/* Interactive progress indicators */}
-        <div className="flex justify-center gap-1 mb-8">
-          {subLessons.map((_, index) => (
-            <button 
-              key={index} 
-              onClick={() => goToSlide(index + 1)}
-              className={`relative transition-all duration-300 ${
-                index + 1 === currentSlide 
-                  ? 'w-12 h-3 bg-blue-600' 
-                  : index + 1 < currentSlide
-                    ? 'w-10 h-3 bg-blue-400'
-                    : 'w-10 h-3 bg-gray-200'
-              } rounded-full hover:opacity-80`}
-              aria-label={`Go to step ${index + 1}`}
-            >
-              {index + 1 === currentSlide && (
-                <span className="absolute top-0 left-0 right-0 bottom-0 bg-blue-500 rounded-full animate-pulse opacity-70"></span>
-              )}
-            </button>
-          ))}
-        </div>
-        
-        {/* Enhanced slide content area */}
-        <div className="relative overflow-hidden border border-gray-200 rounded-xl shadow-lg bg-white">
-          {subLessons.map((subLesson, index) => (
-            <div 
-              key={index} 
-              className={`slide p-8 transition-opacity duration-300 ${currentSlide === index + 1 ? 'block' : 'hidden'}`}
-            >
-              <div className="flex items-center mb-6">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center text-white font-bold mr-4 shadow-md">
-                  {index + 1}
-                </div>
-                <h3 className="text-xl font-bold text-gray-800">{subLesson.subject}</h3>
+        {/* Slide content area */}
+        {subLessons.map((subLesson, index) => (
+          <div
+            key={index}
+            className={`slide p-8 transition-opacity duration-300 ${
+              currentSlide === index + 1 ? 'block' : 'hidden'
+            }`}
+          >
+            <div className="flex items-center mb-6">
+              {/* Modern step indicator */}
+              <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-teal-400 flex items-center justify-center text-white font-bold mr-4 shadow-md">
+                {index + 1}
               </div>
-              
-              <div className="mb-6 text-gray-700 bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500">
+              <h3 className="text-2xl font-semibold text-gray-900">
+                {subLesson.subject}
+              </h3>
+            </div>
+            <div className="mb-6 bg-white p-4 rounded-xl shadow-sm ring-1 ring-gray-100">
+              <p className="text-blue-700 font-medium leading-relaxed">
                 {subLesson.desc}
-              </div>
-              
-              {subLesson.content && (
-                <div className="pt-6 border-t border-gray-100">
-                  <Markdown>{subLesson.content}</Markdown>
-                </div>
-              )}
+              </p>
             </div>
-          ))}
-        </div>
+            {/* Render sub-lesson image if provided */}
+            {subLesson.image && (
+              <div className="mb-6 text-center">
+                <img
+                  src={subLesson.image}
+                  alt={subLesson.subject}
+                  className="mx-auto max-h-48 object-contain rounded-lg shadow-md"
+                />
+              </div>
+            )}
+            {subLesson.content && (
+              <div className="pt-6 border-t border-gray-100">
+                <Markdown>{subLesson.content}</Markdown>
+              </div>
+            )}
+          </div>
+        ))}
       </div>
     </div>
   );

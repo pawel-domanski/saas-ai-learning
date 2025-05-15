@@ -6,6 +6,7 @@ import { Inter } from 'next/font/google';
 import { UserProvider } from '@/lib/auth';
 import { getUser } from '@/lib/db/queries';
 import SchemaOrg from './components/SchemaOrg';
+import PosthogProvider from '@/components/PosthogProvider';
 
 export const metadata: Metadata = {
   title: 'Focus your AI',
@@ -87,9 +88,11 @@ export default async function RootLayout({
         className="min-h-[100dvh] antialiased bg-gradient-to-br from-blue-50 to-green-50 dark:from-blue-950 dark:to-green-950" 
         suppressHydrationWarning
       >
-        <UserProvider userPromise={userPromise}>
-          {children}
-        </UserProvider>
+        <PosthogProvider>
+          <UserProvider userPromise={userPromise}>
+            {children}
+          </UserProvider>
+        </PosthogProvider>
         <SchemaOrg />
       </body>
     </html>

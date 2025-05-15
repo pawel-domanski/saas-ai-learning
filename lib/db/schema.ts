@@ -82,6 +82,28 @@ export const userProgress = pgTable('user_progress', {
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
 
+// Table to track completion of AI Guides documents
+export const aiguidesProgress = pgTable('aiguides_progress', {
+  id: serial('id').primaryKey(),
+  userId: integer('user_id').notNull().references(() => users.id),
+  guideId: varchar('guide_id', { length: 255 }).notNull(),
+  documentId: integer('document_id').notNull(),
+  completed: boolean('completed').notNull().default(true),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
+// Table to track completion of AI-Driven Operating Procedures documents
+export const aiopProgress = pgTable('aiop_progress', {
+  id: serial('id').primaryKey(),
+  userId: integer('user_id').notNull().references(() => users.id),
+  aiopId: varchar('aiop_id', { length: 255 }).notNull(),
+  documentId: integer('document_id').notNull(),
+  completed: boolean('completed').notNull().default(true),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
 export const quizResults = pgTable('quiz_results', {
   id: serial('id').primaryKey(),
   sessionId: varchar('session_id', { length: 255 }).notNull().unique(),
@@ -252,6 +274,21 @@ export const passwordResetTokensRelations = relations(passwordResetTokens, ({ on
   }),
 }));
 
+export const aiTools = pgTable('ai_tools', {
+  id: serial('id').primaryKey(),
+  name: varchar('name', { length: 255 }).notNull(),
+  description: text('description').notNull(),
+  url: text('url'),
+  price_model: varchar('price_model', { length: 50 }),
+  price: varchar('price', { length: 50 }),
+  billing: varchar('billing', { length: 50 }),
+  refund: varchar('refund', { length: 50 }),
+  tags: json('tags').$type<string[]>(),
+  type: varchar('type', { length: 50 }),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow()
+});
+
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 export type Team = typeof teams.$inferSelect;
@@ -287,3 +324,5 @@ export enum ActivityType {
 
 export type Prompt = typeof prompts.$inferSelect;
 export type Tool = typeof tools.$inferSelect;
+export type AiTool = typeof aiTools.$inferSelect;
+export type NewAiTool = typeof aiTools.$inferInsert;

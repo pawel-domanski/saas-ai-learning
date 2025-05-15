@@ -1,6 +1,6 @@
 import { desc, and, eq, isNull } from 'drizzle-orm';
 import { db } from './drizzle';
-import { activityLogs, teamMembers, teams, userProgress, users, prompts } from './schema';
+import { activityLogs, teamMembers, teams, userProgress, users, prompts, aiguidesProgress, aiopProgress, aiTools } from './schema';
 import { getSession } from '@/lib/auth/session-server';
 
 export async function getUser() {
@@ -234,4 +234,43 @@ export async function getPromptByDate(contentDate: string) {
     .where(eq(prompts.content_date, dateObj))
     .limit(1);
   return result.length > 0 ? result[0] : null;
+}
+
+export async function getUserGuideProgress(userId: number, guideId: string, documentId: number) {
+  const result = await db.query.aiguidesProgress.findFirst({
+    where: and(
+      eq(aiguidesProgress.userId, userId),
+      eq(aiguidesProgress.guideId, guideId),
+      eq(aiguidesProgress.documentId, documentId)
+    )
+  });
+  return result || null;
+}
+
+/**
+ * Fetch progress record for AI-Driven Operating Procedures document.
+ */
+export async function getUserAiOpProgress(userId: number, aiopId: string, documentId: number) {
+  const result = await db.query.aiopProgress.findFirst({
+    where: and(
+      eq(aiopProgress.userId, userId),
+      eq(aiopProgress.aiopId, aiopId),
+      eq(aiopProgress.documentId, documentId)
+    )
+  });
+  return result || null;
+}
+
+export async function getAiTools() {
+  return await db.select().from(aiTools);
+}
+
+export async function getAiToolByName(name: string) {
+  const result = await db
+    .select()
+    .from(aiTools)
+    .where(eq(aiTools.name, name))
+    .limit(1);
+
+  return result[0];
 }

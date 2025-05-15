@@ -64,21 +64,25 @@ export default async function PricingPage({
         {orderedProducts.map((product) => {
           const planPrice = prices.find((p) => p.productId === product.id);
           return (
-        <PricingCard
+            <PricingCard
               key={product.id}
               name={product.name}
               price={planPrice?.unitAmount || 0}
               interval={planPrice?.interval || 'month'}
+              intervalCount={planPrice?.intervalCount || 1}
               trialDays={planPrice?.trialPeriodDays || 0}
               features={
                 product.name === 'Base'
                   ? ['Unlimited Usage', 'Unlimited Workspace Members', 'Email Support']
                   : product.name === 'Plus'
-                  ? ['Everything in Base', 'Early Access to New Features', '24/7 Support + Slack Access']
+                  ? ['Everything in Base', 'Early Access to New Features']
+                  : product.name === 'Master'
+                  ? ['Everything in Plus']
                   : []
               }
               priceId={planPrice?.id}
               highlighted={product.name === 'Plus'}
+              currencySymbol={planPrice?.currencySymbol}
             />
           );
         })}
@@ -118,18 +122,22 @@ function PricingCard({
   name,
   price,
   interval,
+  intervalCount,
   trialDays,
   features,
   priceId,
   highlighted = false,
+  currencySymbol,
 }: {
   name: string;
   price: number;
   interval: string;
+  intervalCount: number;
   trialDays: number;
   features: string[];
   priceId?: string;
   highlighted?: boolean;
+  currencySymbol: string;
 }) {
   return (
     <div className={`pt-6 rounded-xl ${highlighted ? 'ring-2 ring-teal-500 p-4 bg-white shadow-lg' : ''}`}>
@@ -139,13 +147,15 @@ function PricingCard({
         </div>
       )}
       <h2 className="text-2xl font-medium text-gray-900 mb-2">{name}</h2>
-      <p className="text-sm text-gray-600 mb-4">
-        with {trialDays} day free trial
-      </p>
+      {trialDays > 0 && (
+        <p className="text-sm text-gray-600 mb-4">
+          with {trialDays} day free trial
+        </p>
+      )}
       <p className="text-4xl font-medium text-gray-900 mb-6">
-        ${price / 100}{' '}
+        {currencySymbol}{price / 100}{' '}
         <span className="text-xl font-normal text-gray-600">
-          per user / {interval}
+          per user / {intervalCount > 1 ? `${intervalCount} ${interval}s` : interval}
         </span>
       </p>
       <ul className="space-y-4 mb-8">
@@ -155,6 +165,12 @@ function PricingCard({
             <span className="text-gray-700">{feature}</span>
           </li>
         ))}
+        {name === 'Master' && (
+          <li className="flex items-start">
+            <Check className="h-5 w-5 text-orange-500 mr-2 mt-0.5 flex-shrink-0" />
+            <span className="text-gray-700">save 33%</span>
+          </li>
+        )}
       </ul>
       <form action={checkoutAction}>
         <input type="hidden" name="priceId" value={priceId} />

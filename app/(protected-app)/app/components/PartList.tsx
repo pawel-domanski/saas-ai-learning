@@ -14,6 +14,7 @@ interface Lesson {
   subject: string;
   lesson: any[];
   part: number;
+  desc?: string;
 }
 
 interface PartInfo {
@@ -90,7 +91,7 @@ export default function PartList({
             </button>
             {isOpen && (
               <div className="border-t border-blue-100 bg-white">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4 w-full overflow-hidden">
+                <div className="grid grid-cols-1 gap-4 p-4 w-full overflow-hidden">
                   {part.lessons.map((lesson) => {
                     const lessonId = lesson.lessonId;
                     const isCompleted = completedLessonIds.includes(lessonId);
@@ -99,53 +100,61 @@ export default function PartList({
                     const isCurrentLesson = lessonId === lastViewedLessonId;
 
                     return (
-                      <div key={lessonId} className="h-full">
+                      <div key={lessonId} className="h-full w-full">
                         <Link
                           href={isAvailable ? `/app/lessons/${lessonId}` : '#'}
-                          className={`${isAvailable ? 'cursor-pointer hover:shadow-md' : 'opacity-70'} block h-full`}
+                          className={`${isAvailable ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'} block w-full`}
                         >
                           <div
-                            className={`bg-white rounded-lg shadow h-full border-l-4 border border-gray-200 ${
-                              isCompleted
-                                ? 'border-l-teal-500'
-                                : isNextLesson
-                                ? 'border-l-blue-500'
-                                : 'border-l-gray-200'
-                            } ${isCurrentLesson ? 'ring-2 ring-blue-100' : ''} transition-all duration-200`}
-                          >
-                            <div className="p-3 h-full flex flex-col">
-                              <div className="flex items-start">
+                            className={`w-full bg-white rounded-2xl shadow-sm hover:shadow-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-300 transition-transform transform hover:-translate-y-1 h-full flex flex-col relative overflow-hidden`}>
+                            {/* Left accent border */}
+                            <div
+                              className={`absolute top-0 bottom-0 left-0 w-2 rounded-l-2xl ${
+                                isCompleted
+                                  ? 'bg-teal-500'
+                                  : isNextLesson
+                                    ? 'bg-gradient-to-b from-blue-500 to-teal-400'
+                                    : 'bg-gray-200'
+                              } transition-all duration-300`}
+                            />
+                            <div className="p-5 flex flex-col flex-grow">
+                              <div className="flex items-center mb-2">
                                 <div
-                                  className={`h-6 w-6 rounded-full flex items-center justify-center text-white font-semibold mr-2 flex-shrink-0 ${
+                                  className={`h-9 w-9 rounded-full flex items-center justify-center text-white font-semibold mr-3 flex-shrink-0 ${
                                     isNextLesson
                                       ? 'bg-blue-500'
-                                      : 'bg-gradient-to-r from-blue-500 to-teal-500'
+                                      : 'bg-gradient-to-r from-blue-500 to-teal-400'
                                   }`}
                                 >
                                   {lessonId}
                                 </div>
-                                <h3 className={`font-medium text-sm truncate ${
+                                <h3 className={`text-lg font-medium truncate ${
                                   isCompleted
-                                    ? 'text-teal-700'
+                                    ? 'text-teal-600'
                                     : isNextLesson
-                                    ? 'text-blue-700'
+                                    ? 'text-blue-600'
                                     : isAvailable
                                     ? 'text-gray-800'
                                     : 'text-gray-400'
-                                }`}
-                                >
+                                }`}>
                                   {lesson.subject}
                                 </h3>
                               </div>
-
-                              <div className="mt-auto pt-2 text-xs flex items-center gap-1">
-                                {isCompleted ? (
-                                  <><BookIcon size={12} className="text-teal-600" />Lesson completed</>
-                                ) : isNextLesson ? (
-                                  <span className="text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">Next</span>
-                                ) : !isAvailable ? (
-                                  <><LockIconSvg size={12} className="text-gray-400" />Locked</>
-                                ) : null}
+                              {lesson.desc && (
+                                <p className="mb-4 text-sm text-gray-600 truncate line-clamp-2">
+                                  {lesson.desc}
+                                </p>
+                              )}
+                              <div className="mt-auto text-sm flex items-center gap-3">
+                                {isCompleted && (
+                                  <><BookIcon size={16} className="text-teal-600" /> <span className="text-teal-600">Completed</span></>
+                                )}
+                                {isNextLesson && !isCompleted && (
+                                  <span className="text-blue-600 bg-blue-50 px-3 py-1.5 rounded-full text-sm font-semibold">Next</span>
+                                )}
+                                {!isAvailable && !isCompleted && (
+                                  <><LockIconSvg size={16} className="text-gray-400" /><span className="text-gray-400">Locked</span></>
+                                )}
                               </div>
                             </div>
                           </div>

@@ -68,7 +68,11 @@ export function Settings({ teamData }: { teamData: TeamDataWithMembers }) {
                 </p>
                 <p className="text-sm text-gray-500 mt-1">
                   {teamData.subscriptionStatus === 'active'
-                    ? 'Billed monthly'
+                    ? (teamData.planName === 'Base'
+                        ? 'Billed weekly'
+                        : teamData.planName === 'Master'
+                          ? 'Billed quarterly'
+                          : 'Billed monthly')
                     : teamData.subscriptionStatus === 'trialing'
                       ? 'Trial period'
                       : 'No active subscription'}

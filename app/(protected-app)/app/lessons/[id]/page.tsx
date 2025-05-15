@@ -12,6 +12,7 @@ import { SaveLessonView } from './save-lesson-view';
 import ConfettiEffect from './confetti';
 import Quiz from '@/components/Quiz';
 import LessonRatingTrigger from './lesson-rating-trigger';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 // Get training plan data from the JSON file
 async function getLessonPlan() {
@@ -324,6 +325,16 @@ export default async function LessonPage({
       />
 
       <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
+        {/* Render a lesson image inside the content card if provided */}
+        {lesson.image && (
+          <div className="mb-6 text-center">
+            <img
+              src={lesson.image}
+              alt={lesson.subject}
+              className="mx-auto max-h-64 object-contain rounded-lg shadow-md"
+            />
+          </div>
+        )}
         {lesson.lesson ? (
           <div>
             {/* Display main content first if available */}
@@ -357,12 +368,10 @@ export default async function LessonPage({
       <div className="flex justify-between items-center mt-8">
         {/* Previous lesson button - always visible if we're not on the first lesson */}
         {lessonId > 1 ? (
-          <Button asChild variant="outline" className="flex items-center gap-2">
+          <Button asChild className="flex items-center gap-2 px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded-full shadow-sm hover:bg-gray-50">
             <a href={`/app/lessons/${lessonId - 1}`}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="m15 18-6-6 6-6"/>
-              </svg>
-              Previous lesson
+              <ChevronLeft className="w-5 h-5" />
+              <span>Previous lesson</span>
             </a>
           </Button>
         ) : (
@@ -376,12 +385,10 @@ export default async function LessonPage({
 
         {/* Next lesson button - visible only if this lesson is completed and there is a next lesson */}
         {showNextLessonButton ? (
-          <Button asChild className="flex items-center gap-2">
+          <Button asChild className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-full shadow-sm hover:bg-blue-700">
             <a href={`/app/lessons/${lessonId + 1}`}>
-              Next lesson
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="m9 18 6-6-6-6"/>
-              </svg>
+              <span>Next lesson</span>
+              <ChevronRight className="w-5 h-5" />
             </a>
           </Button>
         ) : (

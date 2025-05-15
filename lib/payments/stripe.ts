@@ -37,10 +37,7 @@ export async function createCheckoutSession({
     cancel_url: `${process.env.BASE_URL}/pricing`,
     customer: team.stripeCustomerId || undefined,
     client_reference_id: user.id.toString(),
-    allow_promotion_codes: true,
-    subscription_data: {
-      trial_period_days: 14
-    }
+    allow_promotion_codes: true
   });
 
   redirect(session.url!);
@@ -159,7 +156,9 @@ export async function getStripePrices() {
       typeof price.product === 'string' ? price.product : price.product.id,
     unitAmount: price.unit_amount,
     currency: price.currency,
+    currencySymbol: price.currency === 'usd' ? '$' : '€',
     interval: price.recurring?.interval,
+    intervalCount: price.recurring?.interval_count || 1,
     trialPeriodDays: price.recurring?.trial_period_days
   }));
 }

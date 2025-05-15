@@ -302,27 +302,14 @@ export default async function AppPage() {
             />
             
             {tool.link && (
-              <a href={tool.link} target="_blank" rel="noopener noreferrer" className="mt-4 inline-block text-blue-500 hover:underline">
-                Open Link
+              <a href={tool.link} target="_blank" rel="noopener noreferrer" className="mt-4 inline-flex items-center justify-center px-4 py-2 bg-gradient-to-r from-blue-500 to-teal-500 text-white font-medium rounded-lg hover:from-blue-600 hover:to-teal-600 transition-all duration-200 shadow-md">
+                <span>Open Link</span>
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
               </a>
             )}
-            {tool.tags && (
-              <div className="mt-2 flex flex-wrap gap-2">
-                {(
-                  Array.isArray(tool.tags)
-                    ? tool.tags
-                    : typeof tool.tags === 'string'
-                    ? tool.tags.trim().startsWith('[')
-                      ? (JSON.parse(tool.tags) as string[])
-                      : tool.tags.split(',').map((t) => t.trim())
-                    : []
-                ).map((tag) => (
-                  <span key={tag} className="inline-block bg-blue-100 text-blue-700 text-xs font-medium px-2 py-0.5 rounded">
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            )}
+            
             {(tool.price_model || tool.price || tool.billing || tool.refund) && (
               <div className="mt-4 flex justify-between border-t pt-4">
                 {tool.price_model && (
@@ -361,6 +348,24 @@ export default async function AppPage() {
                     </div>
                   </div>
                 )}
+              </div>
+            )}
+            
+            {tool.tags && (
+              <div className="mt-2 flex flex-wrap gap-2">
+                {(
+                  Array.isArray(tool.tags)
+                    ? tool.tags
+                    : typeof tool.tags === 'string'
+                    ? tool.tags.trim().startsWith('[')
+                      ? (JSON.parse(tool.tags) as string[])
+                      : tool.tags.split(',').map((t) => t.trim())
+                    : []
+                ).map((tag) => (
+                  <span key={tag} className="inline-block bg-blue-100 text-blue-700 text-xs font-medium px-2 py-0.5 rounded">
+                    {tag}
+                  </span>
+                ))}
               </div>
             )}
           </CardContent>

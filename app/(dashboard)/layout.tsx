@@ -84,13 +84,33 @@ function UserMenu() {
 }
 
 function Header() {
+  const { userPromise } = useUser();
+  const user = use(userPromise);
   return (
     <header className="border-b border-gray-100 bg-white/80 backdrop-blur-sm sticky top-0 z-30 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex justify-between items-center">
-        <Link href="/" className="flex items-center">
-          <img src="/Logo_all.svg" alt="Focus your AI logo" className="h-8 w-auto" />
-          <span className="ml-2 text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-teal-500">Focus your AI</span>
-        </Link>
+        <div className="flex items-center space-x-8">
+          <Link href="/" className="flex items-center">
+            <img src="/Logo_all.svg" alt="Focus your AI logo" className="h-8 w-auto" />
+            <span className="ml-2 text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-teal-500">Focus your AI</span>
+          </Link>
+          {user && (
+            <nav className="hidden md:flex space-x-6">
+              <Link href="/app" className="flex items-center text-gray-600 hover:text-gray-800 transition-colors">
+                <i className="fa-solid fa-book-open mr-2" aria-hidden="true"></i>
+                Learn
+              </Link>
+              <Link href="/ai-op" className="flex items-center text-gray-600 hover:text-gray-800 transition-colors">
+                <i className="fa-solid fa-robot mr-2" aria-hidden="true"></i>
+                AI-Driven Operating Procedures
+              </Link>
+              <Link href="/ai-guides" className="flex items-center text-gray-600 hover:text-gray-800 transition-colors">
+                <i className="fa-solid fa-book-open mr-2" aria-hidden="true"></i>
+                AI Guides
+              </Link>
+            </nav>
+          )}
+        </div>
         <div className="flex items-center space-x-4">
           <Suspense fallback={<div className="h-9" />}>
             <UserMenu />

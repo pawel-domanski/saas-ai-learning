@@ -70,40 +70,6 @@ export const invitations = pgTable('invitations', {
   status: varchar('status', { length: 20 }).notNull().default('pending'),
 });
 
-export const userProgress = pgTable('user_progress', {
-  id: serial('id').primaryKey(),
-  userId: integer('user_id')
-    .notNull()
-    .references(() => users.id),
-  lessonId: integer('lesson_id').notNull(),
-  completed: boolean('completed').notNull().default(false),
-  lastAccessed: timestamp('last_accessed').notNull().defaultNow(),
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-  updatedAt: timestamp('updated_at').notNull().defaultNow(),
-});
-
-// Table to track completion of AI Guides documents
-export const aiguidesProgress = pgTable('aiguides_progress', {
-  id: serial('id').primaryKey(),
-  userId: integer('user_id').notNull().references(() => users.id),
-  guideId: varchar('guide_id', { length: 255 }).notNull(),
-  documentId: integer('document_id').notNull(),
-  completed: boolean('completed').notNull().default(true),
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-  updatedAt: timestamp('updated_at').notNull().defaultNow(),
-});
-
-// Table to track completion of AI-Driven Operating Procedures documents
-export const aiopProgress = pgTable('aiop_progress', {
-  id: serial('id').primaryKey(),
-  userId: integer('user_id').notNull().references(() => users.id),
-  aiopId: varchar('aiop_id', { length: 255 }).notNull(),
-  documentId: integer('document_id').notNull(),
-  completed: boolean('completed').notNull().default(true),
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-  updatedAt: timestamp('updated_at').notNull().defaultNow(),
-});
-
 export const quizResults = pgTable('quiz_results', {
   id: serial('id').primaryKey(),
   sessionId: varchar('session_id', { length: 255 }).notNull().unique(),
@@ -191,7 +157,6 @@ export const teamsRelations = relations(teams, ({ many }) => ({
 export const usersRelations = relations(users, ({ many }) => ({
   teamMembers: many(teamMembers),
   invitationsSent: many(invitations),
-  progress: many(userProgress),
 }));
 
 export const invitationsRelations = relations(invitations, ({ one }) => ({
@@ -226,37 +191,6 @@ export const activityLogsRelations = relations(activityLogs, ({ one }) => ({
     references: [users.id],
   }),
 }));
-
-export const userProgressRelations = relations(userProgress, ({ one }) => ({
-  user: one(users, {
-    fields: [userProgress.userId],
-    references: [users.id],
-  }),
-}));
-
-// Define prompts table for daily prompt content
-export const prompts = pgTable('prompts', {
-  id: serial('id').primaryKey(),
-  paragraph_content: text('paragraph_content'),
-  code_content: text('code_content'),
-  content_date: timestamp('content_date').notNull(),
-});
-
-// Define tools table for dynamic tools
-export const tools = pgTable('tool', {
-  id: serial('id').primaryKey(),
-  type: varchar('type', { length: 50 }),
-  code_content: varchar('code_content', { length: 255 }),
-  paragraph_content: text('paragraph_content'),
-  content_date: timestamp('content_date').notNull(),
-  icon: text('icon'),
-  link: text('link'),
-  tags: text('tags'),
-  price_model: text('price_model'),
-  price: text('price'),
-  billing: text('billing'),
-  refund: text('refund'),
-});
 
 export const passwordResetTokens = pgTable('password_reset_tokens', {
   id: serial('id').primaryKey(),
@@ -305,9 +239,6 @@ export type TeamDataWithMembers = Team & {
   })[];
 };
 
-export type UserProgress = typeof userProgress.$inferSelect;
-export type NewUserProgress = typeof userProgress.$inferInsert;
-
 export enum ActivityType {
   SIGN_UP = 'SIGN_UP',
   SIGN_IN = 'SIGN_IN',
@@ -322,7 +253,5 @@ export enum ActivityType {
   LESSON_COMPLETED = 'LESSON_COMPLETED',
 }
 
-export type Prompt = typeof prompts.$inferSelect;
-export type Tool = typeof tools.$inferSelect;
 export type AiTool = typeof aiTools.$inferSelect;
 export type NewAiTool = typeof aiTools.$inferInsert;

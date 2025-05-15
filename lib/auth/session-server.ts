@@ -13,9 +13,15 @@ export async function getSession() {
 }
 
 export async function setSession(user: NewUser) {
+  // Zachowujemy ID użytkownika w oryginalnym formacie (jako UUID)
+  if (user.id === undefined || user.id === null) {
+    console.error('Invalid user ID in setSession:', user.id);
+    throw new Error(`Cannot set session: Invalid user ID: ${user.id}`);
+  }
+  
   const expiresInOneDay = new Date(Date.now() + 24 * 60 * 60 * 1000);
   const session: SessionData = {
-    user: { id: user.id! },
+    user: { id: user.id },
     expires: expiresInOneDay.toISOString(),
   };
   const encryptedSession = await signToken(session);

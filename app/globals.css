@@ -549,3 +549,19 @@
   50% { transform: translateX(-50%) scale(1.05); }
   100% { transform: translateX(-50%) scale(1); }
 }
+
+.avatar-border-gradient {
+  position: relative;
+}
+
+.avatar-border-gradient::before {
+  content: "";
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(to right, #3b82f6, #0d9488);
+  border-radius: 9999px;
+  z-index: -1;
+}

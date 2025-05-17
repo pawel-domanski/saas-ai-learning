@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Users, Settings, Shield, Activity, Menu, X } from 'lucide-react';
+import SupportModal from './components/SupportModal';
 
 export default function DashboardLayout({
   children
@@ -13,6 +14,27 @@ export default function DashboardLayout({
 }) {
   const pathname = usePathname();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
+  const [userData, setUserData] = useState<{ name?: string; email: string } | null>(null);
+
+  // Fetch user data when needed
+  useEffect(() => {
+    async function loadUserData() {
+      if (isSupportModalOpen && !userData) {
+        try {
+          const response = await fetch('/api/user');
+          if (response.ok) {
+            const data = await response.json();
+            setUserData(data.user);
+          }
+        } catch (error) {
+          console.error('Error fetching user data:', error);
+        }
+      }
+    }
+
+    loadUserData();
+  }, [isSupportModalOpen, userData]);
 
   const navItems = [
     { href: '/dashboard', icon: Users, label: 'Account' },
@@ -23,6 +45,14 @@ export default function DashboardLayout({
 
   return (
     <div className="flex flex-col min-h-[calc(100dvh-68px)] max-w-7xl mx-auto w-full">
+      {/* Support Modal */}
+      <SupportModal 
+        isOpen={isSupportModalOpen} 
+        onOpenChange={setIsSupportModalOpen} 
+        userName={userData?.name || ''}
+        userEmail={userData?.email || ''}
+      />
+
       {/* Mobile header */}
       <div className="lg:hidden flex items-center justify-between bg-white shadow-sm p-4 sticky top-0 z-20">
         <div className="flex items-center">
@@ -76,7 +106,10 @@ export default function DashboardLayout({
             <div className="p-4 mt-auto border-t border-gray-100">
               <div className="bg-gradient-to-r from-blue-50 to-teal-50 p-4 rounded-xl">
                 <p className="text-sm text-gray-600">Need help with your account?</p>
-                <Button className="mt-2 w-full text-white bg-gradient-to-r from-blue-600 to-teal-500 hover:from-blue-700 hover:to-teal-600">
+                <Button 
+                  className="mt-2 w-full text-white bg-gradient-to-r from-blue-600 to-teal-500 hover:from-blue-700 hover:to-teal-600"
+                  onClick={() => setIsSupportModalOpen(true)}
+                >
                   Contact Support
                 </Button>
               </div>

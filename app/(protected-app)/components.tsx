@@ -21,7 +21,7 @@ export function UserMenu({ user }: { user: any }) {
   if (!user) {
     return (
       <Link href="/login/sign-in">
-        <button className="px-4 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors">
+        <button className="px-4 py-2 bg-gradient-to-r from-blue-600 to-teal-500 hover:from-blue-700 hover:to-teal-600 text-white rounded-full shadow-md hover:shadow-lg transition-all duration-200">
           Sign In
         </button>
       </Link>
@@ -47,28 +47,38 @@ export function UserMenu({ user }: { user: any }) {
   return (
     <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
       <DropdownMenuTrigger>
-        <Avatar className="cursor-pointer h-9 w-9 border-2 border-white shadow-sm">
+        <Avatar className="cursor-pointer h-9 w-9 relative avatar-border-gradient shadow-md hover:shadow-lg transition-all duration-200">
           <AvatarImage alt={user?.name || 'User'} />
           <AvatarFallback className="bg-gradient-to-r from-blue-100 to-teal-100 text-teal-800 font-medium">
             {getUserInitials(user || { email: '' })}
           </AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="flex flex-col gap-1 p-2 shadow-lg rounded-xl border border-gray-100">
-        <DropdownMenuItem className="cursor-pointer rounded-lg hover:bg-gradient-to-r hover:from-blue-50 hover:to-green-50">
-          <Link href="/dashboard" className="flex w-full items-center py-1">
-            <Home className="mr-2 h-4 w-4 text-teal-500" />
-            <span>Dashboard</span>
-          </Link>
-        </DropdownMenuItem>
-        <form action={handleSignOut} className="w-full">
-          <button type="submit" className="flex w-full">
-            <DropdownMenuItem className="w-full flex-1 cursor-pointer rounded-lg hover:bg-gradient-to-r hover:from-blue-50 hover:to-green-50">
-              <LogOut className="mr-2 h-4 w-4 text-teal-500" />
-              <span>Sign out</span>
-            </DropdownMenuItem>
-          </button>
-        </form>
+      <DropdownMenuContent align="end" className="flex flex-col gap-2 p-0 shadow-lg rounded-xl border border-gray-100 w-60 overflow-hidden">
+        <div className="p-4 bg-gradient-to-r from-blue-50 to-teal-50 border-b border-gray-100">
+          <div className="flex items-center gap-3">
+            <div className="flex-1 min-w-0">
+              <p className="font-medium text-gray-900 truncate">{user?.name || 'User'}</p>
+              <p className="text-xs text-gray-500 truncate">{user?.email}</p>
+            </div>
+          </div>
+        </div>
+        <div className="p-2">
+          <DropdownMenuItem className="cursor-pointer rounded-lg hover:bg-gradient-to-r hover:from-blue-50 hover:to-green-50 py-2">
+            <Link href="/dashboard" className="flex w-full items-center">
+              <Home className="mr-3 h-4 w-4 text-teal-500" />
+              <span>Dashboard</span>
+            </Link>
+          </DropdownMenuItem>
+          <form action={handleSignOut} className="w-full">
+            <button type="submit" className="flex w-full">
+              <DropdownMenuItem className="w-full flex-1 cursor-pointer rounded-lg hover:bg-gradient-to-r hover:from-blue-50 hover:to-green-50 py-2">
+                <LogOut className="mr-3 h-4 w-4 text-teal-500" />
+                <span>Sign out</span>
+              </DropdownMenuItem>
+            </button>
+          </form>
+        </div>
       </DropdownMenuContent>
     </DropdownMenu>
   );

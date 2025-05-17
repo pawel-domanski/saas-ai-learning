@@ -12,7 +12,17 @@ export async function getSession() {
   return await verifyToken(session);
 }
 
+<<<<<<< HEAD
 export async function setSession(user: NewUser & { id: string }) {
+=======
+export async function setSession(user: NewUser) {
+  // Zachowujemy ID użytkownika w oryginalnym formacie (jako UUID)
+  if (user.id === undefined || user.id === null) {
+    console.error('Invalid user ID in setSession:', user.id);
+    throw new Error(`Cannot set session: Invalid user ID: ${user.id}`);
+  }
+  
+>>>>>>> a37cdfc8dcf78c376abf1313d41c73ac31df9c1e
   const expiresInOneDay = new Date(Date.now() + 24 * 60 * 60 * 1000);
   const session: SessionData = {
     user: { id: user.id },

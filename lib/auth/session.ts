@@ -17,7 +17,11 @@ export async function comparePasswords(
 }
 
 export type SessionData = {
+<<<<<<< HEAD
   user: { id: string };
+=======
+  user: { id: string | number };
+>>>>>>> a37cdfc8dcf78c376abf1313d41c73ac31df9c1e
   expires: string;
 };
 

@@ -1,4 +1,5 @@
 {
+<<<<<<< HEAD
   "parts": [
     {
       "id": "fba3699e-791b-4993-ad66-5851fcbe7a59",
@@ -16,4 +17,7 @@
       "icon": "Code"
     }
   ]
+=======
+  "parts": []
+>>>>>>> a37cdfc8dcf78c376abf1313d41c73ac31df9c1e
 } 

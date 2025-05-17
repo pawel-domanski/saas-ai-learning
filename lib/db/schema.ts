@@ -16,6 +16,10 @@ export const users = pgTable('users', {
   name: varchar('name', { length: 100 }),
   email: varchar('email', { length: 255 }).notNull().unique(),
   passwordHash: text('password_hash').notNull(),
+  birthDate: timestamp('birth_date').notNull(),
+  birthTime: text('birth_time').notNull(),
+  birthCity: varchar('birth_city', { length: 100 }).notNull(),
+  birthCountry: varchar('birth_country', { length: 100 }).notNull(),
   role: varchar('role', { length: 20 }).notNull().default('member'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
@@ -62,6 +66,7 @@ export const invitations = pgTable('invitations', {
   status: varchar('status', { length: 20 }).notNull().default('pending'),
 });
 
+<<<<<<< HEAD
 export const userProgress = pgTable('user_progress', {
   id: uuid('id').primaryKey().defaultRandom(),
   userId: uuid('user_id').notNull().references(() => users.id),
@@ -94,6 +99,8 @@ export const aiopProgress = pgTable('aiop_progress', {
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
 
+=======
+>>>>>>> a37cdfc8dcf78c376abf1313d41c73ac31df9c1e
 export const quizResults = pgTable('quiz_results', {
   id: uuid('id').primaryKey().defaultRandom(),
   sessionId: uuid('session_id').notNull().unique(),
@@ -181,12 +188,15 @@ export const teamsRelations = relations(teams, ({ many }) => ({
 export const usersRelations = relations(users, ({ many }) => ({
   teamMembers: many(teamMembers),
   invitationsSent: many(invitations),
+<<<<<<< HEAD
   progress: many(userProgress),
   ratings: many(lessonRatings),
   quizResults: many(quizResults),
   aiopProgress: many(aiopProgress),
   aiguidesProgress: many(aiguidesProgress),
   challengeProgress: many(challengeProgress),
+=======
+>>>>>>> a37cdfc8dcf78c376abf1313d41c73ac31df9c1e
 }));
 
 export const invitationsRelations = relations(invitations, ({ one }) => ({
@@ -222,6 +232,7 @@ export const activityLogsRelations = relations(activityLogs, ({ one }) => ({
   }),
 }));
 
+<<<<<<< HEAD
 export const userProgressRelations = relations(userProgress, ({ one }) => ({
   user: one(users, {
     fields: [userProgress.userId],
@@ -253,6 +264,8 @@ export const tools = pgTable('tool', {
   refund: text('refund'),
 });
 
+=======
+>>>>>>> a37cdfc8dcf78c376abf1313d41c73ac31df9c1e
 export const passwordResetTokens = pgTable('password_reset_tokens', {
   id: uuid('id').primaryKey().defaultRandom(),
   userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
@@ -319,9 +332,6 @@ export type TeamDataWithMembers = Team & {
   })[];
 };
 
-export type UserProgress = typeof userProgress.$inferSelect;
-export type NewUserProgress = typeof userProgress.$inferInsert;
-
 export enum ActivityType {
   SIGN_UP = 'SIGN_UP',
   SIGN_IN = 'SIGN_IN',
@@ -337,8 +347,6 @@ export enum ActivityType {
   LESSON_RATED = 'LESSON_RATED',
 }
 
-export type Prompt = typeof prompts.$inferSelect;
-export type Tool = typeof tools.$inferSelect;
 export type AiTool = typeof aiTools.$inferSelect;
 export type NewAiTool = typeof aiTools.$inferInsert;
 

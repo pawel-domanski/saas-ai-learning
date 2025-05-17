@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { eq } from 'drizzle-orm';
 import { db } from '@/lib/db/drizzle';
 import { users, teams, teamMembers } from '@/lib/db/schema';
@@ -95,3 +96,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(new URL('/error', request.url));
   }
 }
+=======
+ 
+>>>>>>> a37cdfc8dcf78c376abf1313d41c73ac31df9c1e

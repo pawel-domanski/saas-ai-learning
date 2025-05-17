@@ -11,6 +11,8 @@ import { signIn, signUp } from './actions';
 import { ActionState } from '@/lib/auth/middleware';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useState } from 'react';
+import { Combobox } from '@/components/ui/combobox';
+import { countries, popularCities } from '@/lib/geo-data';
 
 export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
   const searchParams = useSearchParams();
@@ -18,6 +20,8 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
   const priceId = searchParams.get('priceId');
   const inviteId = searchParams.get('inviteId');
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const [birthCity, setBirthCity] = useState('');
+  const [birthCountry, setBirthCountry] = useState('');
   const [state, formAction, pending] = useActionState<ActionState, FormData>(
     mode === 'signin' ? signIn : signUp,
     { error: '' }
@@ -114,6 +118,89 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
                 />
               </div>
             </div>
+
+            {/* Birth details - only show in signup mode */}
+            {mode === 'signup' && (
+              <>
+                <div>
+                  <Label
+                    htmlFor="birthDate"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    Birth Date
+                  </Label>
+                  <div>
+                    <Input
+                      id="birthDate"
+                      name="birthDate"
+                      type="date"
+                      defaultValue={state.birthDate}
+                      required
+                      className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label
+                    htmlFor="birthTime"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    Birth Time
+                  </Label>
+                  <div>
+                    <Input
+                      id="birthTime"
+                      name="birthTime"
+                      type="time"
+                      defaultValue={state.birthTime}
+                      required
+                      className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label
+                    htmlFor="birthCity"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    Birth City
+                  </Label>
+                  <div>
+                    <Combobox
+                      options={popularCities}
+                      value={birthCity}
+                      onValueChange={setBirthCity}
+                      name="birthCity"
+                      placeholder="Select birth city"
+                      required
+                      searchThreshold={3}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label
+                    htmlFor="birthCountry"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    Birth Country
+                  </Label>
+                  <div>
+                    <Combobox
+                      options={countries}
+                      value={birthCountry}
+                      onValueChange={setBirthCountry}
+                      name="birthCountry"
+                      placeholder="Select birth country"
+                      required
+                      searchThreshold={3}
+                    />
+                  </div>
+                </div>
+              </>
+            )}
 
             {/* Forgot password link only for sign-in mode */}
             {mode === 'signin' && (

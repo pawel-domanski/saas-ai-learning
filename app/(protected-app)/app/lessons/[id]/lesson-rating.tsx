@@ -15,7 +15,7 @@ const ratingLabels: Record<EmojiRating, string> = {
 };
 
 interface LessonRatingProps {
-  lessonId: number;
+  lessonId: string;
   isOpen: boolean;
   onClose: () => void;
 }

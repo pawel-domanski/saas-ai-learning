@@ -6,8 +6,8 @@ interface LessonHeaderProps {
   lessonNumber: number;
   title: string;
   isCompleted: boolean;
-  previousLessonId: number | null;
-  nextLessonId: number | null;
+  previousLessonId: string | null;
+  nextLessonId: string | null;
 }
 
 export function LessonHeader({

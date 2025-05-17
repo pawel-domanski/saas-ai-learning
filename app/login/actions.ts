@@ -31,22 +31,70 @@ import nodemailer from 'nodemailer';
 import crypto from 'crypto';
 import { cookies } from 'next/headers';
 
+// Helper function to convert numeric or string IDs to a valid UUID format
+function ensureUuid(id: string | number | null | undefined): string | null {
+  if (id === null || id === undefined) {
+    return null;
+  }
+  
+  // Convert to string if it's a number
+  const idStr = typeof id === 'number' ? id.toString() : id;
+  
+  // Check if the ID is already a valid UUID
+  const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (uuidPattern.test(idStr)) {
+    return idStr;
+  }
+
+  // If it's a simple number/string, convert it to a valid UUID format
+  return `00000000-0000-0000-0000-${idStr.padStart(12, '0')}`;
+}
+
 async function logActivity(
-  teamId: number | null | undefined,
-  userId: number,
+  teamId: string | number | null | undefined,
+  userId: string | number,
   type: ActivityType,
   ipAddress?: string,
+  metadata?: Record<string, any>
 ) {
-  if (teamId === null || teamId === undefined) {
+  // Convert teamId to valid UUID format if provided
+  const validTeamId = ensureUuid(teamId);
+  if (!validTeamId) {
     return;
   }
+  
+  // Convert userId to valid UUID format
+  const validUserId = ensureUuid(userId);
+  
   const newActivity: NewActivityLog = {
-    teamId,
-    userId,
+    teamId: validTeamId,
+    userId: validUserId,
     action: type,
     ipAddress: ipAddress || '',
   };
+
+  // Add metadata if provided
+  if (metadata) {
+    newActivity.metadata = JSON.stringify(metadata);
+  }
+  
+  // Log to database
   await db.insert(activityLogs).values(newActivity);
+  
+  // Also track in PostHog when available
+  try {
+    if (typeof window !== 'undefined' && 'posthog' in window) {
+      // @ts-ignore: PostHog might not be initialized on server
+      window.posthog.capture(type, {
+        teamId: validTeamId,
+        userId: validUserId,
+        timestamp: new Date().toISOString(),
+        ...(metadata || {})
+      });
+    }
+  } catch (err) {
+    console.error('Error sending PostHog event:', err);
+  }
 }
 
 const signInSchema = z.object({

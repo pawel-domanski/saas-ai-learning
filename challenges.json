@@ -1,14 +1,29 @@
 {
     "challenges": [
         {
-            "id": "4d1c57da-6e30-416b-843c-14c72c4c4fb6",
+            "id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
             "title": "2025 28-Day AI Challenge",
-            "description": "Complete the 28-day AI challenge to enhance your skills."
+            "description": "Complete the 28-day AI challenge to enhance your skills.",
+            "progress": "28 of 28 Days"
           },
           {
-            "id": "4d1c57da-6e30-416b-843c-14c72c4c4fb2",
+            "id": "e8fd159b-57c4-4d36-9bd7-a59ca13057bb",
             "title": "14-Day AI Side Gigs Challenge",
-            "description": "Learn how to leverage AI for side gigs in just 14 days."
+            "description": "Learn how to leverage AI for side gigs in just 14 days.",
+            "progress": "13 of 14 Days"
           }
-    ]
+    ],
+    "data": {
+        "challenge_1": [
+            {
+                "id": "challenge_1_1",
+                "title": "Day 1: Introduction to AI",
+                "description": "Learn the basics of AI and its applications.",
+                "icon": "fa-solid fa-brain",
+                "image": "/img/icons8-chatgpt.svg",
+                "content": "aaaa  Affiliate marketing is a type of performance-based marketing where a business rewards one or more affiliates for each visitor or customer brought by the affiliate's own marketing efforts."
+            }
+        ]
+    }
+    
 }

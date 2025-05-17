@@ -5,7 +5,7 @@ import posthog from 'posthog-js';
 
 interface DocumentCompleteButtonProps {
   aiopId: string;
-  documentId: number;
+  documentId: string;
   initialCompleted?: boolean;
 }
 

@@ -22,7 +22,7 @@ export default async function AiOpDocumentDetail({ params }: { params: { id: str
   const user = await getUser();
   let isRead = false;
   if (user) {
-    const progress = await getUserAiOpProgress(user.id, id, parseInt(documentid, 10));
+    const progress = await getUserAiOpProgress(user.id, id, documentid);
     isRead = Boolean(progress);
   }
 
@@ -33,7 +33,7 @@ export default async function AiOpDocumentDetail({ params }: { params: { id: str
           <i className="fa-solid fa-arrow-left mr-2" aria-hidden="true"></i>
           Back
         </Link>
-        <DocumentCompleteButton aiopId={id} documentId={parseInt(documentid, 10)} initialCompleted={isRead} />
+        <DocumentCompleteButton aiopId={id} documentId={documentid} initialCompleted={isRead} />
       </div>
 
       <div className="bg-gradient-to-r from-blue-50 to-white p-8 rounded-2xl shadow-xl text-center mb-8">

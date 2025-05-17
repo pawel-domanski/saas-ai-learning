@@ -2,7 +2,7 @@
 
 import { cookies } from 'next/headers';
 
-export async function saveViewAction(lessonId: number, partId: number) {
+export async function saveViewAction(lessonId: string, partId: string | number) {
   // Set the cookie for the last viewed lesson
   const cookieStore = await cookies();
   

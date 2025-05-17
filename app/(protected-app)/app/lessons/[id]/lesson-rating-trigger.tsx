@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { LessonRating } from './lesson-rating';
 
 interface LessonRatingTriggerProps {
-  lessonId: number;
+  lessonId: string;
   trigger: boolean;
 }
 

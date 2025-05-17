@@ -108,6 +108,10 @@ function Header() {
                 <i className="fa-solid fa-book-open mr-2" aria-hidden="true"></i>
                 AI Guides
               </Link>
+              <Link href="/challenges" className="flex items-center text-gray-600 hover:text-gray-800 transition-colors">
+                <i className="fa-solid fa-trophy mr-2" aria-hidden="true"></i>
+                Challenges
+              </Link>
             </nav>
           )}
         </div>

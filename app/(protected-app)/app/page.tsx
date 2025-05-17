@@ -13,6 +13,25 @@ import { cookies } from 'next/headers';
 import { CollapsibleText } from './components/CollapsibleText';
 import PartList from './components/PartList';
 
+// Helper function to convert numeric or string IDs to a valid UUID format
+function ensureUuid(id: string | number | null | undefined): string | null {
+  if (id === null || id === undefined) {
+    return null;
+  }
+  
+  // Convert to string if it's a number
+  const idStr = typeof id === 'number' ? id.toString() : id;
+  
+  // Check if the ID is already a valid UUID
+  const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (uuidPattern.test(idStr)) {
+    return idStr;
+  }
+
+  // If it's a simple number/string, convert it to a valid UUID format
+  return `00000000-0000-0000-0000-${idStr.padStart(12, '0')}`;
+}
+
 // Pobierz dane planu szkoleniowego z pliku JSON
 async function getLessonPlan() {
   const filePath = path.join(process.cwd(), 'plan.json');
@@ -90,12 +109,21 @@ export default async function AppPage() {
 
   // Pobierz postęp użytkownika z bazy danych
   const userProgress = await getAllUserProgress(user.id);
+  
+  // Upewnij się, że wszystkie identyfikatory lekcji są w formacie UUID
   const completedLessonIds = userProgress
     .filter(progress => progress.completed)
-    .map(progress => progress.lessonId);
+    .map(progress => {
+      // Sprawdź, czy ID jest w prawidłowym formacie UUID i konwertuj jeśli nie jest
+      return ensureUuid(progress.lessonId) || progress.lessonId;
+    })
+    .filter(Boolean); // Usuń wszystkie null/undefined
   
   const completedLessons = completedLessonIds.length;
   const percentComplete = Math.round((completedLessons / lessons.length) * 100);
+  
+  // Log dla debugowania
+  console.log('Completed lesson IDs:', completedLessonIds);
   
   // Sprawdź, czy można ukończyć lekcję dzisiaj (czy użytkownik już ukończył lekcję dzisiaj)
   let canCompleteToday = true;
@@ -113,7 +141,17 @@ export default async function AppPage() {
     
     const completedDate = new Date(progress.updatedAt);
     completedDate.setHours(0, 0, 0, 0);
-    return completedDate.getTime() === today.getTime() && progress.lessonId > lessonStart;
+    
+    // Spróbuj wyciągnąć numeryczne ID z UUID
+    const progressUuidMatch = progress.lessonId.match(/^00000000-0000-0000-0000-(\d+)$/);
+    let progressNumId = -1;
+    
+    if (progressUuidMatch) {
+      progressNumId = parseInt(progressUuidMatch[1]);
+    }
+    
+    const isNonStarterLesson = !isNaN(progressNumId) && progressNumId > lessonStart;
+    return completedDate.getTime() === today.getTime() && isNonStarterLesson;
   });
   
   if (todayCompletedLessons.length > 0) {
@@ -124,32 +162,49 @@ export default async function AppPage() {
   // 1. Ukończone lekcje są zawsze dostępne
   // 2. Lekcje do wartości LESSON_START są od razu dostępne
   // 3. Dodatkowo dostępna jest pierwsza nieukończona lekcja po LESSON_START
-  const availableLessonIds: number[] = [...completedLessonIds];
-  let nextAvailableLessonId = 1;
-
-  // Dodaj wszystkie lekcje do LESSON_START jako dostępne
-  for (let i = 1; i <= lessonStart && i <= lessons.length; i++) {
-    if (!availableLessonIds.includes(i)) {
-      availableLessonIds.push(i);
+  
+  // Po migracji na UUID, ta funkcja musi zostać dostosowana
+  // zamiast numerycznych ID wykorzystujemy UUID i indeksy
+  
+  // Znajdź wszystkie dostępne lekcje
+  const availableLessons: string[] = [];
+  
+  // Dodaj wszystkie ukończone lekcje jako dostępne
+  completedLessonIds.forEach(completedId => {
+    if (!availableLessons.includes(completedId)) {
+      availableLessons.push(completedId);
+    }
+  });
+  
+  // Dodaj LESSON_START pierwszych lekcji jako dostępne
+  for (let i = 0; i < lessonStart && i < lessons.length; i++) {
+    const lessonUuid = lessons[i].id || lessons[i]["id:"] || ensureUuid((i+1).toString());
+    if (!availableLessons.includes(lessonUuid)) {
+      availableLessons.push(lessonUuid);
     }
   }
-
-  // Znajdź pierwszą nieukończoną lekcję po LESSON_START
-  for (let i = 0; i < lessons.length; i++) {
-    const lessonId = i + 1;
-    if (lessonId > lessonStart && !completedLessonIds.includes(lessonId)) {
-      nextAvailableLessonId = lessonId;
+  
+  // Znajdź pierwszą nieukończoną lekcję po LESSON_START i dodaj ją jako dostępną
+  let nextAvailableLessonId = null;
+  for (let i = lessonStart; i < lessons.length; i++) {
+    const lessonUuid = lessons[i].id || lessons[i]["id:"] || ensureUuid((i+1).toString());
+    if (!completedLessonIds.includes(ensureUuid(lessonUuid))) {
+      nextAvailableLessonId = lessonUuid;
+      if (!availableLessons.includes(lessonUuid)) {
+        availableLessons.push(lessonUuid);
+      }
       break;
     }
   }
-
-  // Dodaj następną dostępną lekcję do listy dostępnych
-  if (!availableLessonIds.includes(nextAvailableLessonId)) {
-    availableLessonIds.push(nextAvailableLessonId);
+  
+  // Jeśli nie znaleziono następnej lekcji po LESSON_START, użyj pierwszej lekcji
+  if (!nextAvailableLessonId && lessons.length > 0) {
+    nextAvailableLessonId = lessons[0].id || lessons[0]["id:"] || ensureUuid("1");
   }
-
-  // Sortuj listę dostępnych lekcji
-  availableLessonIds.sort((a, b) => a - b);
+  
+  // Logowanie dla debugowania
+  console.log('AvailableLessons:', availableLessons);
+  console.log('nextAvailableLessonId:', nextAvailableLessonId);
 
   // Pobierz nazwy części kursu z pliku part.json
   const partDetails = await getPartDetails();
@@ -162,23 +217,29 @@ export default async function AppPage() {
   
   // Czytamy też ostatnio otwartą lekcję do podświetlenia
   const lastViewedLessonIdCookie = cookieStore.get('lastViewedLessonId');
-  const lastViewedLessonId = lastViewedLessonIdCookie ? parseInt(lastViewedLessonIdCookie.value) : null;
+  const lastViewedLessonId = lastViewedLessonIdCookie ? lastViewedLessonIdCookie.value : null;
   
   // Determine the part containing the last viewed lesson
   let lastViewedLessonPart = null;
   if (lastViewedLessonId !== null) {
-    const lessonIndex = lastViewedLessonId - 1;
-    if (lessonIndex >= 0 && lessonIndex < lessons.length) {
-      lastViewedLessonPart = lessons[lessonIndex].part || 1;
+    // Find the lesson by UUID
+    const lastViewedLesson = lessons.find(l => 
+      (l.id || l["id:"]) === lastViewedLessonId
+    );
+    if (lastViewedLesson) {
+      lastViewedLessonPart = lastViewedLesson.part || 1;
     }
   }
   
   // Find the part that contains the next available lesson (marked as "Next")
   let nextLessonPart = null;
   if (nextAvailableLessonId) {
-    const nextLessonIndex = nextAvailableLessonId - 1;
-    if (nextLessonIndex >= 0 && nextLessonIndex < lessons.length) {
-      nextLessonPart = lessons[nextLessonIndex].part || 1;
+    // Find the lesson by UUID
+    const nextAvailableLesson = lessons.find(l => 
+      (l.id || l["id:"]) === nextAvailableLessonId
+    );
+    if (nextAvailableLesson) {
+      nextLessonPart = nextAvailableLesson.part || 1;
     }
   }
   
@@ -377,7 +438,7 @@ export default async function AppPage() {
         sortedParts={sortedParts}
         initialOpenPartId={openPartId}
         completedLessonIds={completedLessonIds}
-        availableLessonIds={availableLessonIds}
+        availableLessonIds={availableLessons}
         nextAvailableLessonId={nextAvailableLessonId}
         lastViewedLessonId={lastViewedLessonId}
       />

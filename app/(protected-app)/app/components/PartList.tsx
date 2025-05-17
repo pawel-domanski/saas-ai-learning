@@ -27,10 +27,10 @@ interface PartInfo {
 interface PartListProps {
   sortedParts: PartInfo[];
   initialOpenPartId: number;
-  completedLessonIds: number[];
-  availableLessonIds: number[];
-  nextAvailableLessonId: number;
-  lastViewedLessonId: number | null;
+  completedLessonIds: string[];
+  availableLessonIds: string[];
+  nextAvailableLessonId: string | null;
+  lastViewedLessonId: string | null;
 }
 
 export default function PartList({
@@ -93,7 +93,7 @@ export default function PartList({
               <div className="border-t border-blue-100 bg-white">
                 <div className="grid grid-cols-1 gap-4 p-4 w-full overflow-hidden">
                   {part.lessons.map((lesson) => {
-                    const lessonId = lesson.lessonId;
+                    const lessonId = lesson.id || lesson["id:"] || `00000000-0000-0000-0000-${lesson.lessonId.toString().padStart(12, '0')}`;
                     const isCompleted = completedLessonIds.includes(lessonId);
                     const isAvailable = availableLessonIds.includes(lessonId);
                     const isNextLesson = lessonId === nextAvailableLessonId;
@@ -126,7 +126,7 @@ export default function PartList({
                                       : 'bg-gradient-to-r from-blue-500 to-teal-400'
                                   }`}
                                 >
-                                  {lessonId}
+                                  {lesson.lessonId}
                                 </div>
                                 <h3 className={`text-lg font-medium truncate ${
                                   isCompleted

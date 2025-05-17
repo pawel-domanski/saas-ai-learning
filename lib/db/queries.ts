@@ -37,7 +37,7 @@ export async function getTeamByStripeCustomerId(customerId: string) {
 }
 
 export async function updateTeamSubscription(
-  teamId: number,
+  teamId: string,
   subscriptionData: {
     stripeSubscriptionId: string | null;
     stripeProductId: string | null;
@@ -54,7 +54,7 @@ export async function updateTeamSubscription(
     .where(eq(teams.id, teamId));
 }
 
-export async function getUserWithTeam(userId: number) {
+export async function getUserWithTeam(userId: string) {
   const result = await db
     .select({
       user: users,
@@ -89,7 +89,7 @@ export async function getActivityLogs() {
     .limit(10);
 }
 
-export async function getTeamForUser(userId: number) {
+export async function getTeamForUser(userId: string) {
   const result = await db.query.users.findFirst({
     where: eq(users.id, userId),
     with: {
@@ -118,28 +118,40 @@ export async function getTeamForUser(userId: number) {
   return result?.teamMembers[0]?.team || null;
 }
 
-export async function getUserLessonProgress(userId: number, lessonId: number) {
+export async function getUserLessonProgress(userId: string, lessonId: string) {
+  // Convert lessonId to a valid UUID
+  const validLessonId = ensureUuid(lessonId);
+  
   const result = await db
     .select()
     .from(userProgress)
     .where(and(
       eq(userProgress.userId, userId),
-      eq(userProgress.lessonId, lessonId)
+      eq(userProgress.lessonId, validLessonId)
     ))
     .limit(1);
 
   return result.length > 0 ? result[0] : null;
 }
 
-export async function getAllUserProgress(userId: number) {
-  return await db
+export async function getAllUserProgress(userId: string) {
+  const results = await db
     .select()
     .from(userProgress)
     .where(eq(userProgress.userId, userId))
     .orderBy(userProgress.lessonId);
+  
+  // Konwertuj wszystkie IDs lekcji na poprawny format UUID przed zwróceniem
+  return results.map(progress => ({
+    ...progress,
+    lessonId: ensureUuid(progress.lessonId)
+  }));
 }
 
-export async function trackLessonAccess(userId: number, lessonId: number) {
+export async function trackLessonAccess(userId: string, lessonId: string) {
+  // Convert lessonId to a valid UUID
+  const validLessonId = ensureUuid(lessonId);
+  
   const existingProgress = await getUserLessonProgress(userId, lessonId);
   
   if (existingProgress) {
@@ -152,7 +164,7 @@ export async function trackLessonAccess(userId: number, lessonId: number) {
       })
       .where(and(
         eq(userProgress.userId, userId),
-        eq(userProgress.lessonId, lessonId)
+        eq(userProgress.lessonId, validLessonId)
       ));
     
     return existingProgress;
@@ -162,7 +174,7 @@ export async function trackLessonAccess(userId: number, lessonId: number) {
       .insert(userProgress)
       .values({
         userId,
-        lessonId,
+        lessonId: validLessonId,
         completed: false,
         lastAccessed: new Date(),
         createdAt: new Date(),
@@ -174,7 +186,10 @@ export async function trackLessonAccess(userId: number, lessonId: number) {
   }
 }
 
-export async function markLessonAsCompleted(userId: number, lessonId: number) {
+export async function markLessonAsCompleted(userId: string, lessonId: string) {
+  // Convert lessonId to a valid UUID
+  const validLessonId = ensureUuid(lessonId);
+  
   const existingProgress = await getUserLessonProgress(userId, lessonId);
   
   if (existingProgress) {
@@ -188,7 +203,7 @@ export async function markLessonAsCompleted(userId: number, lessonId: number) {
       })
       .where(and(
         eq(userProgress.userId, userId),
-        eq(userProgress.lessonId, lessonId)
+        eq(userProgress.lessonId, validLessonId)
       ))
       .returning();
       
@@ -199,8 +214,8 @@ export async function markLessonAsCompleted(userId: number, lessonId: number) {
       .insert(userProgress)
       .values({
         userId,
-        lessonId,
-        completed: false,
+        lessonId: validLessonId,
+        completed: true,
         lastAccessed: new Date(),
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -211,7 +226,7 @@ export async function markLessonAsCompleted(userId: number, lessonId: number) {
   }
 }
 
-export async function getUserCourseProgress(userId: number, totalLessons: number) {
+export async function getUserCourseProgress(userId: string, totalLessons: number) {
   const progress = await getAllUserProgress(userId);
   
   const completedCount = progress.filter(p => p.completed).length;
@@ -236,12 +251,41 @@ export async function getPromptByDate(contentDate: string) {
   return result.length > 0 ? result[0] : null;
 }
 
-export async function getUserGuideProgress(userId: number, guideId: string, documentId: number) {
+// Helper function to convert numeric or string IDs to a valid UUID format
+function ensureUuid(id: string): string {
+  // Sprawdź, czy ID jest null lub undefined i zwróć bezpieczny format
+  if (id === null || id === undefined) {
+    console.warn('ensureUuid otrzymało null lub undefined jako ID');
+    return '00000000-0000-0000-0000-000000000000';
+  }
+  
+  // Dodaj logowanie
+  console.log(`ensureUuid przetwarzanie: ${id}`);
+  
+  // Check if the ID is already a valid UUID
+  const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (uuidPattern.test(id)) {
+    console.log(`ensureUuid: ID już jest w formacie UUID: ${id}`);
+    return id;
+  }
+
+  // If it's a simple number/string, convert it to a valid UUID format
+  // We'll use a deterministic approach to always generate the same UUID for the same input
+  const result = `00000000-0000-0000-0000-${id.padStart(12, '0')}`;
+  console.log(`ensureUuid: Konwertowano ${id} na ${result}`);
+  return result;
+}
+
+export async function getUserGuideProgress(userId: string, guideId: string, documentId: string) {
+  // Convert IDs to valid UUIDs if they're not already
+  const validGuideId = ensureUuid(guideId);
+  const validDocumentId = ensureUuid(documentId);
+  
   const result = await db.query.aiguidesProgress.findFirst({
     where: and(
       eq(aiguidesProgress.userId, userId),
-      eq(aiguidesProgress.guideId, guideId),
-      eq(aiguidesProgress.documentId, documentId)
+      eq(aiguidesProgress.guideId, validGuideId),
+      eq(aiguidesProgress.documentId, validDocumentId)
     )
   });
   return result || null;
@@ -250,12 +294,16 @@ export async function getUserGuideProgress(userId: number, guideId: string, docu
 /**
  * Fetch progress record for AI-Driven Operating Procedures document.
  */
-export async function getUserAiOpProgress(userId: number, aiopId: string, documentId: number) {
+export async function getUserAiOpProgress(userId: string, aiopId: string, documentId: string) {
+  // Convert IDs to valid UUIDs if they're not already
+  const validAiopId = ensureUuid(aiopId);
+  const validDocumentId = ensureUuid(documentId);
+  
   const result = await db.query.aiopProgress.findFirst({
     where: and(
       eq(aiopProgress.userId, userId),
-      eq(aiopProgress.aiopId, aiopId),
-      eq(aiopProgress.documentId, documentId)
+      eq(aiopProgress.aiopId, validAiopId),
+      eq(aiopProgress.documentId, validDocumentId)
     )
   });
   return result || null;

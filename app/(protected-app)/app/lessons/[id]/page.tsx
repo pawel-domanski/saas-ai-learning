@@ -14,6 +14,18 @@ import Quiz from '@/components/Quiz';
 import LessonRatingTrigger from './lesson-rating-trigger';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
+// Helper function to convert numeric or string IDs to a valid UUID format
+function ensureUuid(id: string): string {
+  // Check if the ID is already a valid UUID
+  const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (uuidPattern.test(id)) {
+    return id;
+  }
+
+  // If it's a simple number/string, convert it to a valid UUID format
+  return `00000000-0000-0000-0000-${id.padStart(12, '0')}`;
+}
+
 // Get training plan data from the JSON file
 async function getLessonPlan() {
   const filePath = path.join(process.cwd(), 'plan.json');
@@ -28,8 +40,8 @@ async function getPartNames() {
   const data = JSON.parse(fileContents);
   
   // Transform the array into an object where the key is the part id
-  const partMap: {[key: number]: string} = {};
-  data.parts.forEach((part: {id: number, name: string}) => {
+  const partMap: {[key: string]: string} = {};
+  data.parts.forEach((part: {id: string, name: string}) => {
     partMap[part.id] = part.name;
   });
   
@@ -48,14 +60,44 @@ export default async function LessonPage({
   const limitReached = searchParamsResolved?.limitReached === 'true';
   const successMessage = searchParamsResolved?.success === 'true';
 
-  // Convert params.id to a number - use await to ensure params is fully available
+  // Get the requested lesson ID from params
   const { id } = await Promise.resolve(params);
-  const lessonId = parseInt(id);
   
-  if (isNaN(lessonId)) {
+  // Get the lesson plan data
+  const plan = await getLessonPlan();
+  const lessons = plan.data;
+  
+  // Try to find the lesson - first by UUID if provided, or by index if numeric
+  let lessonIndex = -1;
+  let lesson;
+  
+  // Check if id is a UUID format
+  const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (uuidPattern.test(id)) {
+    // Find lesson by UUID
+    lessonIndex = lessons.findIndex(l => l.id === id || l["id:"] === id);
+    lesson = lessons[lessonIndex];
+  } else {
+    // Try to use id as a numeric index (for backward compatibility)
+    const numericId = parseInt(id);
+    if (!isNaN(numericId) && numericId > 0 && numericId <= lessons.length) {
+      lessonIndex = numericId - 1;
+      lesson = lessons[lessonIndex];
+    }
+  }
+  
+  // If lesson not found, return 404
+  if (!lesson) {
+    console.log(`Lesson not found with ID: ${id}`);
     return notFound();
   }
 
+  // Log for debugging
+  console.log(`Found lesson at index ${lessonIndex} with ID ${id}`);
+  
+  // Extract the true lesson UUID (might be "id" or "id:" in the JSON)
+  const lessonUuid = lesson.id || lesson["id:"] || ensureUuid(id);
+  
   // Get the current user
   const user = await getUser();
   if (!user) {
@@ -76,16 +118,6 @@ export default async function LessonPage({
   if (!hasActiveSubscription) {
     redirect('/pricing?access=premium');
   }
-
-  // Get the lesson plan and find the lesson
-  const plan = await getLessonPlan();
-  const lessons = plan.data;
-  
-  if (lessonId < 1 || lessonId > lessons.length) {
-    return notFound();
-  }
-  
-  const lesson = lessons[lessonId - 1];
   
   // Determine if this lesson has rating enabled in plan.json
   const shouldRate = lesson.ocena === true;
@@ -96,15 +128,15 @@ export default async function LessonPage({
     return notFound();
   }
   
-  // Get the course part number
-  const part = lesson.part || 1;
+  // Get the course part number/ID
+  const part = lesson.part || "1";
   
   // Get course part names from part.json file
   const partNames = await getPartNames();
   const partName = partNames[part] || `Part ${part}`;
 
-  // Track that the user accessed this lesson
-  await trackLessonAccess(user.id, lessonId);
+  // Track that the user accessed this lesson - use the UUID format
+  await trackLessonAccess(user.id, lessonUuid);
 
   // Get user progress from the database
   const userProgress = await getAllUserProgress(user.id);
@@ -112,48 +144,66 @@ export default async function LessonPage({
     .filter(progress => progress.completed)
     .map(progress => progress.lessonId);
   
-  const isCompleted = completedLessonIds.includes(lessonId);
+  // Check if this lesson is completed - compare with UUID
+  const isCompleted = completedLessonIds.includes(ensureUuid(lessonUuid));
   const completedLessons = completedLessonIds.length;
   const percentComplete = Math.round((completedLessons / lessons.length) * 100);
 
   // Display placeholder progress instead of trying to access the non-existent table
   const isPreviousLessonCompleted = true; // Allow marking any lesson as completed for now
-  const showNextLessonButton = isCompleted && lessonId < lessons.length;
-  const hasNextLesson = lessonId < lessons.length;
+  
+  // Find adjacent lessons by index
+  const prevLessonId = lessonIndex > 0 ? 
+    (lessons[lessonIndex - 1].id || lessons[lessonIndex - 1]["id:"]) : 
+    null;
+    
+  const nextLessonId = lessonIndex < lessons.length - 1 ? 
+    (lessons[lessonIndex + 1].id || lessons[lessonIndex + 1]["id:"]) : 
+    null;
+  
+  // Log for debugging
+  console.log(`Previous lesson ID: ${prevLessonId}, Next lesson ID: ${nextLessonId}`);
+  
+  const showNextLessonButton = isCompleted && nextLessonId;
+  const hasNextLesson = nextLessonId !== null;
 
   // Check if the user has access to this lesson
   let isAccessAllowed = false;
-  let nextAvailableLessonId = 1; // The first lesson is always available
+  let nextAvailableLessonId = lessons[0].id || lessons[0]["id:"]; // The first lesson is always available
 
   // Pobierz wartość LESSON_START z procesu środowiskowego
   const lessonStartEnv = process.env.LESSON_START;
   const lessonStart = lessonStartEnv ? parseInt(lessonStartEnv, 10) : 1;
   console.log('LESSON_START value (lesson page):', lessonStart);
 
-  // Lekcja jest dostępna, jeśli:
-  // 1. Została już ukończona
-  // 2. Jest jedną z pierwszych LESSON_START lekcji
-  // 3. Jest pierwszą nieukończoną lekcją po LESSON_START
-  
   // Sprawdź, czy lekcja jest automatycznie dostępna jako jedna z pierwszych
-  const isInStarterLessons = lessonId <= lessonStart;
+  // W nowym systemie używamy indeksu w tablicy lekcji
+  const isInStarterLessons = lessonIndex < lessonStart;
   
   // Znajdź pierwszą nieukończoną lekcję po LESSON_START
-  for (let i = 0; i < lessons.length; i++) {
-    const currentLessonId = i + 1;
-    if (currentLessonId > lessonStart && !completedLessonIds.includes(currentLessonId)) {
-      nextAvailableLessonId = currentLessonId;
+  let foundNextAvailable = false;
+  for (let i = Math.max(lessonStart, 0); i < lessons.length; i++) {
+    const currentLessonUuid = lessons[i].id || lessons[i]["id:"];
+    // Zawsze używaj ensureUuid do porównania lekcji
+    if (!completedLessonIds.includes(ensureUuid(currentLessonUuid))) {
+      nextAvailableLessonId = currentLessonUuid;
+      foundNextAvailable = true;
       break;
     }
   }
 
+  // Log dla debugowania
+  console.log('Next available lesson ID:', nextAvailableLessonId);
+  console.log('Current lesson UUID:', lessonUuid);
+  console.log('Is in starter lessons:', isInStarterLessons);
+  
   // Lekcja jest dostępna jeśli: jest już ukończona, jest w startowych lekcjach, 
   // lub jest następną lekcją do ukończenia po lekcjach startowych
-  isAccessAllowed = isCompleted || isInStarterLessons || lessonId === nextAvailableLessonId;
+  isAccessAllowed = isCompleted || isInStarterLessons || lessonUuid === nextAvailableLessonId;
 
   // Get the cookie for last viewed lesson
   const cookieStore = await cookies();
-  const lastViewedLessonId = cookieStore.get('lastViewedLessonId')?.value || '1';
+  const lastViewedLessonId = cookieStore.get('lastViewedLessonId')?.value || lessons[0].id || lessons[0]["id:"];
 
   if (!isAccessAllowed) {
     return (
@@ -201,10 +251,10 @@ export default async function LessonPage({
     
     // Check if this is a starter lesson (within LESSON_START)
     // Starter lessons can be completed without daily limit restrictions
-    if (limitReached && lessonId <= lessonStart) {
+    if (limitReached && isInStarterLessons) {
       return (
         <form action="/api/lessons/complete" method="POST">
-          <input type="hidden" name="lessonId" value={lessonId} />
+          <input type="hidden" name="lessonId" value={lessonUuid} />
           <input type="hidden" name="partId" value={part} />
           <div className="flex flex-col items-center gap-2">
             <Button type="submit">
@@ -239,7 +289,7 @@ export default async function LessonPage({
     // Otherwise show the button to complete the lesson
     return (
       <form action="/api/lessons/complete" method="POST">
-        <input type="hidden" name="lessonId" value={lessonId} />
+        <input type="hidden" name="lessonId" value={lessonUuid} />
         <input type="hidden" name="partId" value={part} />
         <Button type="submit">
           Mark as completed
@@ -301,14 +351,14 @@ export default async function LessonPage({
   return (
     <div className="max-w-3xl mx-auto py-8 px-4">
       {/* Component to save view info using client-side JS */}
-      <SaveLessonView lessonId={lessonId} partId={part} />
+      <SaveLessonView lessonId={lessonUuid} partId={part} />
       
       {/* Confetti effect only shows when success=true in URL */}
       <ConfettiEffect />
       
       {/* Show rating dialog only for lessons with ocena:true */}
       {shouldRate && (
-        <LessonRatingTrigger lessonId={lessonId} trigger={successMessage} />
+        <LessonRatingTrigger lessonId={lessonUuid} trigger={successMessage} />
       )}
       
       <div className="mb-4 text-sm font-medium flex items-center">
@@ -317,11 +367,11 @@ export default async function LessonPage({
       </div>
       
       <LessonHeader 
-        lessonNumber={lessonId}
+        lessonNumber={lessonIndex + 1}
         title={lesson.subject}
         isCompleted={isCompleted}
-        previousLessonId={lessonId > 1 ? lessonId - 1 : null}
-        nextLessonId={lessonId < lessons.length ? lessonId + 1 : null}
+        previousLessonId={prevLessonId}
+        nextLessonId={nextLessonId}
       />
 
       <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
@@ -367,9 +417,9 @@ export default async function LessonPage({
 
       <div className="flex justify-between items-center mt-8">
         {/* Previous lesson button - always visible if we're not on the first lesson */}
-        {lessonId > 1 ? (
+        {prevLessonId ? (
           <Button asChild className="flex items-center gap-2 px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded-full shadow-sm hover:bg-gray-50">
-            <a href={`/app/lessons/${lessonId - 1}`}>
+            <a href={`/app/lessons/${prevLessonId}`}>
               <ChevronLeft className="w-5 h-5" />
               <span>Previous lesson</span>
             </a>
@@ -386,7 +436,7 @@ export default async function LessonPage({
         {/* Next lesson button - visible only if this lesson is completed and there is a next lesson */}
         {showNextLessonButton ? (
           <Button asChild className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-full shadow-sm hover:bg-blue-700">
-            <a href={`/app/lessons/${lessonId + 1}`}>
+            <a href={`/app/lessons/${nextLessonId}`}>
               <span>Next lesson</span>
               <ChevronRight className="w-5 h-5" />
             </a>

@@ -1,6 +1,6 @@
 import { desc, and, eq, isNull } from 'drizzle-orm';
 import { db } from './drizzle';
-import { activityLogs, teamMembers, teams, userProgress, users, prompts, aiguidesProgress, aiopProgress, aiTools } from './schema';
+import { activityLogs, teamMembers, teams, userProgress, users, prompts, aiguidesProgress, aiopProgress, aiTools, challengeProgress } from './schema';
 import { getSession } from '@/lib/auth/session-server';
 
 export async function getUser() {
@@ -321,4 +321,120 @@ export async function getAiToolByName(name: string) {
     .limit(1);
 
   return result[0];
+}
+
+/**
+ * Get challenge progress for a specific user and challenge
+ */
+export async function getUserChallengeProgress(userId: string, challengeId: string) {
+  // Convert challenge ID to valid UUID if needed
+  const validChallengeId = ensureUuid(challengeId);
+  
+  const result = await db
+    .select()
+    .from(challengeProgress)
+    .where(and(
+      eq(challengeProgress.userId, userId),
+      eq(challengeProgress.challengeId, validChallengeId)
+    ))
+    .limit(1);
+
+  return result.length > 0 ? result[0] : null;
+}
+
+/**
+ * Start a challenge for a user, creating a progress record with day 0 completed
+ */
+export async function startChallenge(userId: string, challengeId: string) {
+  // Convert challenge ID to valid UUID if needed
+  const validChallengeId = ensureUuid(challengeId);
+  
+  // Check if user already has progress for this challenge
+  const existingProgress = await getUserChallengeProgress(userId, challengeId);
+  
+  if (existingProgress) {
+    // Return existing progress record
+    return existingProgress;
+  }
+  
+  // Create new progress record
+  const now = new Date();
+  const result = await db
+    .insert(challengeProgress)
+    .values({
+      userId,
+      challengeId: validChallengeId,
+      startDate: now,
+      lastCompletedDay: 0,
+      createdAt: now,
+      updatedAt: now,
+    })
+    .returning();
+  
+  return result[0];
+}
+
+/**
+ * Mark a challenge day as completed
+ */
+export async function completeDay(userId: string, challengeId: string, day: number) {
+  // Convert challenge ID to valid UUID if needed
+  const validChallengeId = ensureUuid(challengeId);
+  
+  // Get current progress
+  const existingProgress = await getUserChallengeProgress(userId, challengeId);
+  
+  if (!existingProgress) {
+    // Start the challenge if it's not started yet
+    const newProgress = await startChallenge(userId, challengeId);
+    
+    // Only update if the day is greater than the current last completed day
+    if (day > newProgress.lastCompletedDay) {
+      const result = await db
+        .update(challengeProgress)
+        .set({
+          lastCompletedDay: day,
+          updatedAt: new Date(),
+        })
+        .where(and(
+          eq(challengeProgress.userId, userId),
+          eq(challengeProgress.challengeId, validChallengeId)
+        ))
+        .returning();
+      
+      return result[0];
+    }
+    
+    return newProgress;
+  }
+  
+  // Only update if the day is greater than the current last completed day
+  if (day > existingProgress.lastCompletedDay) {
+    const result = await db
+      .update(challengeProgress)
+      .set({
+        lastCompletedDay: day,
+        updatedAt: new Date(),
+      })
+      .where(and(
+        eq(challengeProgress.userId, userId),
+        eq(challengeProgress.challengeId, validChallengeId)
+      ))
+      .returning();
+    
+    return result[0];
+  }
+  
+  return existingProgress;
+}
+
+/**
+ * Get all challenges that a user has started
+ */
+export async function getUserChallenges(userId: string) {
+  return await db
+    .select()
+    .from(challengeProgress)
+    .where(eq(challengeProgress.userId, userId))
+    .orderBy(challengeProgress.startDate);
 }

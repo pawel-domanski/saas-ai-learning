@@ -186,6 +186,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   quizResults: many(quizResults),
   aiopProgress: many(aiopProgress),
   aiguidesProgress: many(aiguidesProgress),
+  challengeProgress: many(challengeProgress),
 }));
 
 export const invitationsRelations = relations(invitations, ({ one }) => ({
@@ -283,11 +284,21 @@ export const aiTools = pgTable('ai_tools', {
   updatedAt: timestamp('updated_at').notNull().defaultNow()
 });
 
+export const challengeProgress = pgTable('challenge_progress', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: uuid('user_id').notNull().references(() => users.id),
+  challengeId: uuid('challenge_id').notNull(),
+  startDate: timestamp('start_date').notNull().defaultNow(),
+  lastCompletedDay: integer('last_completed_day').notNull().default(0),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
 export const challenges = pgTable('challenges', {
   id: uuid('id').primaryKey().defaultRandom(),
   title: varchar('title', { length: 255 }).notNull(),
   description: text('description').notNull(),
-  progress: text('progress'),
+  time_duration: text('time_duration'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
@@ -347,6 +358,9 @@ export type AiguidesProgress = typeof aiguidesProgress.$inferSelect;
 export type NewAiguidesProgress = typeof aiguidesProgress.$inferInsert;
 
 export type NewPrompt = typeof prompts.$inferInsert;
+
+export type ChallengeProgress = typeof challengeProgress.$inferSelect;
+export type NewChallengeProgress = typeof challengeProgress.$inferInsert;
 
 export type Challenge = typeof challenges.$inferSelect;
 export type NewChallenge = typeof challenges.$inferInsert;

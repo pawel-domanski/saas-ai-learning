@@ -82,9 +82,13 @@ export function Header({ user, team }: { user: any; team: Team | null }) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex justify-between items-center">
         <div className="flex items-center space-x-8">
           <Link href="/" className="flex items-center">
-            <img src="/Logo_all.svg" alt="Logo" className="h-7 w-7" />
-            <span className="ml-2 text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-teal-500 truncate">
-              Focus your AI
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="h-7 w-7 text-purple-600">
+              <circle cx="12" cy="12" r="10" />
+              <circle cx="12" cy="12" r="4" />
+              <path d="M12 2v4M12 18v4M2 12h4M18 12h4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+            </svg>
+            <span className="ml-2 text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600 truncate">
+              Astro
             </span>
           </Link>
           {user && (
@@ -92,8 +96,8 @@ export function Header({ user, team }: { user: any; team: Team | null }) {
               {(team?.subscriptionStatus === 'active' || team?.subscriptionStatus === 'trialing') && (
                 <>
                   <Link href="/app" className="flex items-center text-gray-600 hover:text-gray-800 transition-colors">
-                    <i className="fa-solid fa-book-open mr-2" aria-hidden="true"></i>
-                    Learn
+                    <i className="fa-solid fa-chart-line mr-2" aria-hidden="true"></i>
+                    Dashboard
                   </Link>
                 </>
               )}

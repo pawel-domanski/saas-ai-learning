@@ -3,6 +3,7 @@ import { getUser, getTeamForUser } from '@/lib/db/queries';
 import { Header } from './components';
 import { Suspense } from 'react';
 import PosthogProvider from '@/components/PosthogProvider';
+import { BirthDetailsAlert } from '@/components/BirthDetailsAlert';
 
 export default async function ProtectedAppLayout({
   children,
@@ -19,6 +20,9 @@ export default async function ProtectedAppLayout({
         <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-50 to-green-50 overflow-hidden">
           <Suspense fallback={<div className="h-12 bg-white border-b border-gray-100" />}>
             <Header user={user} team={team} />
+          </Suspense>
+          <Suspense fallback={null}>
+            <BirthDetailsAlert />
           </Suspense>
           <main className="flex-grow flex flex-col overflow-hidden">
             <div className="w-full h-full overflow-auto max-w-full">

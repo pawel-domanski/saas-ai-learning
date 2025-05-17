@@ -116,6 +116,10 @@ const signUpSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8),
   name: z.string().min(1, 'Name is required').max(50),
+  birthDate: z.string().min(1, 'Birth date is required'),
+  birthTime: z.string().min(1, 'Birth time is required'),
+  birthCity: z.string().min(1, 'Birth city is required').max(100),
+  birthCountry: z.string().min(1, 'Birth country is required').max(100),
   inviteId: z.string().optional(),
   'terms-accept': z.string().optional().refine(val => val === 'on', {
     message: "You must accept the Terms and Conditions, Privacy Policy, and Earnings Disclaimer"
@@ -123,7 +127,7 @@ const signUpSchema = z.object({
 });
 
 export const signUp = validatedAction(signUpSchema, async (data, formData) => {
-  const { email, password, name, inviteId } = data;
+  const { email, password, name, birthDate, birthTime, birthCity, birthCountry, inviteId } = data;
   
   // Check if terms were accepted
   if (!data['terms-accept']) {
@@ -132,6 +136,10 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
       email,
       password,
       name,
+      birthDate,
+      birthTime,
+      birthCity,
+      birthCountry,
     };
   }
 
@@ -147,6 +155,10 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
       email,
       password,
       name,
+      birthDate,
+      birthTime,
+      birthCity,
+      birthCountry,
     };
   }
 
@@ -156,6 +168,10 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
     email,
     name,
     passwordHash,
+    birthDate: new Date(birthDate),
+    birthTime: birthTime, // Store just the time string
+    birthCity,
+    birthCountry,
     role: 'owner', // Default role, will be overridden if there's an invitation
   };
 
@@ -167,6 +183,10 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
       email,
       password,
       name,
+      birthDate,
+      birthTime,
+      birthCity,
+      birthCountry,
     };
   }
 
@@ -205,7 +225,16 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
         .where(eq(teams.id, teamId))
         .limit(1);
     } else {
-      return { error: 'Invalid or expired invitation.', email, password, name };
+      return { 
+        error: 'Invalid or expired invitation.', 
+        email, 
+        password, 
+        name,
+        birthDate,
+        birthTime,
+        birthCity,
+        birthCountry
+      };
     }
   } else {
     // Create a new team if there's no invitation
@@ -221,6 +250,10 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
         email,
         password,
         name,
+        birthDate,
+        birthTime,
+        birthCity,
+        birthCountry,
       };
     }
 
@@ -354,16 +387,28 @@ export const deleteAccount = validatedActionWithUser(
 const updateAccountSchema = z.object({
   name: z.string().min(1, 'Name is required').max(100),
   email: z.string().email('Invalid email address'),
+  birthDate: z.string().optional(),
+  birthTime: z.string().optional(),
+  birthCity: z.string().optional(),
+  birthCountry: z.string().optional(),
 });
 
 export const updateAccount = validatedActionWithUser(
   updateAccountSchema,
   async (data, _, user) => {
-    const { name, email } = data;
+    const { name, email, birthDate, birthTime, birthCity, birthCountry } = data;
     const userWithTeam = await getUserWithTeam(user.id);
 
+    const updateData: any = { name, email };
+    
+    // Only update birth details if they are provided
+    if (birthDate) updateData.birthDate = new Date(birthDate);
+    if (birthTime) updateData.birthTime = birthTime; // Store just the time string
+    if (birthCity) updateData.birthCity = birthCity;
+    if (birthCountry) updateData.birthCountry = birthCountry;
+
     await Promise.all([
-      db.update(users).set({ name, email }).where(eq(users.id, user.id)),
+      db.update(users).set(updateData).where(eq(users.id, user.id)),
       logActivity(userWithTeam?.teamId, user.id, ActivityType.UPDATE_ACCOUNT),
     ]);
 

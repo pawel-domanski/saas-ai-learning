@@ -168,6 +168,7 @@ export const lessonRatings = pgTable('lesson_ratings', {
   userName: varchar('user_name', { length: 255 }).notNull(),
   ipAddress: varchar('ip_address', { length: 45 }).notNull(),
   rating: integer('rating').notNull(),
+  comment: text('comment'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
@@ -290,6 +291,7 @@ export const challengeProgress = pgTable('challenge_progress', {
   challengeId: uuid('challenge_id').notNull(),
   startDate: timestamp('start_date').notNull().defaultNow(),
   lastCompletedDay: integer('last_completed_day').notNull().default(0),
+  dayCompletionDates: json('day_completion_dates').$type<Record<string, string>>().default({}),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });

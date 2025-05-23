@@ -24,21 +24,52 @@ interface ChallengeParams {
 
 // Function to calculate the number of days available based on start date
 const getAvailableDays = (startDate: Date | null, lastCompletedDay: number): number => {
-  if (!startDate) return 1; // If no start date, only show day 1
+  // If no start date, only show day 1
+  if (!startDate) return 1; 
   
   const now = new Date();
   
-  // Calculate days elapsed since start date
-  const diffTime = Math.abs(now.getTime() - startDate.getTime());
+  // Calculate calendar day difference, not just 24-hour periods
+  // By resetting hours to compare just calendar days
+  const startDay = new Date(startDate);
+  startDay.setHours(0, 0, 0, 0);
+  
+  const today = new Date(now);
+  today.setHours(0, 0, 0, 0);
+  
+  // Calculate days between dates (inclusive of start and end dates)
+  const diffTime = today.getTime() - startDay.getTime();
   const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
   
-  // Strictly enforce one day = one lesson, regardless of completion status
-  // Day 1 is always available, and additional days based on elapsed days since start
-  const daysFromStart = Math.max(1, diffDays + 1);
+  // If challenge started today, diffDays will be 0
+  // If challenge started yesterday, diffDays will be 1, etc.
+  const calendarDaysElapsed = diffDays;
   
-  // Even if users complete a lesson, the next one will only be available the next day
-  // This ensures users can't complete the entire challenge in one day
-  return daysFromStart;
+  // Available days is startDay (1) + calendar days elapsed
+  const maxAvailableDays = calendarDaysElapsed + 1;
+  
+  // Debug logging
+  console.log('Start day (midnight):', startDay);
+  console.log('Today (midnight):', today);
+  console.log('Calendar days elapsed:', calendarDaysElapsed);
+  console.log('Max available days:', maxAvailableDays);
+  console.log('Last completed day:', lastCompletedDay);
+  
+  return maxAvailableDays;
+};
+
+// Format date to readable format
+const formatDate = (dateString: string): string => {
+  if (!dateString) return '';
+  
+  const date = new Date(dateString);
+  return date.toLocaleString('en-US', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
 };
 
 export default async function ChallengePage({ params }: ChallengeParams) {
@@ -89,6 +120,9 @@ export default async function ChallengePage({ params }: ChallengeParams) {
   // For development testing, uncomment to override:
   // const availableDays = 3; // Shows first 3 days
 
+  // Get completion dates from progress
+  const completionDates = userProgress.dayCompletionDates || {};
+
   return (
     <div className="p-4 lg:p-8 max-w-7xl mx-auto">
       <div className="mb-6">
@@ -129,7 +163,7 @@ export default async function ChallengePage({ params }: ChallengeParams) {
                 `}
                 title={
                   isCompleted 
-                    ? `Day ${dayNumber}: Completed` 
+                    ? `Day ${dayNumber}: Completed ${completionDates[dayNumber.toString()] ? 'on ' + formatDate(completionDates[dayNumber.toString()]) : ''}` 
                     : isAvailable 
                       ? `Day ${dayNumber}: Available` 
                       : `Day ${dayNumber}: Unlocks ${dayNumber === availableDays + 1 ? 'tomorrow' : `in ${dayNumber - availableDays} days`}`
@@ -148,6 +182,7 @@ export default async function ChallengePage({ params }: ChallengeParams) {
             const dayNumber = index + 1;
             const isAvailable = dayNumber <= availableDays;
             const isCompleted = dayNumber <= userProgress.lastCompletedDay;
+            const completionDate = completionDates[dayNumber.toString()];
             
             // Only show available days
             if (!isAvailable) {
@@ -188,9 +223,16 @@ export default async function ChallengePage({ params }: ChallengeParams) {
                   <div className="flex justify-between items-center w-full">
                     <CardTitle>{day.title}</CardTitle>
                     {isCompleted && (
-                      <span className="px-2 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full">
-                        Completed
-                      </span>
+                      <div className="flex flex-col items-end">
+                        <span className="px-2 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full">
+                          Completed
+                        </span>
+                        {completionDate && (
+                          <span className="text-xs text-gray-500 mt-1">
+                            {formatDate(completionDate)}
+                          </span>
+                        )}
+                      </div>
                     )}
                   </div>
                 </CardHeader>

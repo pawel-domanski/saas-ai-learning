@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 
 type EmojiRating = '😞' | '😐' | '🙂' | '😀' | '🤩';
 
@@ -22,6 +24,7 @@ interface LessonRatingProps {
 
 export function LessonRating({ lessonId, isOpen, onClose }: LessonRatingProps) {
   const [selectedRating, setSelectedRating] = useState<EmojiRating | null>(null);
+  const [comment, setComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleRatingSubmit = async () => {
@@ -38,10 +41,14 @@ export function LessonRating({ lessonId, isOpen, onClose }: LessonRatingProps) {
         body: JSON.stringify({
           lessonId,
           rating: Object.keys(ratingLabels).indexOf(selectedRating) + 1, // Convert emoji to 1-5 rating
+          comment: comment.trim() || null, // Send comment if provided
         }),
       });
       
       onClose();
+      // Reset form
+      setSelectedRating(null);
+      setComment('');
     } catch (error) {
       console.error('Failed to submit rating:', error);
     } finally {
@@ -59,18 +66,35 @@ export function LessonRating({ lessonId, isOpen, onClose }: LessonRatingProps) {
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex justify-between py-6">
-          {(Object.keys(ratingLabels) as EmojiRating[]).map((emoji) => (
-            <div
-              key={emoji}
-              className={`flex flex-col items-center cursor-pointer transition-all ${
-                selectedRating === emoji ? 'scale-125 text-blue-600' : 'hover:scale-110'
-              }`}
-              onClick={() => setSelectedRating(emoji)}
-            >
-              <div className="text-3xl">{emoji}</div>
+        <div className="space-y-6">
+          <div className="flex justify-between py-6">
+            {(Object.keys(ratingLabels) as EmojiRating[]).map((emoji) => (
+              <div
+                key={emoji}
+                className={`flex flex-col items-center cursor-pointer transition-all ${
+                  selectedRating === emoji ? 'scale-125 text-blue-600' : 'hover:scale-110'
+                }`}
+                onClick={() => setSelectedRating(emoji)}
+              >
+                <div className="text-3xl">{emoji}</div>
+              </div>
+            ))}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="comment">Additional feedback (optional)</Label>
+            <Textarea
+              id="comment"
+              placeholder="Share your thoughts about the lesson content, what you learned, or suggestions for improvement..."
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              className="min-h-[80px] resize-none"
+              maxLength={500}
+            />
+            <div className="text-xs text-gray-500 text-right">
+              {comment.length}/500 characters
             </div>
-          ))}
+          </div>
         </div>
 
         <DialogFooter className="sm:justify-center">

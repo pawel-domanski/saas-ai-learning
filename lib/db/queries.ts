@@ -390,10 +390,15 @@ export async function completeDay(userId: string, challengeId: string, day: numb
     
     // Only update if the day is greater than the current last completed day
     if (day > newProgress.lastCompletedDay) {
+      // Store completion date
+      const now = new Date().toISOString();
+      const dayCompletionDates = { ...newProgress.dayCompletionDates, [day.toString()]: now };
+      
       const result = await db
         .update(challengeProgress)
         .set({
           lastCompletedDay: day,
+          dayCompletionDates,
           updatedAt: new Date(),
         })
         .where(and(
@@ -410,10 +415,15 @@ export async function completeDay(userId: string, challengeId: string, day: numb
   
   // Only update if the day is greater than the current last completed day
   if (day > existingProgress.lastCompletedDay) {
+    // Store completion date
+    const now = new Date().toISOString();
+    const dayCompletionDates = { ...existingProgress.dayCompletionDates, [day.toString()]: now };
+    
     const result = await db
       .update(challengeProgress)
       .set({
         lastCompletedDay: day,
+        dayCompletionDates,
         updatedAt: new Date(),
       })
       .where(and(

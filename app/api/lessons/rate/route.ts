@@ -43,6 +43,7 @@ export async function POST(request: NextRequest) {
     const data = await request.json();
     const lessonId = data.lessonId;
     const rating = data.rating;
+    const comment = data.comment;
     
     if (!lessonId || typeof rating !== 'number' || rating < 1 || rating > 5) {
       return NextResponse.json({ error: 'Invalid data provided' }, { status: 400 });
@@ -79,7 +80,7 @@ export async function POST(request: NextRequest) {
         // Update existing
         result = await db.execute(sql`
           UPDATE public.lesson_ratings 
-          SET rating = ${rating}, user_name = ${userName}, ip_address = ${ip}, updated_at = NOW()
+          SET rating = ${rating}, comment = ${comment}, user_name = ${userName}, ip_address = ${ip}, updated_at = NOW()
           WHERE user_id = ${session.user.id} AND lesson_id = ${validLessonId}
           RETURNING *
         `);
@@ -87,9 +88,9 @@ export async function POST(request: NextRequest) {
         // Insert new
         result = await db.execute(sql`
           INSERT INTO public.lesson_ratings 
-          (id, user_id, lesson_id, user_name, ip_address, rating, created_at, updated_at)
+          (id, user_id, lesson_id, user_name, ip_address, rating, comment, created_at, updated_at)
           VALUES 
-          (gen_random_uuid(), ${session.user.id}, ${validLessonId}, ${userName}, ${ip}, ${rating}, NOW(), NOW())
+          (gen_random_uuid(), ${session.user.id}, ${validLessonId}, ${userName}, ${ip}, ${rating}, ${comment}, NOW(), NOW())
           RETURNING *
         `);
       }

@@ -32,6 +32,7 @@ export async function GET(request: NextRequest) {
         challengeId,
         startDate: null,
         lastCompletedDay: 0,
+        dayCompletionDates: {},
       });
     }
     
@@ -39,6 +40,7 @@ export async function GET(request: NextRequest) {
       challengeId: progress.challengeId,
       startDate: progress.startDate,
       lastCompletedDay: progress.lastCompletedDay,
+      dayCompletionDates: progress.dayCompletionDates || {},
     });
   } catch (error) {
     console.error('Error fetching challenge progress:', error);
@@ -97,6 +99,52 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Valid day number is required' }, { status: 400 });
       }
       
+      // Get current progress to check day constraints
+      const currentProgress = await getUserChallengeProgress(user.id, challengeId);
+      
+      // Calculate how many days should be available based on start date (using calendar days)
+      if (currentProgress && currentProgress.startDate) {
+        const startDate = new Date(currentProgress.startDate);
+        const now = new Date();
+        
+        // Reset hours to compare just calendar days
+        const startDay = new Date(startDate);
+        startDay.setHours(0, 0, 0, 0);
+        
+        const today = new Date(now);
+        today.setHours(0, 0, 0, 0);
+        
+        // Calculate days between dates
+        const diffTime = today.getTime() - startDay.getTime();
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+        
+        // If challenge started today, diffDays will be 0
+        // If challenge started yesterday, diffDays will be 1, etc.
+        const calendarDaysElapsed = diffDays;
+        
+        // Available days is startDay (1) + calendar days elapsed
+        const maxAvailableDays = calendarDaysElapsed + 1;
+        
+        console.log('API - Start day (midnight):', startDay);
+        console.log('API - Today (midnight):', today);
+        console.log('API - Calendar days elapsed:', calendarDaysElapsed);
+        console.log('API - Max available days:', maxAvailableDays);
+        
+        // Check if trying to complete a future day that's not yet available
+        if (day > maxAvailableDays) {
+          return NextResponse.json({ 
+            error: 'This day is not yet available. New challenges are unlocked daily.' 
+          }, { status: 400 });
+        }
+        
+        // Check if trying to complete multiple days on same calendar day
+        if (day > currentProgress.lastCompletedDay + 1) {
+          return NextResponse.json({ 
+            error: 'Please complete challenges in order, one per day.' 
+          }, { status: 400 });
+        }
+      }
+      
       progress = await completeDay(user.id, challengeId, day);
     } else {
       return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
@@ -114,6 +162,7 @@ export async function POST(request: NextRequest) {
       challengeId: progress.challengeId,
       startDate: progress.startDate,
       lastCompletedDay: progress.lastCompletedDay,
+      dayCompletionDates: progress.dayCompletionDates || {},
     });
   } catch (error) {
     console.error('Error updating challenge progress:', error);

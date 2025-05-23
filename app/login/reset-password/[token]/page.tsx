@@ -11,16 +11,9 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
-interface Props { 
-  params: { 
-    token: string 
-  } 
-}
+interface Props {   params: Promise<{     token: string   }> }
 
-export default function ResetPasswordPage({ params }: Props) {
-  // Use React.use() to unwrap the params object as required by Next.js
-  const unwrappedParams = use(params);
-  const { token } = unwrappedParams;
+export default function ResetPasswordPage({ params }: Props) {  // Use React.use() to unwrap the params Promise as required by Next.js 15  const unwrappedParams = use(params);  const { token } = unwrappedParams;
   const [state, formAction, pending] = useActionState(resetPassword, { error: '' });
   const [passwordVisible, setPasswordVisible] = useState<boolean>(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState<boolean>(false);

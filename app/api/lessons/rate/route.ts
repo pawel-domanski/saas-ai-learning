@@ -34,11 +34,7 @@ export async function POST(request: NextRequest) {
     // Use name if available, otherwise fallback to email
     const userName = dbUser.name || dbUser.email;
     // Extract client IP address
-    const ip =
-      request.headers.get('x-forwarded-for') ||
-      request.ip ||
-      request.headers.get('host') ||
-      '';
+        const ip =      request.headers.get('x-forwarded-for') ||      request.headers.get('x-real-ip') ||      request.headers.get('host') ||      '';
 
     const data = await request.json();
     const lessonId = data.lessonId;

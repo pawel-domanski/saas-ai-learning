@@ -188,7 +188,7 @@ export default async function AppPage() {
   let nextAvailableLessonId = null;
   for (let i = lessonStart; i < lessons.length; i++) {
     const lessonUuid = lessons[i].id || lessons[i]["id:"] || ensureUuid((i+1).toString());
-    if (!completedLessonIds.includes(ensureUuid(lessonUuid))) {
+    const ensuredUuid = ensureUuid(lessonUuid);    if (ensuredUuid && !completedLessonIds.includes(ensuredUuid)) {
       nextAvailableLessonId = lessonUuid;
       if (!availableLessons.includes(lessonUuid)) {
         availableLessons.push(lessonUuid);
@@ -223,9 +223,7 @@ export default async function AppPage() {
   let lastViewedLessonPart = null;
   if (lastViewedLessonId !== null) {
     // Find the lesson by UUID
-    const lastViewedLesson = lessons.find(l => 
-      (l.id || l["id:"]) === lastViewedLessonId
-    );
+        const lastViewedLesson = lessons.find((l: any) =>       (l.id || l["id:"]) === lastViewedLessonId    );
     if (lastViewedLesson) {
       lastViewedLessonPart = lastViewedLesson.part || 1;
     }
@@ -235,9 +233,7 @@ export default async function AppPage() {
   let nextLessonPart = null;
   if (nextAvailableLessonId) {
     // Find the lesson by UUID
-    const nextAvailableLesson = lessons.find(l => 
-      (l.id || l["id:"]) === nextAvailableLessonId
-    );
+        const nextAvailableLesson = lessons.find((l: any) =>       (l.id || l["id:"]) === nextAvailableLessonId    );
     if (nextAvailableLesson) {
       nextLessonPart = nextAvailableLesson.part || 1;
     }

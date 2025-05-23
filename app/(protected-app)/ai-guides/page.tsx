@@ -8,5 +8,5 @@ export const metadata = {
 
 export default function AiGuidePage() {
   const items = aiguideData.aiop;
-  return <AiGuidePageClient items={items} />;
+  return <AiGuidePageClient items={items as any} />;
 } 

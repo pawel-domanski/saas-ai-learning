@@ -17,9 +17,9 @@ interface ChallengeDayContent {
 }
 
 interface ChallengeParams {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 // Function to calculate the number of days available based on start date
@@ -73,9 +73,8 @@ const formatDate = (dateString: string): string => {
 };
 
 export default async function ChallengePage({ params }: ChallengeParams) {
-  // Make sure to await params first per Next.js recommendation
-  const resolvedParams = await Promise.resolve(params);
-  const { id } = resolvedParams;
+  // Await params as they are now a Promise in Next.js 15
+  const { id } = await params;
 
   // Verify user is logged in
   const user = await getUser();

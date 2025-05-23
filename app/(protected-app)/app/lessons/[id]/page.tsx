@@ -52,16 +52,18 @@ export default async function LessonPage({
   params,
   searchParams 
 }: { 
-  params: { id: string };
-  searchParams: { [key: string]: string | string[] | undefined };
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  // Fix for searchParams - await before accessing properties
-  const searchParamsResolved = await Promise.resolve(searchParams);
-  const limitReached = searchParamsResolved?.limitReached === 'true';
-  const successMessage = searchParamsResolved?.success === 'true';
+  // Await both params and searchParams
+  const resolvedParams = await params;
+  const resolvedSearchParams = await searchParams;
+  
+  const limitReached = resolvedSearchParams?.limitReached === 'true';
+  const successMessage = resolvedSearchParams?.success === 'true';
 
   // Get the requested lesson ID from params
-  const { id } = await Promise.resolve(params);
+  const { id } = resolvedParams;
   
   // Get the lesson plan data
   const plan = await getLessonPlan();
@@ -75,7 +77,7 @@ export default async function LessonPage({
   const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   if (uuidPattern.test(id)) {
     // Find lesson by UUID
-    lessonIndex = lessons.findIndex(l => l.id === id || l["id:"] === id);
+    lessonIndex = lessons.findIndex((l: any) => l.id === id || l["id:"] === id);
     lesson = lessons[lessonIndex];
   } else {
     // Try to use id as a numeric index (for backward compatibility)

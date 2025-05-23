@@ -7,9 +7,9 @@ export const metadata = {
   title: 'AI Guides Detail',
 };
 
-export default async function AiGuideDetail({ params }: { params: { id: string } }) {
+export default async function AiGuideDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const lessons = aiguideData.data?.[id];
+  const lessons = aiguideData.data?.[id as keyof typeof aiguideData.data];
   const course = aiguideData.aiop.find((entry: any) => String(entry.id) === id);
   if (!lessons || !course) notFound();
 
@@ -21,5 +21,5 @@ export default async function AiGuideDetail({ params }: { params: { id: string }
     groups[key].push(entry);
   });
 
-  return <AiOpDetailClient item={course} groups={groups} />;
+  return <AiOpDetailClient item={course as any} groups={groups} />;
 } 

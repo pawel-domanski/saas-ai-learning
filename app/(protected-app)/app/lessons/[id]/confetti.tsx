@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import styles from './confetti.module.css';
 import { Book } from 'lucide-react';
@@ -16,7 +16,7 @@ const CONFETTI_COLORS = [
 const SHAPES = ['square', 'circle', 'triangle', 'star', 'heart', 'diamond'];
 
 export default function Confetti() {
-  const [confetti, setConfetti] = useState<JSX.Element[]>([]);
+  const [confetti, setConfetti] = useState<React.ReactElement[]>([]);
   const [showMessage, setShowMessage] = useState(false);
   const searchParams = useSearchParams();
   const success = searchParams.get('success');
@@ -25,7 +25,7 @@ export default function Confetti() {
     // Only trigger confetti if success parameter is 'true'
     if (success !== 'true') return;
 
-    const pieces: JSX.Element[] = [];
+    const pieces: React.ReactElement[] = [];
     // Increase number of pieces for more impact
     const TOTAL_PIECES = 300;
     const centerX = window.innerWidth / 2;

@@ -10,11 +10,12 @@ export const revalidate = 3600;
 export default async function PricingPage({
   searchParams,
 }: {
-  searchParams: { [key: string]: string | string[] | undefined };
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  const [prices, products] = await Promise.all([
+  const [prices, products, resolvedSearchParams] = await Promise.all([
     getStripePrices(),
     getStripeProducts(),
+    searchParams,
   ]);
 
   const basePlan = products.find((product) => product.name === 'Base');
@@ -27,8 +28,8 @@ export default async function PricingPage({
     .map((name) => products.find((p) => p.name === name))
     .filter((p): p is typeof products[number] => !!p);
 
-  // Await searchParams promise to access its properties safely
-  const { access } = await searchParams;
+  // Access resolved searchParams properties safely
+  const { access } = resolvedSearchParams;
   const needsSubscription = access === 'premium';
 
   return (
@@ -82,7 +83,7 @@ export default async function PricingPage({
               }
               priceId={planPrice?.id}
               highlighted={product.name === 'Plus'}
-              currencySymbol={planPrice?.currencySymbol}
+              currencySymbol={planPrice?.currencySymbol || '€'}
             />
           );
         })}
@@ -137,7 +138,7 @@ function PricingCard({
   features: string[];
   priceId?: string;
   highlighted?: boolean;
-  currencySymbol: string;
+  currencySymbol?: string;
 }) {
   return (
     <div className={`pt-6 rounded-xl ${highlighted ? 'ring-2 ring-teal-500 p-4 bg-white shadow-lg' : ''}`}>
@@ -153,7 +154,7 @@ function PricingCard({
         </p>
       )}
       <p className="text-4xl font-medium text-gray-900 mb-6">
-        {currencySymbol}{price / 100}{' '}
+        {currencySymbol || '€'}{price / 100}{' '}
         <span className="text-xl font-normal text-gray-600">
           per user / {intervalCount > 1 ? `${intervalCount} ${interval}s` : interval}
         </span>

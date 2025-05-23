@@ -8,5 +8,5 @@ export const metadata = {
 
 export default function AiOpPage() {
   const items = aiopData.aiop;
-  return <AiOpPageClient items={items} />;
+  return <AiOpPageClient items={items as any} />;
 } 

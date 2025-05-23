@@ -6,12 +6,11 @@ import Link from 'next/link';
 import DocumentCompleteButton from '../../DocumentCompleteButton';
 import { getUser, getUserGuideProgress } from '@/lib/db/queries';
 
-export default async function AiOpDocumentDetail({ params }: { params: { id: string; documentid: string } }) {
-  const { id, documentid } = await params;
+export default async function AiOpDocumentDetail({ params }: { params: Promise<{ id: string; documentid: string }> }) {  const { id, documentid } = await params;
   const filePath = path.join(process.cwd(), 'aiguide.json');
   if (!fs.existsSync(filePath)) notFound();
   const jsonData = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
-  const lessons = jsonData.data?.[id];
+  const lessons = jsonData.data?.[id as keyof typeof jsonData.data];
   const lesson = lessons?.find((entry: any) => String(entry.id) === documentid);
   if (!lesson) notFound();
   const course = jsonData.aiop?.find((c: any) => c.id === id);

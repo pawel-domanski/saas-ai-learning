@@ -88,7 +88,7 @@ export async function POST(req: NextRequest) {
               const planJson = fs.readFileSync(planFilePath, 'utf-8');
               const plan = JSON.parse(planJson);
               const lessons = plan.data || [];
-              const lessonIndex = lessons.findIndex(l => l.id === lessonIdStr || l["id:"] === lessonIdStr);
+              const lessonIndex = lessons.findIndex((l: any) => l.id === lessonIdStr || l["id:"] === lessonIdStr);
               if (lessonIndex >= 0) {
                 lessonNumericIndex = lessonIndex + 1; // Indeksowanie od 1
                 console.log(`Znaleziono lekcję na pozycji ${lessonNumericIndex} w planie na podstawie UUID: ${lessonIdStr}`);
@@ -197,7 +197,7 @@ export async function POST(req: NextRequest) {
                 const planJson = fs.readFileSync(planFilePath, 'utf-8');
                 const plan = JSON.parse(planJson);
                 const lessons = plan.data || [];
-                const lessonIndex = lessons.findIndex(l => l.id === progress.lessonId || l["id:"] === progress.lessonId);
+                const lessonIndex = lessons.findIndex((l: any) => l.id === progress.lessonId || l["id:"] === progress.lessonId);
                 if (lessonIndex >= 0) {
                   progressNumId = lessonIndex + 1; // Indeksowanie od 1
                   console.log(`Metoda 3: Znaleziono lekcję na pozycji ${progressNumId} w planie na podstawie UUID: ${progress.lessonId}`);

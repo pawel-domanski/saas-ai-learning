@@ -9,13 +9,7 @@ import {
   LockIcon as LockIconSvg
 } from 'lucide-react';
 
-interface Lesson {
-  lessonId: number;
-  subject: string;
-  lesson: any[];
-  part: number;
-  desc?: string;
-}
+interface Lesson {  lessonId: number;  subject: string;  lesson: any[];  part: number;  desc?: string;  id?: string;  "id:"?: string;}
 
 interface PartInfo {
   id: number;

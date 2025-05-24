@@ -254,9 +254,8 @@ export default async function ChallengePage({ params }: ChallengeParams) {
                 </CardContent>
                 {!isCompleted && (
                   <CardFooter className="px-4 pb-4 pt-0 flex justify-end">
-                    <form action={`/api/challenges/progress`} method="POST">
+                    <form action="/api/challenges/complete" method="POST">
                       <input type="hidden" name="challengeId" value={id} />
-                      <input type="hidden" name="action" value="complete" />
                       <input type="hidden" name="day" value={dayNumber} />
                       <Button 
                         type="submit"

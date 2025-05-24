@@ -11,9 +11,20 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
-interface Props {   params: Promise<{     token: string   }> }
+interface Props {
+  params: Promise<{
+    token: string
+  }>
+}
 
-export default function ResetPasswordPage({ params }: Props) {  // Use React.use() to unwrap the params Promise as required by Next.js 15  const unwrappedParams = use(params);  const { token } = unwrappedParams;
+export default function ResetPasswordPage({ params }: Props) {
+  // Use React.use() to unwrap the params Promise as required by Next.js 15
+  const unwrappedParams = use(params);
+  const { token } = unwrappedParams;
+  
+  // Ensure token is a string (handle potential array case)
+  const tokenString = Array.isArray(token) ? token[0] : token;
+  
   const [state, formAction, pending] = useActionState(resetPassword, { error: '' });
   const [passwordVisible, setPasswordVisible] = useState<boolean>(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState<boolean>(false);
@@ -26,10 +37,10 @@ export default function ResetPasswordPage({ params }: Props) {  // Use React.use
   
   // Validate token format
   useEffect(() => {
-    if (!token || typeof token !== 'string' || token.length < 10) {
+    if (!tokenString || typeof tokenString !== 'string' || tokenString.length < 10) {
       setTokenExpired(true);
     }
-  }, [token]);
+  }, [tokenString]);
 
   useEffect(() => {
     if (state.error && (
@@ -132,7 +143,7 @@ export default function ResetPasswordPage({ params }: Props) {  // Use React.use
           </div>
         ) : (
         <form className="space-y-4" action={formAction}>
-          <input type="hidden" name="token" value={token} />
+          <input type="hidden" name="token" value={tokenString} />
           <div>
             <Label htmlFor="password" className="block text-sm font-medium text-gray-700">New Password</Label>
             <div className="relative">

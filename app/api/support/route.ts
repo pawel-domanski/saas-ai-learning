@@ -3,6 +3,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
 import { getUser } from '@/lib/db/queries';
 
+interface EmailAttachment {
+  filename: string;
+  content: Buffer;
+  contentType: string;
+}
+
 export async function POST(request: NextRequest) {
   try {
     // Verify that the user is authenticated
@@ -22,7 +28,7 @@ export async function POST(request: NextRequest) {
     const userEmail = formData.get('userEmail') as string || user.email;
 
     // Get attachments
-    const attachments: nodemailer.Attachment[] = [];
+    const attachments: EmailAttachment[] = [];
     for (const [key, value] of formData.entries()) {
       if (key.startsWith('attachment_') && value instanceof Blob) {
         const filename = (value as File).name;
@@ -40,7 +46,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create email transporter using the same configuration as password reset
-    const transporter = nodemailer.createTransport({
+    const transporter = nodemailer.createTransporter({
       host: process.env.SMTP_HOST,
       port: Number(process.env.SMTP_PORT),
       auth: {

@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button';
 import confetti from 'canvas-confetti';
 import { ProgressBarsStep } from '@/components/ProgressBars';
 import { cn } from '@/lib/utils';
-import { motion } from 'framer-text';
 
 interface Option {
   label: string;
@@ -25,6 +24,8 @@ interface Question {
   type: 'single_choice' | 'multi_choice' | 'info' | 'summary' | 'form_input' | string;
   question?: string;
   options?: Option[];
+  // correct answer for single-choice questions
+  correctIndex?: string;
   // index strings for multi-choice correct answers
   correctIndexes?: string[];
   title?: string;

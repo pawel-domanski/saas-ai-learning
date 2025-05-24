@@ -15,7 +15,7 @@ export async function addDayCompletionDatesColumn() {
       console.log('Successfully added day_completion_dates column');
     } catch (err) {
       // Check if this is a "column already exists" error (PostgreSQL error code 42701)
-      if (err.message && err.message.includes('already exists')) {
+      if (err instanceof Error && err.message.includes('already exists')) {
         console.log('day_completion_dates column already exists');
       } else {
         // If it's another error, rethrow it

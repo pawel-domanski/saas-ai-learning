@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth/session-server';
-import { getUser } from '@/lib/db/queries';
+import { getUser, getTeamForUser } from '@/lib/db/queries';
 import { db } from '@/lib/db/drizzle';
 import { sql } from 'drizzle-orm';
 import { lessonRatings, activityLogs, ActivityType } from '@/lib/db/schema';
@@ -26,15 +26,21 @@ export async function POST(request: NextRequest) {
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+    
     // Fetch full user record to get username
     const dbUser = await getUser();
     if (!dbUser) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+    
     // Use name if available, otherwise fallback to email
     const userName = dbUser.name || dbUser.email;
+    
     // Extract client IP address
-        const ip =      request.headers.get('x-forwarded-for') ||      request.headers.get('x-real-ip') ||      request.headers.get('host') ||      '';
+    const ip = request.headers.get('x-forwarded-for') || 
+               request.headers.get('x-real-ip') || 
+               request.headers.get('host') || 
+               '';
 
     const data = await request.json();
     const lessonId = data.lessonId;
@@ -67,10 +73,10 @@ export async function POST(request: NextRequest) {
         WHERE user_id = ${session.user.id} AND lesson_id = ${validLessonId}
       `);
       
-      // Bezpieczne sprawdzenie wyników
+      // Check if records exist
       const hasExistingRecord = existingRecords && 
-                               existingRecords.rows && 
-                               existingRecords.rows.length > 0;
+                               Array.isArray(existingRecords) && 
+                               existingRecords.length > 0;
       
       if (hasExistingRecord) {
         // Update existing
@@ -97,20 +103,21 @@ export async function POST(request: NextRequest) {
 
     // Log to activity_logs table using raw SQL to avoid schema issues
     try {
-      // Sprawdź, czy teamId istnieje
-      if (dbUser.teamId) {
+      // Get user's team
+      const userTeam = await getTeamForUser(session.user.id);
+      if (userTeam) {
         await db.execute(sql`
           INSERT INTO public.activity_logs 
           (id, team_id, user_id, action, timestamp, ip_address)
           VALUES 
-          (gen_random_uuid(), ${dbUser.teamId}, ${session.user.id}, ${ActivityType.LESSON_RATED}, NOW(), ${ip})
+          (gen_random_uuid(), ${userTeam.id}, ${session.user.id}, ${ActivityType.LESSON_RATED}, NOW(), ${ip})
         `);
       } else {
         console.log("Skipping activity log - user has no team");
-        // Możemy też spróbować znaleźć domyślny zespół
+        // Try to find default team
         const defaultTeam = await db.execute(sql`SELECT id FROM public.teams LIMIT 1`);
-        if (defaultTeam && defaultTeam.rows && defaultTeam.rows.length > 0) {
-          const teamId = defaultTeam.rows[0].id;
+        if (defaultTeam && Array.isArray(defaultTeam) && defaultTeam.length > 0) {
+          const teamId = defaultTeam[0].id;
           await db.execute(sql`
             INSERT INTO public.activity_logs 
             (id, team_id, user_id, action, timestamp, ip_address)
@@ -143,9 +150,9 @@ export async function POST(request: NextRequest) {
       console.error('Error sending PostHog event for lesson rating:', err);
     }
 
-    // Bezpieczne wydobycie danych z wyniku
-    const resultData = result && result.rows && result.rows.length > 0 
-      ? result.rows[0] 
+    // Extract data from result safely
+    const resultData = result && Array.isArray(result) && result.length > 0 
+      ? result[0] 
       : { id: 'unknown', rating };
 
     return NextResponse.json({ success: true, data: resultData });

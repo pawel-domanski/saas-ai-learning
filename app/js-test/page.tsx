@@ -23,7 +23,7 @@ export default function JsTest() {
         window.posthog.init('phc_hX3OAIHMbd2tF40deCXLFyQWwHWnP3mExxsOSa4dNtJ', {
           api_host: 'https://eu.i.posthog.com',
           capture_pageview: true,
-          loaded: function(posthog) {
+          loaded: function(posthog: any) {
             setStatus('PostHog initialized: ' + posthog.__loaded);
             console.log('PostHog loaded via script:', posthog.__loaded);
           }

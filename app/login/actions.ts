@@ -33,12 +33,9 @@ import { cookies } from 'next/headers';
 
 // Helper function to convert numeric or string IDs to a valid UUID format
 function ensureUuid(id: string | number | null | undefined): string | null {
-  if (id === null || id === undefined) {
-    return null;
-  }
+  if (!id) return null;
   
-  // Convert to string if it's a number
-  const idStr = typeof id === 'number' ? id.toString() : id;
+  const idStr = id.toString();
   
   // Check if the ID is already a valid UUID
   const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -75,7 +72,7 @@ async function logActivity(
 
   // Add metadata if provided
   if (metadata) {
-    newActivity.metadata = JSON.stringify(metadata);
+    newActivity.metadata = metadata;
   }
   
   // Log to database
@@ -218,7 +215,7 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
     };
   }
 
-  let teamId: number;
+  let teamId: string;
   let userRole: string;
   let createdTeam: typeof teams.$inferSelect | null = null;
 
@@ -229,7 +226,7 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
       .from(invitations)
       .where(
         and(
-          eq(invitations.id, parseInt(inviteId)),
+          eq(invitations.id, inviteId),
           eq(invitations.email, email),
           eq(invitations.status, 'pending'),
         ),
@@ -419,9 +416,7 @@ export const updateAccount = validatedActionWithUser(
   },
 );
 
-const removeTeamMemberSchema = z.object({
-  memberId: z.number(),
-});
+const removeTeamMemberSchema = z.object({  memberId: z.string(),});
 
 export const removeTeamMember = validatedActionWithUser(
   removeTeamMemberSchema,
@@ -530,10 +525,7 @@ export const requestPasswordReset = validatedAction(requestPasswordResetSchema, 
   const { email } = data;
   // Find user by email
   const [user] = await db.select().from(users).where(eq(users.email, email)).limit(1);
-  // Always respond success to avoid email enumeration
-  if (!user) {
-    return { success: true };
-  }
+  // Always respond success to avoid email enumeration  if (!user) {    return { success: 'If an account with that email exists, a reset link has been sent.' };  }
   // Generate token
   const token = crypto.randomUUID();
   const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
@@ -554,9 +546,7 @@ export const requestPasswordReset = validatedAction(requestPasswordResetSchema, 
     to: email,
     subject: 'Reset your password',
     html: `<p>Click <a href="${resetUrl}">here</a> to reset your password. This link expires in one hour.</p>`,
-  });
-  return { success: true };
-});
+  });  return { success: 'If an account with that email exists, a reset link has been sent.' };});
 
 // Schema and action for resetting password
 const resetPasswordSchema = z

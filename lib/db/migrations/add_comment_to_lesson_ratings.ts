@@ -14,7 +14,7 @@ export async function addCommentToLessonRatings() {
       console.log('Successfully added comment column to lesson_ratings');
     } catch (err) {
       // Check if this is a "column already exists" error
-      if (err.message && err.message.includes('already exists')) {
+      if (err instanceof Error && err.message.includes('already exists')) {
         console.log('comment column already exists in lesson_ratings');
       } else {
         // If it's another error, rethrow it

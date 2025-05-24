@@ -8,15 +8,20 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 
+type ActionState = {
+  error?: string;
+  success?: string;
+};
+
 export default function ForgotPasswordPage() {
-  const [state, formAction, pending] = useActionState(requestPasswordReset, { success: false, error: '' });
+  const [state, formAction, pending] = useActionState<ActionState, FormData>(requestPasswordReset, { error: '' });
 
   return (
     <div className="min-h-screen flex flex-col justify-center items-center bg-gradient-to-br from-blue-50 to-green-50 p-4">
       <div className="w-full max-w-md bg-white p-8 rounded-xl shadow-lg">
         <h2 className="text-2xl font-bold mb-4 text-gray-900">Forgot your password?</h2>
         {state.success ? (
-          <p className="text-green-600">If an account with that email exists, a reset link has been sent.</p>
+          <p className="text-green-600">{state.success}</p>
         ) : (
           <form className="space-y-4" action={formAction}>
             <div>

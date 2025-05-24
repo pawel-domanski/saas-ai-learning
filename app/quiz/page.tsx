@@ -1,4 +1,4 @@
-import { getUser } from '@/lib/db/queries';
+import { getUser, getTeamForUser } from '@/lib/db/queries';
 import { Header } from '@/app/(protected-app)/components';
 // Import the client-side Quiz component directly
 import Quiz from '../../components/Quiz';
@@ -6,7 +6,8 @@ import Quiz from '../../components/Quiz';
 export default async function QuizPage() {
   // Próba pobrania informacji o użytkowniku - może być null dla niezalogowanych użytkowników
   const user = await getUser();
-  
+  const team = user ? await getTeamForUser(user.id) : null;
+
   // Define quiz questions (could be loaded from props or API)
   const questions = [
     {
@@ -319,7 +320,7 @@ export default async function QuizPage() {
   ];
   return (
     <>
-      <Header user={user} />
+      <Header user={user} team={team} />
       <div className="flex-1 p-8 max-w-4xl mx-auto">
         {/* Render the Quiz component with defined questions */}
         <Quiz questions={questions} />

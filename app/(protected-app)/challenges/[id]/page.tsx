@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import { getUser, getTeamForUser, getUserChallengeProgress, startChallenge } from '@/lib/db/queries';
+import { getUser, getTeamForUser, getUserChallengeProgress, startChallenge, completeDay } from '@/lib/db/queries';
 import fs from 'fs';
 import path from 'path';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
@@ -20,6 +20,71 @@ interface ChallengeParams {
   params: Promise<{
     id: string;
   }>;
+}
+
+// Server Action for completing a day
+async function completeDayAction(challengeId: string, day: number) {
+  'use server';
+  
+  try {
+    // Check if user is authenticated
+    const user = await getUser();
+    if (!user) {
+      throw new Error('Unauthorized');
+    }
+    
+    // Get current progress to check day constraints
+    const currentProgress = await getUserChallengeProgress(user.id, challengeId);
+    
+    // Calculate how many days should be available based on start date (using calendar days)
+    if (currentProgress && currentProgress.startDate) {
+      const startDate = new Date(currentProgress.startDate);
+      const now = new Date();
+      
+      // Reset hours to compare just calendar days
+      const startDay = new Date(startDate);
+      startDay.setHours(0, 0, 0, 0);
+      
+      const today = new Date(now);
+      today.setHours(0, 0, 0, 0);
+      
+      // Calculate days between dates
+      const diffTime = today.getTime() - startDay.getTime();
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+      
+      // If challenge started today, diffDays will be 0
+      // If challenge started yesterday, diffDays will be 1, etc.
+      const calendarDaysElapsed = diffDays;
+      
+      // Available days is startDay (1) + calendar days elapsed
+      const maxAvailableDays = calendarDaysElapsed + 1;
+      
+      console.log('Server Action - Start day (midnight):', startDay);
+      console.log('Server Action - Today (midnight):', today);
+      console.log('Server Action - Calendar days elapsed:', calendarDaysElapsed);
+      console.log('Server Action - Max available days:', maxAvailableDays);
+      
+      // Check if trying to complete a future day that's not yet available
+      if (day > maxAvailableDays) {
+        throw new Error('This day is not yet available. New challenges are unlocked daily.');
+      }
+      
+      // Check if trying to complete multiple days on same calendar day
+      if (day > currentProgress.lastCompletedDay + 1) {
+        throw new Error('Please complete challenges in order, one per day.');
+      }
+    }
+    
+    // Complete the day
+    await completeDay(user.id, challengeId, day);
+    
+  } catch (error) {
+    console.error('Error completing challenge day:', error);
+    throw error;
+  }
+  
+  // Redirect back to the challenge page
+  redirect(`/challenges/${challengeId}`);
 }
 
 // Function to calculate the number of days available based on start date
@@ -254,9 +319,7 @@ export default async function ChallengePage({ params }: ChallengeParams) {
                 </CardContent>
                 {!isCompleted && (
                   <CardFooter className="px-4 pb-4 pt-0 flex justify-end">
-                    <form action="/api/challenges/complete" method="POST">
-                      <input type="hidden" name="challengeId" value={id} />
-                      <input type="hidden" name="day" value={dayNumber} />
+                    <form action={completeDayAction.bind(null, id, dayNumber)}>
                       <Button 
                         type="submit"
                         className="bg-green-600 hover:bg-green-700 text-white"

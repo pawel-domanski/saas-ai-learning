@@ -92,9 +92,11 @@ export function withSubscription<T>(action: SubscribedActionFunction<T>) {
     }
 
     // Check if subscription is active or in trial
+    // If canceled but not expired yet, still allow access
+    const now = new Date();
     const hasActiveSubscription = 
-      team.subscriptionStatus === 'active' || 
-      team.subscriptionStatus === 'trialing';
+      (team.subscriptionStatus === 'active' || team.subscriptionStatus === 'trialing') &&
+      (!team.cancelAtPeriodEnd || (team.currentPeriodEnd && team.currentPeriodEnd > now));
     
     if (!hasActiveSubscription) {
       redirect('/dashboard/settings?subscription=required');

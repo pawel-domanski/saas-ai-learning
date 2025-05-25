@@ -45,18 +45,21 @@ export default function AiOpDetailClient({ item, groups }: AiOpDetailClientProps
     loadProgress();
   }, [item.id]);
 
-  const trackSectionToggle = (part: string, isOpen: boolean) => {
-    captureEvent('aiop_section_toggled', { 
-      aiopId: item.id, 
-      part, 
-      isOpen
+  const handleSectionToggle = (sectionId: string, isOpen: boolean) => {
+    captureEvent('AI-Op Section Toggled', {
+      aiopId: item.id,
+      sectionId,
+      isOpen,
+      source: 'aiop_detail_page'
     });
   };
 
-  const trackDocumentOpen = (documentId: number) => {
-    captureEvent('aiop_document_opened', { 
-      aiopId: item.id, 
-      documentId
+  const handleDocumentOpen = (documentId: string, documentTitle: string) => {
+    captureEvent('AI-Op Document Opened', {
+      aiopId: item.id,
+      documentId,
+      documentTitle,
+      source: 'aiop_detail_page'
     });
   };
 
@@ -76,7 +79,7 @@ export default function AiOpDetailClient({ item, groups }: AiOpDetailClientProps
         <details 
           key={part} 
           className="group mb-6" 
-          onToggle={(e) => trackSectionToggle(part, (e.currentTarget as HTMLDetailsElement).open)}
+          onToggle={(e) => handleSectionToggle(part, (e.currentTarget as HTMLDetailsElement).open)}
         >
           <summary className="flex items-center justify-between p-4 bg-gray-100 border border-gray-200 rounded-lg shadow-sm group-open:bg-white group-open:shadow-md group-open:border-blue-300 cursor-pointer">
             <span className="text-lg font-semibold text-gray-800">{part}</span>
@@ -115,7 +118,7 @@ export default function AiOpDetailClient({ item, groups }: AiOpDetailClientProps
                   key={entry.id}
                   href={`/ai-op/${item.id}/document/${entry.id}`}
                   className={cardClass}
-                  onClick={() => trackDocumentOpen(entry.id)}
+                  onClick={() => handleDocumentOpen(String(entry.id), entry.subject)}
                 >
                   {iconCircle}
                   <div className="ml-4">

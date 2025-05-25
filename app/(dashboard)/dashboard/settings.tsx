@@ -68,11 +68,13 @@ export function Settings({ teamData }: { teamData: TeamDataWithMembers }) {
                 </p>
                 <p className="text-sm text-gray-500 mt-1">
                   {teamData.subscriptionStatus === 'active'
-                    ? (teamData.planName === 'Base'
-                        ? 'Billed weekly'
-                        : teamData.planName === 'Master'
-                          ? 'Billed quarterly'
-                          : 'Billed monthly')
+                    ? teamData.cancelAtPeriodEnd
+                      ? `Canceled - Access until ${teamData.currentPeriodEnd ? new Date(teamData.currentPeriodEnd).toLocaleDateString() : 'period end'}`
+                      : (teamData.planName === 'Base'
+                          ? 'Billed weekly'
+                          : teamData.planName === 'Master'
+                            ? 'Billed quarterly'
+                            : 'Billed monthly')
                     : teamData.subscriptionStatus === 'trialing'
                       ? 'Trial period'
                       : 'No active subscription'}

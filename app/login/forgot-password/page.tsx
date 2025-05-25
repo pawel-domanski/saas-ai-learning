@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
+import { captureEvent } from '@/lib/posthog-helpers';
 
 type ActionState = {
   error?: string;
@@ -16,6 +17,17 @@ type ActionState = {
 export default function ForgotPasswordPage() {
   const [state, formAction, pending] = useActionState<ActionState, FormData>(requestPasswordReset, { error: '' });
 
+  const handleSubmit = async (formData: FormData) => {
+    // Track the event
+    captureEvent('Password Reset Requested', {
+      email: formData.get('email'),
+      source: 'forgot_password_page'
+    });
+    
+    // Call the original action
+    return formAction(formData);
+  };
+
   return (
     <div className="min-h-screen flex flex-col justify-center items-center bg-gradient-to-br from-blue-50 to-green-50 p-4">
       <div className="w-full max-w-md bg-white p-8 rounded-xl shadow-lg">
@@ -23,7 +35,7 @@ export default function ForgotPasswordPage() {
         {state.success ? (
           <p className="text-green-600">{state.success}</p>
         ) : (
-          <form className="space-y-4" action={formAction}>
+          <form className="space-y-4" action={handleSubmit}>
             <div>
               <Label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</Label>
               <Input

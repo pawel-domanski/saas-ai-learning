@@ -50,13 +50,10 @@ export function LessonRating({ lessonId, isOpen, onClose }: LessonRatingProps) {
 
               if (response.ok) {
           // Track lesson rating event with PostHog
-          captureEvent('lesson_rating_submitted', {
+          captureEvent('Lesson Rating Submitted', {
             lessonId,
-            rating,
-            ratingEmoji: selectedRating,
-            ratingLabel: ratingLabels[selectedRating],
-            hasComment: !!comment.trim(),
-            commentLength: comment.trim().length
+            rating: rating,
+            source: 'lesson_rating_component'
           });
       }
       

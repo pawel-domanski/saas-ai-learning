@@ -75,16 +75,14 @@ export async function POST(request: NextRequest) {
 
     // Track support request with PostHog
     try {
-      const PostHog = require('posthog-node').default;
+      const { PostHog } = require('posthog-node');
       const posthogClient = new PostHog(process.env.NEXT_PUBLIC_POSTHOG_API_KEY, {
         host: process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://eu.i.posthog.com'
       });
       
-      console.log('🎯 Tracking support request submission (server-side)');
-      
       posthogClient.capture({
         distinctId: user.id,
-        event: 'support_request_sent',
+        event: 'Support Request Submitted',
         properties: {
           userId: user.id,
           subject: subject,
@@ -92,12 +90,12 @@ export async function POST(request: NextRequest) {
           attachmentCount: attachments.length,
           userName: userName,
           userEmail: userEmail,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
+          source: 'server_side_support'
         }
       });
       
       await posthogClient.shutdown();
-      console.log('✅ Support request event sent to PostHog (server-side)');
     } catch (error) {
       console.error('❌ Error tracking support request (server-side):', error);
     }

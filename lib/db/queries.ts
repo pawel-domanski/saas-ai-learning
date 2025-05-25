@@ -43,6 +43,8 @@ export async function updateTeamSubscription(
     stripeProductId: string | null;
     planName: string | null;
     subscriptionStatus: string;
+    cancelAtPeriodEnd?: boolean;
+    currentPeriodEnd?: Date;
   }
 ) {
   await db
@@ -90,32 +92,44 @@ export async function getActivityLogs() {
 }
 
 export async function getTeamForUser(userId: string) {
-  const result = await db.query.users.findFirst({
-    where: eq(users.id, userId),
-    with: {
-      teamMembers: {
-        with: {
-          team: {
-            with: {
-              teamMembers: {
-                with: {
-                  user: {
-                    columns: {
-                      id: true,
-                      name: true,
-                      email: true,
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-  });
+  // First get the team for this user
+  const userTeamResult = await db
+    .select()
+    .from(teamMembers)
+    .innerJoin(teams, eq(teamMembers.teamId, teams.id))
+    .where(eq(teamMembers.userId, userId))
+    .limit(1);
 
-  return result?.teamMembers[0]?.team || null;
+  if (userTeamResult.length === 0) {
+    return null;
+  }
+
+  const team = userTeamResult[0].teams;
+  const teamId = team.id;
+
+  // Then get all team members for this team
+  const allTeamMembers = await db
+    .select({
+      id: teamMembers.id,
+      userId: teamMembers.userId,
+      teamId: teamMembers.teamId,
+      role: teamMembers.role,
+      joinedAt: teamMembers.joinedAt,
+      user: {
+        id: users.id,
+        name: users.name,
+        email: users.email,
+      },
+    })
+    .from(teamMembers)
+    .innerJoin(users, eq(teamMembers.userId, users.id))
+    .where(eq(teamMembers.teamId, teamId));
+
+  // Return team with all members
+  return {
+    ...team,
+    teamMembers: allTeamMembers,
+  };
 }
 
 export async function getUserLessonProgress(userId: string, lessonId: string) {

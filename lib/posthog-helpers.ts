@@ -1,4 +1,30 @@
 import posthog from 'posthog-js';
+import { cookieConsent } from './cookie-consent';
+
+/**
+ * Wait for PostHog to be fully loaded
+ */
+const waitForPostHog = (maxWaitTime = 5000): Promise<boolean> => {
+  return new Promise((resolve) => {
+    const startTime = Date.now();
+    
+    const checkPostHog = () => {
+      if (posthog.__loaded) {
+        resolve(true);
+        return;
+      }
+      
+      if (Date.now() - startTime >= maxWaitTime) {
+        resolve(false);
+        return;
+      }
+      
+      setTimeout(checkPostHog, 100);
+    };
+    
+    checkPostHog();
+  });
+};
 
 /**
  * Helper function to capture events with automatic user identification
@@ -6,8 +32,12 @@ import posthog from 'posthog-js';
  * @param properties - Event properties
  */
 export const captureEvent = (eventName: string, properties: Record<string, any> = {}) => {
+  // Check if tracking is allowed by cookie consent
+  if (!cookieConsent.canTrack()) {
+    return;
+  }
+
   if (!posthog.__loaded) {
-    console.warn('PostHog not loaded - skipping event:', eventName);
     return;
   }
 
@@ -15,15 +45,11 @@ export const captureEvent = (eventName: string, properties: Record<string, any> 
     // Get current user ID from PostHog
     const distinctId = posthog.get_distinct_id();
     
-    console.log(`🎯 Tracking event: ${eventName}`, properties);
-    
     posthog.capture(eventName, {
       ...properties,
       timestamp: new Date().toISOString(),
       distinctId: distinctId
     });
-    
-    console.log(`✅ Event sent to PostHog: ${eventName}`);
   } catch (error) {
     console.error(`❌ Error sending event ${eventName}:`, error);
   }
@@ -35,20 +61,20 @@ export const captureEvent = (eventName: string, properties: Record<string, any> 
  * @param userProperties - User properties
  */
 export const identifyUser = (userId: string, userProperties: Record<string, any> = {}) => {
+  // Check if tracking is allowed by cookie consent
+  if (!cookieConsent.canTrack()) {
+    return;
+  }
+
   if (!posthog.__loaded) {
-    console.warn('PostHog not loaded - skipping user identification');
     return;
   }
 
   try {
-    console.log('👤 Identifying user in PostHog:', userId);
-    
     posthog.identify(userId, {
       ...userProperties,
       $set: userProperties
     });
-    
-    console.log('✅ User identified in PostHog:', userId);
   } catch (error) {
     console.error('❌ Error identifying user:', error);
   }
@@ -59,14 +85,11 @@ export const identifyUser = (userId: string, userProperties: Record<string, any>
  */
 export const resetUser = () => {
   if (!posthog.__loaded) {
-    console.warn('PostHog not loaded - skipping user reset');
     return;
   }
 
   try {
-    console.log('🔄 Resetting PostHog user identity');
     posthog.reset();
-    console.log('✅ PostHog user identity reset');
   } catch (error) {
     console.error('❌ Error resetting user identity:', error);
   }
@@ -114,4 +137,61 @@ export const trackQuizEvent = (eventName: string, quizData: {
     ...quizData,
     category: 'quiz'
   });
+};
+
+/**
+ * Helper function for tracking cookie consent events
+ */
+export const trackCookieConsent = async (action: 'accepted' | 'rejected' | 'customized', categories: Record<string, boolean>) => {
+  // Wait for PostHog to be ready
+  const isReady = await waitForPostHog();
+  
+  if (!isReady) {
+    console.warn('❌ PostHog not ready - skipping cookie consent event');
+    return;
+  }
+
+  try {
+    // Check current opt-out status
+    const wasOptedOut = posthog.has_opted_out_capturing();
+    
+    // Temporarily enable capturing for this event
+    if (wasOptedOut) {
+      posthog.opt_in_capturing();
+    }
+    
+    // Create descriptive event name
+    let eventName = '';
+    switch (action) {
+      case 'accepted':
+        eventName = 'Cookie Consent Accepted';
+        break;
+      case 'rejected':
+        eventName = 'Cookie Consent Rejected';
+        break;
+      case 'customized':
+        eventName = 'Cookie Consent Customized';
+        break;
+    }
+    
+    const eventData = {
+      action,
+      categories,
+      timestamp: new Date().toISOString(),
+      category: 'privacy',
+      source: 'cookie_banner',
+      analytics_enabled: categories.analytics || false,
+      marketing_enabled: categories.marketing || false,
+      preferences_enabled: categories.preferences || false
+    };
+    
+    posthog.capture(eventName, eventData);
+    
+    // Restore opt-out state if it was opted out
+    if (wasOptedOut) {
+      posthog.opt_out_capturing();
+    }
+  } catch (error) {
+    console.error('❌ Error sending cookie consent event:', error);
+  }
 }; 

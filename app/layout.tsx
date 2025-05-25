@@ -7,6 +7,7 @@ import { UserProvider } from '@/lib/auth';
 import { getUser } from '@/lib/db/queries';
 import SchemaOrg from './components/SchemaOrg';
 import PosthogProvider from '@/components/PosthogProvider';
+import CookieBanner from '@/components/cookie-banner/CookieBanner';
 
 export const metadata: Metadata = {
   title: 'Focus your AI',
@@ -91,6 +92,7 @@ export default async function RootLayout({
         <PosthogProvider>
           <UserProvider userPromise={userPromise}>
             {children}
+            <CookieBanner />
           </UserProvider>
         </PosthogProvider>
         <SchemaOrg />

@@ -11,6 +11,7 @@ import { signIn, signUp } from './actions';
 import { ActionState } from '@/lib/auth/middleware';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useState } from 'react';
+import { captureEvent } from '@/lib/posthog-helpers';
 
 export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
   const searchParams = useSearchParams();
@@ -22,6 +23,21 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
     mode === 'signin' ? signIn : signUp,
     { error: '' }
   );
+
+  const handleSubmit = async (formData: FormData) => {
+    // Track the event
+    const eventName = mode === 'signin' ? 'Sign In Attempted' : 'Sign Up Attempted';
+    captureEvent(eventName, {
+      email: formData.get('email'),
+      hasRedirect: !!redirect,
+      hasPriceId: !!priceId,
+      hasInviteId: !!inviteId,
+      source: mode === 'signin' ? 'signin_page' : 'signup_page'
+    });
+    
+    // Call the original action
+    return formAction(formData);
+  };
 
   return (
     <div className="min-h-[100dvh] flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-50 to-green-50">
@@ -38,7 +54,7 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-6 sm:px-8 shadow-lg rounded-xl border border-gray-100">
-          <form className="space-y-5" action={formAction}>
+          <form className="space-y-5" action={handleSubmit}>
             <input type="hidden" name="redirect" value={redirect || ''} />
             <input type="hidden" name="priceId" value={priceId || ''} />
             <input type="hidden" name="inviteId" value={inviteId || ''} />

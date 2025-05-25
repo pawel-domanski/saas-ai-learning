@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import { captureEvent } from '@/lib/posthog-helpers';
 
@@ -14,28 +14,12 @@ interface AiOpPageClientProps {
 }
 
 export default function AiOpPageClient({ items }: AiOpPageClientProps) {
-  // Ensure PostHog is initialized
-  useEffect(() => {
-    if (!posthog.__loaded) {
-      console.log('PostHog not loaded in AiOpPageClient, initializing directly');
-      const apiKey = process.env.NEXT_PUBLIC_POSTHOG_API_KEY;
-      
-      if (apiKey) {
-        posthog.init(apiKey, {
-          api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://app.posthog.com'
-        });
-      } else {
-        // Demo key for testing
-        posthog.init('phc_hX3OAIHMbd2tF40deCXLFyQWwHWnP3mExxsOSa4dNtJ', {
-          api_host: 'https://app.posthog.com'
-        });
-      }
-    }
-  }, []);
-
   const handleItemClick = (id: number, name: string) => {
-    console.log('AI-Op clicked:', id, name);
-    captureEvent('aiop_selected', { aiopId: id, name });
+    captureEvent('AI-Op Selected', { 
+      aiopId: id, 
+      name,
+      source: 'ai_op_page'
+    });
   };
 
   return (

@@ -90,30 +90,27 @@ export async function GET(request: NextRequest) {
 
     // Track successful payment with PostHog
     try {
-      const PostHog = require('posthog-node').default;
+      const { PostHog } = require('posthog-node');
       const posthogClient = new PostHog(process.env.NEXT_PUBLIC_POSTHOG_API_KEY, {
         host: process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://eu.i.posthog.com'
       });
-      
-      console.log('🎯 Tracking payment success');
-      
-      posthogClient.capture({
-        distinctId: user[0].id,
-        event: 'payment_success',
-        properties: {
-          userId: user[0].id,
-          teamId: userTeam[0].teamId,
-          subscriptionId,
-          productId,
-          planName: (plan.product as Stripe.Product).name,
-          amount: plan.unit_amount,
-          currency: plan.currency,
-          timestamp: new Date().toISOString()
-        }
-      });
-      
-      await posthogClient.shutdown();
-      console.log('✅ Payment success event sent to PostHog');
+              posthogClient.capture({
+          distinctId: user[0].id,
+          event: 'Payment Completed Successfully',
+          properties: {
+            userId: user[0].id,
+            teamId: userTeam[0].teamId,
+            subscriptionId,
+            productId,
+            planName: (plan.product as Stripe.Product).name,
+            amount: plan.unit_amount,
+            currency: plan.currency,
+            timestamp: new Date().toISOString(),
+            source: 'server_side_payment'
+          }
+        });
+        
+        await posthogClient.shutdown();
     } catch (error) {
       console.error('❌ Error tracking payment success:', error);
     }

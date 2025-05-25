@@ -56,12 +56,11 @@ export default function SupportModal({ isOpen, onOpenChange, userName = '', user
       }
 
       // Track support request submission
-      captureEvent('support_request_submitted', {
-        subject: subject,
+      captureEvent('Support Request Submitted', {
+        subject: formData.get('subject'),
         hasAttachments: attachments.length > 0,
         attachmentCount: attachments.length,
-        userName: userName,
-        userEmail: userEmail
+        source: 'dashboard_support_modal'
       });
 
       // Reset form

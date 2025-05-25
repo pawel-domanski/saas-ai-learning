@@ -45,8 +45,8 @@ export default async function AiOpDocumentDetail({ params }: { params: Promise<{
 
       <div className="grid gap-8">
         {body && Array.isArray(body) ? (
-          body.map((section: any) => (
-            <div key={section.id} className="bg-white rounded-xl shadow-lg overflow-hidden">
+          body.map((section: any, index: number) => (
+            <div key={section.id || index} className="bg-white rounded-xl shadow-lg overflow-hidden">
               {section.image && (
                 <img
                   src={section.image}

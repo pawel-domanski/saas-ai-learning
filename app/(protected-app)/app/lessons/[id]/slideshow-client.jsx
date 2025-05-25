@@ -19,26 +19,26 @@ export default function SlideshowClient({ subLessons }) {
   };
 
   const handlePrevious = () => {
-    if (currentSlide > 1) {
-      // Capture slide navigation event
-      captureEvent('slideshow navigate', {
+    if (currentSlide > 0) {
+      setCurrentSlide(currentSlide - 1);
+      captureEvent('Lesson Slideshow Previous', {
+        lessonId: 'placeholder', // Assuming lessonId is needed
+        currentSlide,
         direction: 'previous',
-        from_step: currentSlide,
-        to_step: currentSlide - 1,
+        source: 'lesson_slideshow'
       });
-      goToSlide(currentSlide - 1);
     }
   };
 
   const handleNext = () => {
     if (currentSlide < totalSlides) {
-      // Capture slide navigation event
-      captureEvent('slideshow navigate', {
+      setCurrentSlide(currentSlide + 1);
+      captureEvent('Lesson Slideshow Next', {
+        lessonId: 'placeholder', // Assuming lessonId is needed
+        currentSlide,
         direction: 'next',
-        from_step: currentSlide,
-        to_step: currentSlide + 1,
+        source: 'lesson_slideshow'
       });
-      goToSlide(currentSlide + 1);
     }
   };
 

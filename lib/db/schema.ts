@@ -32,6 +32,8 @@ export const teams = pgTable('teams', {
   stripeProductId: text('stripe_product_id'),
   planName: varchar('plan_name', { length: 50 }),
   subscriptionStatus: varchar('subscription_status', { length: 20 }),
+  cancelAtPeriodEnd: boolean('cancel_at_period_end').default(false),
+  currentPeriodEnd: timestamp('current_period_end'),
 });
 
 export const teamMembers = pgTable('team_members', {

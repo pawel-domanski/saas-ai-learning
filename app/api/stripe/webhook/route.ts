@@ -35,32 +35,75 @@ export async function POST(request: NextRequest) {
         
         if (team) {
           // Initialize PostHog for server-side tracking
-          const PostHog = require('posthog-node').default;
+          const { PostHog } = require('posthog-node');
           const posthogClient = new PostHog(process.env.NEXT_PUBLIC_POSTHOG_API_KEY, {
             host: process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://eu.i.posthog.com'
           });
           
-          console.log('🎯 Tracking subscription event:', event.type);
-          
           posthogClient.capture({
             distinctId: team.id,
-            event: event.type === 'customer.subscription.updated' ? 'subscription_updated' : 'subscription_cancelled',
+            event: event.type === 'customer.subscription.updated' ? 'Subscription Updated' : 'Subscription Cancelled',
             properties: {
               teamId: team.id,
               subscriptionId: subscription.id,
               status: subscription.status,
               planName: team.planName,
-              timestamp: new Date().toISOString()
+              timestamp: new Date().toISOString(),
+              source: 'server_side_stripe_webhook'
             }
           });
           
           await posthogClient.shutdown();
-          console.log('✅ Subscription event sent to PostHog');
         }
       } catch (error) {
         console.error('❌ Error tracking subscription event:', error);
       }
       break;
+
+    case 'invoice.payment_succeeded':
+      // Handle subscription renewal
+      const invoice = event.data.object as Stripe.Invoice;
+      if (invoice.subscription && invoice.billing_reason === 'subscription_cycle') {
+        try {
+          // Fetch the subscription to get updated data
+          const renewedSubscription = await stripe.subscriptions.retrieve(
+            invoice.subscription as string
+          );
+          await handleSubscriptionChange(renewedSubscription);
+          
+          // Track renewal with PostHog
+          const customerId = invoice.customer as string;
+          const team = await getTeamByStripeCustomerId(customerId);
+          
+          if (team) {
+            const { PostHog } = require('posthog-node');
+            const posthogClient = new PostHog(process.env.NEXT_PUBLIC_POSTHOG_API_KEY, {
+              host: process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://eu.i.posthog.com'
+            });
+            
+            posthogClient.capture({
+              distinctId: team.id,
+              event: 'Subscription Renewed Successfully',
+              properties: {
+                teamId: team.id,
+                subscriptionId: renewedSubscription.id,
+                invoiceId: invoice.id,
+                amount: invoice.amount_paid,
+                currency: invoice.currency,
+                planName: team.planName,
+                timestamp: new Date().toISOString(),
+                source: 'server_side_stripe_webhook'
+              }
+            });
+            
+            await posthogClient.shutdown();
+          }
+        } catch (error) {
+          console.error('❌ Error handling subscription renewal:', error);
+        }
+      }
+      break;
+
     default:
       console.log(`Unhandled event type ${event.type}`);
   }

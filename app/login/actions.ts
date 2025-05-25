@@ -143,28 +143,29 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
 
   // Track sign-in with PostHog
   try {
-    const PostHog = require('posthog-node').default;
+    const { PostHog } = require('posthog-node');
     const posthogClient = new PostHog(process.env.NEXT_PUBLIC_POSTHOG_API_KEY, {
       host: process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://eu.i.posthog.com'
     });
     
-    console.log('🎯 Tracking user sign-in');
-    
     posthogClient.capture({
       distinctId: foundUser.id,
-      event: 'user_signed_in',
+      event: 'User Signed In Successfully',
       properties: {
         userId: foundUser.id,
         email: foundUser.email,
         teamId: foundTeam?.id,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        source: 'server_side_login'
       }
     });
     
     await posthogClient.shutdown();
-    console.log('✅ Sign-in event sent to PostHog');
+    console.log('✅ User sign-in tracked successfully');
   } catch (error) {
     console.error('❌ Error tracking sign-in:', error);
+    console.error('❌ PostHog API Key:', process.env.NEXT_PUBLIC_POSTHOG_API_KEY ? 'Present' : 'Missing');
+    console.error('❌ PostHog Host:', process.env.NEXT_PUBLIC_POSTHOG_HOST);
   }
 
   const redirectTo = formData.get('redirect') as string | null;
@@ -315,16 +316,14 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
 
   // Track sign-up with PostHog
   try {
-    const PostHog = require('posthog-node').default;
+    const { PostHog } = require('posthog-node');
     const posthogClient = new PostHog(process.env.NEXT_PUBLIC_POSTHOG_API_KEY, {
       host: process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://eu.i.posthog.com'
     });
     
-    console.log('🎯 Tracking user sign-up');
-    
     posthogClient.capture({
       distinctId: createdUser.id,
-      event: 'user_signed_up',
+      event: 'User Signed Up Successfully',
       properties: {
         userId: createdUser.id,
         email: createdUser.email,
@@ -332,14 +331,16 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
         teamId: teamId,
         userRole: userRole,
         hasInvitation: !!inviteId,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        source: 'server_side_signup'
       }
     });
     
     await posthogClient.shutdown();
-    console.log('✅ Sign-up event sent to PostHog');
+    console.log('✅ User sign-up tracked successfully');
   } catch (error) {
     console.error('❌ Error tracking sign-up:', error);
+    console.error('❌ PostHog API Key:', process.env.NEXT_PUBLIC_POSTHOG_API_KEY ? 'Present' : 'Missing');
   }
 
   const redirectTo = formData.get('redirect') as string | null;
@@ -358,26 +359,24 @@ export async function signOut() {
   
   // Track sign-out with PostHog
   try {
-    const PostHog = require('posthog-node').default;
+    const { PostHog } = require('posthog-node');
     const posthogClient = new PostHog(process.env.NEXT_PUBLIC_POSTHOG_API_KEY, {
       host: process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://eu.i.posthog.com'
     });
     
-    console.log('🎯 Tracking user sign-out');
-    
     posthogClient.capture({
       distinctId: user.id,
-      event: 'user_signed_out',
+      event: 'User Signed Out',
       properties: {
         userId: user.id,
         email: user.email,
         teamId: userWithTeam?.teamId,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        source: 'server_side_logout'
       }
     });
     
     await posthogClient.shutdown();
-    console.log('✅ Sign-out event sent to PostHog');
   } catch (error) {
     console.error('❌ Error tracking sign-out:', error);
   }
@@ -605,16 +604,47 @@ const requestPasswordResetSchema = z.object({
 });
 export const requestPasswordReset = validatedAction(requestPasswordResetSchema, async (data) => {
   const { email } = data;
+  
   // Find user by email
   const [user] = await db.select().from(users).where(eq(users.email, email)).limit(1);
-  // Always respond success to avoid email enumeration  if (!user) {    return { success: 'If an account with that email exists, a reset link has been sent.' };  }
+  
+  // Track password reset request with PostHog (always track regardless of whether user exists)
+  try {
+    const { PostHog } = require('posthog-node');
+    const posthogClient = new PostHog(process.env.NEXT_PUBLIC_POSTHOG_API_KEY, {
+      host: process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://eu.i.posthog.com'
+    });
+    
+    posthogClient.capture({
+      distinctId: user ? user.id : email, // Use email as distinctId if user doesn't exist
+      event: 'Password Reset Link Requested',
+      properties: {
+        email: email,
+        userExists: !!user,
+        timestamp: new Date().toISOString(),
+        source: 'server_side_password_reset'
+      }
+    });
+    
+    await posthogClient.shutdown();
+  } catch (error) {
+    console.error('❌ Error tracking password reset request:', error);
+  }
+  
+  // Always respond success to avoid email enumeration  
+  if (!user) {
+    return { success: 'If an account with that email exists, a reset link has been sent.' };
+  }
+  
   // Generate token
   const token = crypto.randomUUID();
   const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+  
   // Store in database
   await db.insert(passwordResetTokens).values({ userId: user.id, token, expiresAt });
+  
   // Send email
-  const transporter = nodemailer.createTransport({
+  const transporter = nodemailer.createTransporter({
     host: process.env.SMTP_HOST,
     port: Number(process.env.SMTP_PORT),
     auth: {
@@ -622,13 +652,18 @@ export const requestPasswordReset = validatedAction(requestPasswordResetSchema, 
       pass: process.env.SMTP_PASS,
     },
   });
+  
   const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/login/reset-password/${token}`;
+  
   await transporter.sendMail({
     from: process.env.SMTP_FROM,
     to: email,
     subject: 'Reset your password',
     html: `<p>Click <a href="${resetUrl}">here</a> to reset your password. This link expires in one hour.</p>`,
-  });  return { success: 'If an account with that email exists, a reset link has been sent.' };});
+  });
+  
+  return { success: 'If an account with that email exists, a reset link has been sent.' };
+});
 
 // Schema and action for resetting password
 const resetPasswordSchema = z
@@ -699,6 +734,28 @@ export const resetPassword = validatedAction(resetPasswordSchema, async (data) =
     
     // Log activity
     await logActivity(null, row.userId, ActivityType.UPDATE_PASSWORD);
+    
+    // Track successful password reset with PostHog
+    try {
+      const { PostHog } = require('posthog-node');
+      const posthogClient = new PostHog(process.env.NEXT_PUBLIC_POSTHOG_API_KEY, {
+        host: process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://eu.i.posthog.com'
+      });
+      
+      posthogClient.capture({
+        distinctId: row.userId,
+        event: 'Password Reset Completed Successfully',
+        properties: {
+          userId: row.userId,
+          timestamp: new Date().toISOString(),
+          source: 'server_side_password_reset'
+        }
+      });
+      
+      await posthogClient.shutdown();
+    } catch (error) {
+      console.error('❌ Error tracking password reset completion:', error);
+    }
     
   } catch (error) {
     console.error('Error updating password:', error);

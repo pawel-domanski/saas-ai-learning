@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { captureEvent } from '@/lib/posthog-helpers';
+import posthog from 'posthog-js';
 
 interface DocumentCompleteButtonProps {
   aiopId: string;

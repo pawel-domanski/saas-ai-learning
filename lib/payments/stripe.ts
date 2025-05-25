@@ -125,21 +125,31 @@ export async function handleSubscriptionChange(
     return;
   }
 
+  console.log(`📅 Processing subscription change: ${status}, cancel_at_period_end: ${subscription.cancel_at_period_end}, team: ${team.id}`);
+
   if (status === 'active' || status === 'trialing') {
     const plan = subscription.items.data[0]?.plan;
     await updateTeamSubscription(team.id, {
       stripeSubscriptionId: subscriptionId,
       stripeProductId: plan?.product as string,
       planName: (plan?.product as Stripe.Product).name,
-      subscriptionStatus: status
+      subscriptionStatus: status,
+      cancelAtPeriodEnd: subscription.cancel_at_period_end,
+      currentPeriodEnd: new Date(subscription.current_period_end * 1000)
     });
+    
+    console.log(`✅ Updated subscription for team ${team.id}: status=${status}, cancelAtPeriodEnd=${subscription.cancel_at_period_end}`);
   } else if (status === 'canceled' || status === 'unpaid') {
     await updateTeamSubscription(team.id, {
       stripeSubscriptionId: null,
       stripeProductId: null,
       planName: null,
-      subscriptionStatus: status
+      subscriptionStatus: status,
+      cancelAtPeriodEnd: false,
+      currentPeriodEnd: null
     });
+    
+    console.log(`❌ Canceled subscription for team ${team.id}: status=${status}`);
   }
 }
 

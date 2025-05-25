@@ -19,6 +19,47 @@ function ensureUuid(id: string): string {
   return `00000000-0000-0000-0000-${id.padStart(12, '0')}`;
 }
 
+export async function GET(request: NextRequest) {
+  try {
+    // Authenticate and get session data
+    const session = await getSession();
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Get lessonId from URL search params
+    const { searchParams } = new URL(request.url);
+    const lessonId = searchParams.get('lessonId');
+    
+    if (!lessonId) {
+      return NextResponse.json({ error: 'Lesson ID is required' }, { status: 400 });
+    }
+
+    // Convert lessonId to UUID format
+    const validLessonId = ensureUuid(lessonId.toString());
+
+    // Check if user has rated this lesson
+    const existingRecords = await db.execute(sql`
+      SELECT id, rating, comment, created_at FROM public.lesson_ratings 
+      WHERE user_id = ${session.user.id} AND lesson_id = ${validLessonId}
+    `);
+    
+    const hasRated = existingRecords && 
+                     Array.isArray(existingRecords) && 
+                     existingRecords.length > 0;
+    
+    const ratingData = hasRated ? existingRecords[0] : null;
+
+    return NextResponse.json({ 
+      hasRated,
+      rating: ratingData
+    });
+  } catch (error) {
+    console.error('Error checking lesson rating:', error);
+    return NextResponse.json({ error: 'Failed to check rating' }, { status: 500 });
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     // Authenticate and get session data

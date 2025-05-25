@@ -360,7 +360,7 @@ export default async function LessonPage({
       
       {/* Show rating dialog only for lessons with ocena:true */}
       {shouldRate && (
-        <LessonRatingTrigger lessonId={lessonUuid} trigger={successMessage} />
+        <LessonRatingTrigger lessonId={lessonUuid} trigger={successMessage} showAlways={true} />
       )}
       
       <div className="mb-4 text-sm font-medium flex items-center">

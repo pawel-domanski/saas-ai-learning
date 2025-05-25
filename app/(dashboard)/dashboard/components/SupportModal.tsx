@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Paperclip, X, FileText, CheckCircle } from 'lucide-react';
+import { captureEvent } from '@/lib/posthog-helpers';
 
 interface SupportModalProps {
   isOpen: boolean;
@@ -53,6 +54,15 @@ export default function SupportModal({ isOpen, onOpenChange, userName = '', user
         const data = await response.json();
         throw new Error(data.error || 'Failed to submit support request');
       }
+
+      // Track support request submission
+      captureEvent('support_request_submitted', {
+        subject: subject,
+        hasAttachments: attachments.length > 0,
+        attachmentCount: attachments.length,
+        userName: userName,
+        userEmail: userEmail
+      });
 
       // Reset form
       setSubject('');

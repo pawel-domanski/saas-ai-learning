@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Markdown } from '@/components/ui/markdown';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import posthog from 'posthog-js';
+import { captureEvent } from '@/lib/posthog-helpers';
 
 export default function SlideshowClient({ subLessons }) {
   const [currentSlide, setCurrentSlide] = useState(1);
@@ -21,7 +21,7 @@ export default function SlideshowClient({ subLessons }) {
   const handlePrevious = () => {
     if (currentSlide > 1) {
       // Capture slide navigation event
-      posthog.capture('slideshow navigate', {
+      captureEvent('slideshow navigate', {
         direction: 'previous',
         from_step: currentSlide,
         to_step: currentSlide - 1,
@@ -33,7 +33,7 @@ export default function SlideshowClient({ subLessons }) {
   const handleNext = () => {
     if (currentSlide < totalSlides) {
       // Capture slide navigation event
-      posthog.capture('slideshow navigate', {
+      captureEvent('slideshow navigate', {
         direction: 'next',
         from_step: currentSlide,
         to_step: currentSlide + 1,

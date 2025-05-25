@@ -88,6 +88,36 @@ export async function GET(request: NextRequest) {
       })
       .where(eq(teams.id, userTeam[0].teamId));
 
+    // Track successful payment with PostHog
+    try {
+      const PostHog = require('posthog-node').default;
+      const posthogClient = new PostHog(process.env.NEXT_PUBLIC_POSTHOG_API_KEY, {
+        host: process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://eu.i.posthog.com'
+      });
+      
+      console.log('🎯 Tracking payment success');
+      
+      posthogClient.capture({
+        distinctId: user[0].id,
+        event: 'payment_success',
+        properties: {
+          userId: user[0].id,
+          teamId: userTeam[0].teamId,
+          subscriptionId,
+          productId,
+          planName: (plan.product as Stripe.Product).name,
+          amount: plan.unit_amount,
+          currency: plan.currency,
+          timestamp: new Date().toISOString()
+        }
+      });
+      
+      await posthogClient.shutdown();
+      console.log('✅ Payment success event sent to PostHog');
+    } catch (error) {
+      console.error('❌ Error tracking payment success:', error);
+    }
+
     await setSession(user[0]);
     return NextResponse.redirect(new URL('/dashboard', request.url));
   } catch (error) {

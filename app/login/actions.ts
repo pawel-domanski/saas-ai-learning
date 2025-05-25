@@ -141,6 +141,32 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
     logActivity(foundTeam?.id, foundUser.id, ActivityType.SIGN_IN),
   ]);
 
+  // Track sign-in with PostHog
+  try {
+    const PostHog = require('posthog-node').default;
+    const posthogClient = new PostHog(process.env.NEXT_PUBLIC_POSTHOG_API_KEY, {
+      host: process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://eu.i.posthog.com'
+    });
+    
+    console.log('🎯 Tracking user sign-in');
+    
+    posthogClient.capture({
+      distinctId: foundUser.id,
+      event: 'user_signed_in',
+      properties: {
+        userId: foundUser.id,
+        email: foundUser.email,
+        teamId: foundTeam?.id,
+        timestamp: new Date().toISOString()
+      }
+    });
+    
+    await posthogClient.shutdown();
+    console.log('✅ Sign-in event sent to PostHog');
+  } catch (error) {
+    console.error('❌ Error tracking sign-in:', error);
+  }
+
   const redirectTo = formData.get('redirect') as string | null;
   if (redirectTo === 'checkout') {
     const priceId = formData.get('priceId') as string;
@@ -287,6 +313,35 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
     setSession(createdUser),
   ]);
 
+  // Track sign-up with PostHog
+  try {
+    const PostHog = require('posthog-node').default;
+    const posthogClient = new PostHog(process.env.NEXT_PUBLIC_POSTHOG_API_KEY, {
+      host: process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://eu.i.posthog.com'
+    });
+    
+    console.log('🎯 Tracking user sign-up');
+    
+    posthogClient.capture({
+      distinctId: createdUser.id,
+      event: 'user_signed_up',
+      properties: {
+        userId: createdUser.id,
+        email: createdUser.email,
+        name: createdUser.name,
+        teamId: teamId,
+        userRole: userRole,
+        hasInvitation: !!inviteId,
+        timestamp: new Date().toISOString()
+      }
+    });
+    
+    await posthogClient.shutdown();
+    console.log('✅ Sign-up event sent to PostHog');
+  } catch (error) {
+    console.error('❌ Error tracking sign-up:', error);
+  }
+
   const redirectTo = formData.get('redirect') as string | null;
   if (redirectTo === 'checkout') {
     const priceId = formData.get('priceId') as string;
@@ -300,6 +355,33 @@ export async function signOut() {
   const user = (await getUser()) as User;
   const userWithTeam = await getUserWithTeam(user.id);
   await logActivity(userWithTeam?.teamId, user.id, ActivityType.SIGN_OUT);
+  
+  // Track sign-out with PostHog
+  try {
+    const PostHog = require('posthog-node').default;
+    const posthogClient = new PostHog(process.env.NEXT_PUBLIC_POSTHOG_API_KEY, {
+      host: process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://eu.i.posthog.com'
+    });
+    
+    console.log('🎯 Tracking user sign-out');
+    
+    posthogClient.capture({
+      distinctId: user.id,
+      event: 'user_signed_out',
+      properties: {
+        userId: user.id,
+        email: user.email,
+        teamId: userWithTeam?.teamId,
+        timestamp: new Date().toISOString()
+      }
+    });
+    
+    await posthogClient.shutdown();
+    console.log('✅ Sign-out event sent to PostHog');
+  } catch (error) {
+    console.error('❌ Error tracking sign-out:', error);
+  }
+  
   await clearSession();
 }
 

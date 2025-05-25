@@ -1,11 +1,18 @@
 'use client';
 
-import { useEffect, Suspense } from 'react';
+import { useEffect, Suspense, useState } from 'react';
 import posthog from 'posthog-js';
 import { usePathname, useSearchParams } from 'next/navigation';
 
 interface Props {
   children: React.ReactNode;
+}
+
+interface User {
+  id: string;
+  email: string;
+  name: string;
+  role: string;
 }
 
 function PosthogTracker() {
@@ -27,6 +34,52 @@ function PosthogTracker() {
 }
 
 export default function PosthogProvider({ children }: Props) {
+  const [userIdentified, setUserIdentified] = useState(false);
+  
+  // Function to identify user with PostHog
+  const identifyUser = async () => {
+    if (!posthog.__loaded || userIdentified) return;
+    
+    try {
+      console.log('🔍 Fetching user data for PostHog identification...');
+      const response = await fetch('/api/user');
+      
+      if (response.ok) {
+        const user: User = await response.json();
+        console.log('👤 User data received:', { id: user.id, email: user.email, name: user.name });
+        
+        // Identify user with PostHog
+        posthog.identify(user.id, {
+          email: user.email,
+          name: user.name,
+          role: user.role,
+          $set: {
+            email: user.email,
+            name: user.name,
+            role: user.role
+          }
+        });
+        
+        console.log('✅ User identified in PostHog:', user.id);
+        setUserIdentified(true);
+        
+        // Track user identification event
+        posthog.capture('user_identified', {
+          userId: user.id,
+          email: user.email,
+          name: user.name,
+          timestamp: new Date().toISOString()
+        });
+        
+        console.log('🎯 User identification event sent to PostHog');
+      } else {
+        console.log('ℹ️ User not logged in or endpoint unavailable');
+      }
+    } catch (error) {
+      console.error('❌ Error identifying user:', error);
+    }
+  };
+
   // Initialize PostHog once
   useEffect(() => {
     console.log('🚀 PostHog Provider useEffect triggered');
@@ -58,6 +111,9 @@ export default function PosthogProvider({ children }: Props) {
                 pathname: window.location.pathname
               });
               console.log('🧪 Test event sent: posthog_initialized');
+              
+              // Try to identify user after PostHog loads
+              setTimeout(identifyUser, 1000);
             },
             request_batching: false, // Send events immediately for testing
           });
@@ -70,6 +126,8 @@ export default function PosthogProvider({ children }: Props) {
       }
     } else {
       console.log('✅ PostHog already initialized:', posthog.__loaded);
+      // Try to identify user if PostHog is already loaded
+      setTimeout(identifyUser, 500);
     }
   }, []);
 

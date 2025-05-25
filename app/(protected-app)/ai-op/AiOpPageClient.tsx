@@ -1,7 +1,7 @@
 'use client';
 import React, { useEffect } from 'react';
 import Link from 'next/link';
-import posthog from 'posthog-js';
+import { captureEvent } from '@/lib/posthog-helpers';
 
 interface AiOpItem {
   id: number;
@@ -35,7 +35,7 @@ export default function AiOpPageClient({ items }: AiOpPageClientProps) {
 
   const handleItemClick = (id: number, name: string) => {
     console.log('AI-Op clicked:', id, name);
-    posthog.capture('aiop_selected', { aiopId: id, name });
+    captureEvent('aiop_selected', { aiopId: id, name });
   };
 
   return (

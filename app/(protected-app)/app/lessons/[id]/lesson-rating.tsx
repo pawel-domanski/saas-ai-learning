@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { captureEvent } from '@/lib/posthog-helpers';
 
 type EmojiRating = '😞' | '😐' | '🙂' | '😀' | '🤩';
 
@@ -31,19 +32,33 @@ export function LessonRating({ lessonId, isOpen, onClose }: LessonRatingProps) {
     if (!selectedRating) return;
     
     setIsSubmitting(true);
+    const rating = Object.keys(ratingLabels).indexOf(selectedRating) + 1;
+    
     try {
       // Here you would send the rating to your API
-      await fetch('/api/lessons/rate', {
+      const response = await fetch('/api/lessons/rate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           lessonId,
-          rating: Object.keys(ratingLabels).indexOf(selectedRating) + 1, // Convert emoji to 1-5 rating
+          rating, // Convert emoji to 1-5 rating
           comment: comment.trim() || null, // Send comment if provided
         }),
       });
+
+              if (response.ok) {
+          // Track lesson rating event with PostHog
+          captureEvent('lesson_rating_submitted', {
+            lessonId,
+            rating,
+            ratingEmoji: selectedRating,
+            ratingLabel: ratingLabels[selectedRating],
+            hasComment: !!comment.trim(),
+            commentLength: comment.trim().length
+          });
+      }
       
       onClose();
       // Reset form

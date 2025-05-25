@@ -5,7 +5,6 @@ import { db } from '@/lib/db/drizzle';
 import { sql } from 'drizzle-orm';
 import { lessonRatings, activityLogs, ActivityType } from '@/lib/db/schema';
 import { and, eq } from 'drizzle-orm';
-import posthog from 'posthog-js';
 
 // Helper function to convert numeric or string IDs to a valid UUID format
 function ensureUuid(id: string): string {
@@ -169,26 +168,6 @@ export async function POST(request: NextRequest) {
       }
     } catch (logError) {
       console.error("Error logging activity:", logError);
-    }
-
-    // Track in PostHog
-    try {
-      // Try to initialize PostHog if not already initialized (server-side)
-      if (!posthog.__loaded && process.env.NEXT_PUBLIC_POSTHOG_API_KEY) {
-        posthog.init(process.env.NEXT_PUBLIC_POSTHOG_API_KEY, {
-          api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://eu.i.posthog.com'
-        });
-      }
-      
-      // Send the event to PostHog
-      posthog.capture('lesson_rated', {
-        userId: session.user.id,
-        lessonId: validLessonId,
-        rating,
-        timestamp: new Date().toISOString()
-      });
-    } catch (err) {
-      console.error('Error sending PostHog event for lesson rating:', err);
     }
 
     // Extract data from result safely

@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import posthog from 'posthog-js';
+import { Button } from '@/components/ui/button';
+import { captureEvent } from '@/lib/posthog-helpers';
 
 interface DocumentCompleteButtonProps {
   aiopId: string;
@@ -37,16 +38,10 @@ export default function DocumentCompleteButton({ aiopId, documentId, initialComp
       if (res.ok) {
         setCompleted(true);
         
-        try {
-          console.log('Tracking AI-Op document completion:', aiopId, documentId);
-          posthog.capture('aiop_document_completed', { 
-            aiopId, 
-            documentId,
-            timestamp: new Date().toISOString() 
-          });
-        } catch (err) {
-          console.error('Error sending PostHog event for completion:', err);
-        }
+        captureEvent('aiop_document_completed', { 
+          aiopId, 
+          documentId
+        });
       } else {
         console.error('Failed to mark AI-Op document as read');
       }

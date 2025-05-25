@@ -12,6 +12,7 @@ import { SaveLessonView } from './save-lesson-view';
 import ConfettiEffect from './confetti';
 import Quiz from '@/components/Quiz';
 import LessonRatingTrigger from './lesson-rating-trigger';
+import LessonCompletionTracker from './lesson-completion-tracker';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 // Helper function to convert numeric or string IDs to a valid UUID format
@@ -354,6 +355,15 @@ export default async function LessonPage({
     <div className="max-w-3xl mx-auto py-8 px-4">
       {/* Component to save view info using client-side JS */}
       <SaveLessonView lessonId={lessonUuid} partId={part} />
+      
+      {/* Track lesson completion events */}
+      <LessonCompletionTracker 
+        lessonId={lessonUuid}
+        lessonTitle={lesson.subject}
+        partId={part}
+        isCompleted={isCompleted}
+        successMessage={successMessage}
+      />
       
       {/* Confetti effect only shows when success=true in URL */}
       <ConfettiEffect />

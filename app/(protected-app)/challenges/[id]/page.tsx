@@ -6,6 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/componen
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { ArrowLeft, Calendar, CheckCircle, Lock, Clock } from 'lucide-react';
+import ChallengeCompletionTracker from './challenge-completion-tracker';
+import ChallengeDayCompleteButton from './challenge-day-complete-button';
 
 interface ChallengeDayContent {
   id: string;
@@ -189,6 +191,14 @@ export default async function ChallengePage({ params }: ChallengeParams) {
 
   return (
     <div className="p-4 lg:p-8 max-w-7xl mx-auto">
+      {/* Track challenge viewing */}
+      <ChallengeCompletionTracker 
+        challengeId={id}
+        challengeTitle={challenge.title}
+        day={userProgress.lastCompletedDay + 1}
+        isCompleted={false}
+      />
+      
       <div className="mb-6">
         <Link 
           href="/challenges" 
@@ -319,14 +329,12 @@ export default async function ChallengePage({ params }: ChallengeParams) {
                 </CardContent>
                 {!isCompleted && (
                   <CardFooter className="px-4 pb-4 pt-0 flex justify-end">
-                    <form action={completeDayAction.bind(null, id, dayNumber)}>
-                      <Button 
-                        type="submit"
-                        className="bg-green-600 hover:bg-green-700 text-white"
-                      >
-                        Mark as Complete
-                      </Button>
-                    </form>
+                    <ChallengeDayCompleteButton
+                      challengeId={id}
+                      challengeTitle={challenge.title}
+                      day={dayNumber}
+                      isCompleted={isCompleted}
+                    />
                   </CardFooter>
                 )}
               </Card>

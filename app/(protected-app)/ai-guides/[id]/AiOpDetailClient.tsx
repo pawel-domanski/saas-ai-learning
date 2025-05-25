@@ -2,7 +2,9 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import posthog from 'posthog-js';
+import { Markdown } from '@/components/ui/markdown';
+import DocumentCompleteButton from './DocumentCompleteButton';
+import { captureEvent } from '@/lib/posthog-helpers';
 
 interface AiOpItem {
   id: number;
@@ -27,20 +29,7 @@ export default function AiOpDetailClient({ item, groups }: AiOpDetailClientProps
   const match = pathname.match(/lesson\/(\d+)$/);
   const currentLessonId = match ? match[1] : null;
   
-  // Ensure PostHog is initialized
-  useEffect(() => {
-    if (!posthog.__loaded) {
-      console.log('PostHog not loaded in AI Guides client, initializing directly');
-      const apiKey = process.env.NEXT_PUBLIC_POSTHOG_API_KEY;
-      
-      if (apiKey) {
-        posthog.init(apiKey, {
-          api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://eu.i.posthog.com'
-        });
-        console.log('PostHog manually initialized in AI Guides client');
-      }
-    }
-  }, []);
+
   
   useEffect(() => {
     async function loadProgress() {
@@ -58,30 +47,18 @@ export default function AiOpDetailClient({ item, groups }: AiOpDetailClientProps
   }, [item.id]);
 
   const trackSectionToggle = (part: string, isOpen: boolean) => {
-    try {
-      console.log('Tracking guide section toggle:', part, isOpen);
-      posthog.capture('aiguide_section_toggled', { 
-        guideId: item.id, 
-        part, 
-        isOpen,
-        timestamp: new Date().toISOString()
-      });
-    } catch (err) {
-      console.error('Error tracking section toggle:', err);
-    }
+    captureEvent('aiguide_section_toggled', { 
+      guideId: item.id, 
+      part, 
+      isOpen
+    });
   };
 
   const trackDocumentOpen = (documentId: number) => {
-    try {
-      console.log('Tracking guide document open:', documentId);
-      posthog.capture('aiguide_document_opened', { 
-        guideId: item.id, 
-        documentId,
-        timestamp: new Date().toISOString()
-      });
-    } catch (err) {
-      console.error('Error tracking document open:', err);
-    }
+    captureEvent('aiguide_document_opened', { 
+      guideId: item.id, 
+      documentId
+    });
   };
 
   return (

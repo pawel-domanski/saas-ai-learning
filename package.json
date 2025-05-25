@@ -43,6 +43,7 @@
     "postcss": "^8.5.3",
     "postgres": "^3.4.5",
     "posthog-js": "^1.239.1",
+    "posthog-node": "^4.17.2",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-markdown": "^10.1.0",

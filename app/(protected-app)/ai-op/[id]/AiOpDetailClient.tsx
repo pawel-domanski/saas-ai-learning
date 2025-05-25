@@ -2,7 +2,9 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import posthog from 'posthog-js';
+import { Markdown } from '@/components/ui/markdown';
+import DocumentCompleteButton from '../DocumentCompleteButton';
+import { captureEvent } from '@/lib/posthog-helpers';
 
 interface AiOpItem {
   id: number;
@@ -26,20 +28,7 @@ export default function AiOpDetailClient({ item, groups }: AiOpDetailClientProps
   const currentLessonId = match ? match[1] : null;
   const [completedDocs, setCompletedDocs] = useState<number[]>([]);
 
-  // Ensure PostHog is initialized
-  useEffect(() => {
-    if (!posthog.__loaded) {
-      console.log('PostHog not loaded in AiOpDetailClient, initializing directly');
-      const apiKey = process.env.NEXT_PUBLIC_POSTHOG_API_KEY;
-      
-      if (apiKey) {
-        posthog.init(apiKey, {
-          api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://eu.i.posthog.com'
-        });
-        console.log('PostHog manually initialized in AiOpDetailClient');
-      }
-    }
-  }, []);
+
 
   useEffect(() => {
     async function loadProgress() {
@@ -57,30 +46,18 @@ export default function AiOpDetailClient({ item, groups }: AiOpDetailClientProps
   }, [item.id]);
 
   const trackSectionToggle = (part: string, isOpen: boolean) => {
-    try {
-      console.log('Tracking section toggle:', part, isOpen);
-      posthog.capture('aiop_section_toggled', { 
-        aiopId: item.id, 
-        part, 
-        isOpen, 
-        timestamp: new Date().toISOString() 
-      });
-    } catch (err) {
-      console.error('Error tracking section toggle:', err);
-    }
+    captureEvent('aiop_section_toggled', { 
+      aiopId: item.id, 
+      part, 
+      isOpen
+    });
   };
 
   const trackDocumentOpen = (documentId: number) => {
-    try {
-      console.log('Tracking document open:', documentId);
-      posthog.capture('aiop_document_opened', { 
-        aiopId: item.id, 
-        documentId,
-        timestamp: new Date().toISOString()
-      });
-    } catch (err) {
-      console.error('Error tracking document open:', err);
-    }
+    captureEvent('aiop_document_opened', { 
+      aiopId: item.id, 
+      documentId
+    });
   };
 
   return (

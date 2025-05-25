@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import posthog from 'posthog-js';
+import { Button } from '@/components/ui/button';
+import { captureEvent } from '@/lib/posthog-helpers';
 
 interface DocumentCompleteButtonProps {
   guideId: string;
@@ -13,18 +14,7 @@ export default function DocumentCompleteButton({ guideId, documentId, initialCom
   const [completed, setCompleted] = useState(initialCompleted);
   const [loading, setLoading] = useState(false);
 
-  // Ensure PostHog is initialized
-  useEffect(() => {
-    if (!posthog.__loaded) {
-      console.log('PostHog not loaded in AI-Guides DocumentCompleteButton, initializing directly');
-      const apiKey = process.env.NEXT_PUBLIC_POSTHOG_API_KEY;
-      if (apiKey) {
-        posthog.init(apiKey, {
-          api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://eu.i.posthog.com'
-        });
-      }
-    }
-  }, []);
+
 
   const handleComplete = async () => {
     if (completed) return;
@@ -37,16 +27,10 @@ export default function DocumentCompleteButton({ guideId, documentId, initialCom
       if (res.ok) {
         setCompleted(true);
         
-        try {
-          console.log('Tracking AI-Guides document completion:', guideId, documentId);
-          posthog.capture('aiguides_document_completed', { 
-            guideId, 
-            documentId,
-            timestamp: new Date().toISOString() 
-          });
-        } catch (err) {
-          console.error('Error sending PostHog event for completion:', err);
-        }
+        captureEvent('aiguides_document_completed', { 
+          guideId, 
+          documentId
+        });
       } else {
         console.error('Failed to mark AI-Guides document as read');
       }

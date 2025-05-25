@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button';
 import confetti from 'canvas-confetti';
 import { ProgressBarsStep } from '@/components/ProgressBars';
 import { cn } from '@/lib/utils';
+import posthog from 'posthog-js';
+import { trackQuizEvent } from '@/lib/posthog-helpers';
 
 interface Option {
   label: string;
@@ -173,13 +175,19 @@ export default function Quiz({
     }
   };
 
-  // Zapisuj czas rozpoczęcia quizu
+  // Zapisuj czas rozpoczęcia quizu i trackuj w PostHog
   useEffect(() => {
     if (stepIndex === 0 && !localStorage.getItem('quizStartTime')) {
       localStorage.setItem('quizStartTime', new Date().toISOString());
       console.log('Quiz start time set:', localStorage.getItem('quizStartTime'));
+      
+      // Track quiz started event
+      trackQuizEvent('quiz_started', {
+        sessionId: quizSessionId,
+        questionsCount: questions.length
+      });
     }
-  }, [stepIndex]);
+  }, [stepIndex, quizSessionId, questions.length]);
 
   // Save data whenever answers change
   useEffect(() => {
@@ -189,9 +197,17 @@ export default function Quiz({
     }
   }, [stepIndex, answers, formData]);
 
-  // Trigger confetti when reaching the final step
+  // Trigger confetti when reaching the final step and track completion
   useEffect(() => {
     if (isFinalStep) {
+      // Track quiz completion event
+      trackQuizEvent('quiz_completed', {
+        sessionId: quizSessionId,
+        questionsCount: questions.length,
+        answers: Object.keys(answers).length,
+        completionTime: Date.now() - (new Date(localStorage.getItem('quizStartTime') || '').getTime())
+      });
+      
       // Fire multiple confetti bursts from bottom of the screen
       const duration = 5000;
       const end = Date.now() + duration;
@@ -298,6 +314,15 @@ export default function Quiz({
   const handleSelect = (value: string) => {
     if (!current) return;
     
+    // Track answer selection
+    trackQuizEvent('quiz_answer_selected', {
+      sessionId: quizSessionId,
+      questionId: current.id,
+      questionType: current.type,
+      selectedAnswer: value,
+      stepIndex
+    });
+    
     if (current.type === 'multi_choice') {
       // For multi-choice, we need to toggle the selection
       setAnswers(prev => {
@@ -336,6 +361,13 @@ export default function Quiz({
         setStepIndex(next);
       } else {
         console.log('Quiz complete:', answers);
+        // Track quiz completion
+        trackQuizEvent('quiz_completed', {
+          sessionId: quizSessionId,
+          totalQuestions: questions.length,
+          answersCount: Object.keys(answers).length,
+          completionTime: new Date().toISOString()
+        });
       }
     }, 500);
   };
@@ -349,6 +381,13 @@ export default function Quiz({
         setStepIndex(next);
       } else {
         console.log('Quiz complete:', answers);
+        // Track quiz completion
+        trackQuizEvent('quiz_completed', {
+          sessionId: quizSessionId,
+          totalQuestions: questions.length,
+          answersCount: Object.keys(answers).length,
+          completionTime: new Date().toISOString()
+        });
       }
       return;
     }
@@ -363,6 +402,13 @@ export default function Quiz({
         setStepIndex(next);
       } else {
         console.log('Quiz complete:', answers);
+        // Track quiz completion
+        trackQuizEvent('quiz_completed', {
+          sessionId: quizSessionId,
+          totalQuestions: questions.length,
+          answersCount: Object.keys(answers).length,
+          completionTime: new Date().toISOString()
+        });
       }
     }
   };
@@ -492,7 +538,16 @@ export default function Quiz({
               onClick={() => {
                 const next = stepIndex + 1;
                 if (next < questions.length) setStepIndex(next);
-                else console.log('Quiz complete:', answers);
+                else {
+                  console.log('Quiz complete:', answers);
+                  // Track quiz completion
+                  trackQuizEvent('quiz_completed', {
+                    sessionId: quizSessionId,
+                    totalQuestions: questions.length,
+                    answersCount: Object.keys(answers).length,
+                    completionTime: new Date().toISOString()
+                  });
+                }
               }}
               className="px-8 py-3 bg-gradient-to-r from-blue-500 to-teal-500 text-white rounded-md"
             >

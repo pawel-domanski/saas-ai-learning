@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import { getUser, getTeamForUser } from '@/lib/db/queries';
+import { getUser, getTeamForUser, getUserChallenges } from '@/lib/db/queries';
 import fs from 'fs';
 import path from 'path';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
@@ -31,14 +31,43 @@ export default async function ChallengesPage() {
   // Załaduj dane z pliku challenges.json
   const filePath = path.join(process.cwd(), 'challenges.json');
   const fileContents = fs.readFileSync(filePath, 'utf8');
-  const { challenges } = JSON.parse(fileContents);
+  const { challenges, data } = JSON.parse(fileContents);
 
   // Sortuj wyzwania według challenge_id
   const sortedChallenges = [...challenges].sort((a, b) => a.challenge_id - b.challenge_id);
   
-  // Zakładamy, że użytkownik może rozpocząć tylko pierwsze wyzwanie
-  // Później będziemy musieli dodać śledzenie ukończonych wyzwań z bazy danych
-  const completedChallenges: string[] = []; // Tu docelowo pobieranie z bazy danych
+  // Pobierz postęp użytkownika z bazy danych
+  const userChallengesProgress = await getUserChallenges(user.id);
+  
+  // Sprawdź, które wyzwania są w pełni ukończone
+  const completedChallenges: string[] = [];
+  
+  for (const challengeProgress of userChallengesProgress) {
+    const challengeId = challengeProgress.challengeId;
+    const challengeContent = data[challengeId] || [];
+    const totalDays = challengeContent.length;
+    
+    // Sprawdź czy wyzwanie ma jakąś zawartość
+    if (totalDays === 0) {
+      console.warn(`Challenge ${challengeId} has no content (0 days)`);
+      continue;
+    }
+    
+    console.log(`Challenge ${challengeId}: completed ${challengeProgress.lastCompletedDay}/${totalDays} days`);
+    
+    // Wyzwanie jest ukończone, gdy użytkownik ukończył wszystkie dni
+    if (challengeProgress.lastCompletedDay >= totalDays) {
+      completedChallenges.push(challengeId);
+      console.log(`✅ Challenge ${challengeId} is fully completed!`);
+    }
+  }
+  
+  console.log('Completed challenges:', completedChallenges);
+  console.log('User challenges progress:', userChallengesProgress.map(p => ({
+    challengeId: p.challengeId,
+    lastCompletedDay: p.lastCompletedDay,
+    startDate: p.startDate
+  })));
   
   // Pierwsze wyzwanie jest zawsze dostępne
   const availableChallenges = new Set<string>([sortedChallenges[0]?.id]);
@@ -52,12 +81,17 @@ export default async function ChallengesPage() {
       )
     );
     
+    console.log(`Highest completed challenge ID: ${maxCompletedId}`);
+    
     // Następne wyzwanie po ukończonym jest dostępne
     const nextChallenge = sortedChallenges.find(c => c.challenge_id === maxCompletedId + 1);
     if (nextChallenge) {
       availableChallenges.add(nextChallenge.id);
+      console.log(`🔓 Unlocked next challenge: ${nextChallenge.title} (ID: ${nextChallenge.id})`);
     }
   }
+  
+  console.log('Available challenges:', Array.from(availableChallenges));
 
   const hasActiveSubscription = team.subscriptionStatus === 'active' || team.subscriptionStatus === 'trialing';
 

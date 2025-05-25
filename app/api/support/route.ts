@@ -73,6 +73,35 @@ export async function POST(request: NextRequest) {
       attachments,
     });
 
+    // Track support request with PostHog
+    try {
+      const PostHog = require('posthog-node').default;
+      const posthogClient = new PostHog(process.env.NEXT_PUBLIC_POSTHOG_API_KEY, {
+        host: process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://eu.i.posthog.com'
+      });
+      
+      console.log('🎯 Tracking support request submission (server-side)');
+      
+      posthogClient.capture({
+        distinctId: user.id,
+        event: 'support_request_sent',
+        properties: {
+          userId: user.id,
+          subject: subject,
+          hasAttachments: attachments.length > 0,
+          attachmentCount: attachments.length,
+          userName: userName,
+          userEmail: userEmail,
+          timestamp: new Date().toISOString()
+        }
+      });
+      
+      await posthogClient.shutdown();
+      console.log('✅ Support request event sent to PostHog (server-side)');
+    } catch (error) {
+      console.error('❌ Error tracking support request (server-side):', error);
+    }
+
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error processing support request:', error);

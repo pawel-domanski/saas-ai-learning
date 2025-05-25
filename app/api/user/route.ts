@@ -12,12 +12,12 @@ export async function GET() {
       );
     }
     
-    // Return only necessary user data
+    // Return user data for PostHog identification
     return NextResponse.json({
-      user: {
-        name: user.name,
-        email: user.email
-      }
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role
     });
   } catch (error) {
     console.error('Error fetching user data:', error);

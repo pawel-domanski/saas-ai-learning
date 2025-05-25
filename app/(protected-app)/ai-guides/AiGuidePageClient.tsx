@@ -1,7 +1,7 @@
 'use client';
 import React, { useEffect } from 'react';
 import Link from 'next/link';
-import posthog from 'posthog-js';
+import { captureEvent } from '@/lib/posthog-helpers';
 
 interface AiGuideItem {
   id: number;
@@ -35,7 +35,7 @@ export default function AiGuidePageClient({ items }: AiGuidePageClientProps) {
 
   const handleItemClick = (id: number, name: string) => {
     console.log('AI Guide clicked:', id, name);
-    posthog.capture('aiguide_selected', { guideId: id, name });
+    captureEvent('aiguide_selected', { guideId: id, name });
   };
 
   return (

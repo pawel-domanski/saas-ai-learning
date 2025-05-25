@@ -245,9 +245,21 @@ export default async function LessonPage({
     // Check if the lesson is already completed
     if (isCompleted) {
       return (
-        <div className="flex items-center text-teal-600 gap-2 bg-teal-50 px-4 py-2 rounded-lg">
-          <Book size={20} />
-          <span className="font-medium">Lesson completed</span>
+        <div className="flex flex-col items-center space-y-3">
+          <div className="flex items-center text-teal-600 gap-2 bg-teal-50 px-4 py-2 rounded-lg">
+            <Book size={20} />
+            <span className="font-medium">Lesson completed</span>
+          </div>
+          {/* Show rating component after completion banner if lesson has ocena:true */}
+          {shouldRate && (
+            <div className="mt-4">
+              <LessonRatingTrigger 
+                lessonId={lessonUuid} 
+                trigger={false} 
+                showAlways={true} 
+              />
+            </div>
+          )}
         </div>
       );
     } 

@@ -138,7 +138,7 @@ export default function Quiz({
       };
 
       const dataToSend = {
-        sessionId: quizSessionId,
+        sessionId: quizSessionId || undefined,
         answers,
         formData,
         completedAt: isFinalStep ? new Date().toISOString() : null,
@@ -183,7 +183,7 @@ export default function Quiz({
       
       // Track quiz started event
       trackQuizEvent('quiz_started', {
-        sessionId: quizSessionId,
+        sessionId: quizSessionId || undefined,
         questionsCount: questions.length
       });
     }
@@ -202,7 +202,7 @@ export default function Quiz({
     if (isFinalStep) {
       // Track quiz completion event
       trackQuizEvent('quiz_completed', {
-        sessionId: quizSessionId,
+        sessionId: quizSessionId || undefined,
         questionsCount: questions.length,
         answers: Object.keys(answers).length,
         completionTime: Date.now() - (new Date(localStorage.getItem('quizStartTime') || '').getTime())
@@ -316,7 +316,7 @@ export default function Quiz({
     
     // Track answer selection
     trackQuizEvent('quiz_answer_selected', {
-      sessionId: quizSessionId,
+      sessionId: quizSessionId || undefined,
       questionId: current.id,
       questionType: current.type,
       selectedAnswer: value,
@@ -363,7 +363,7 @@ export default function Quiz({
         console.log('Quiz complete:', answers);
         // Track quiz completion
         trackQuizEvent('quiz_completed', {
-          sessionId: quizSessionId,
+          sessionId: quizSessionId || undefined,
           totalQuestions: questions.length,
           answersCount: Object.keys(answers).length,
           completionTime: new Date().toISOString()
@@ -383,7 +383,7 @@ export default function Quiz({
         console.log('Quiz complete:', answers);
         // Track quiz completion
         trackQuizEvent('quiz_completed', {
-          sessionId: quizSessionId,
+          sessionId: quizSessionId || undefined,
           totalQuestions: questions.length,
           answersCount: Object.keys(answers).length,
           completionTime: new Date().toISOString()
@@ -404,7 +404,7 @@ export default function Quiz({
         console.log('Quiz complete:', answers);
         // Track quiz completion
         trackQuizEvent('quiz_completed', {
-          sessionId: quizSessionId,
+          sessionId: quizSessionId || undefined,
           totalQuestions: questions.length,
           answersCount: Object.keys(answers).length,
           completionTime: new Date().toISOString()
@@ -542,7 +542,7 @@ export default function Quiz({
                   console.log('Quiz complete:', answers);
                   // Track quiz completion
                   trackQuizEvent('quiz_completed', {
-                    sessionId: quizSessionId,
+                    sessionId: quizSessionId || undefined,
                     totalQuestions: questions.length,
                     answersCount: Object.keys(answers).length,
                     completionTime: new Date().toISOString()

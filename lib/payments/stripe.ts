@@ -135,7 +135,7 @@ export async function handleSubscriptionChange(
       planName: (plan?.product as Stripe.Product).name,
       subscriptionStatus: status,
       cancelAtPeriodEnd: subscription.cancel_at_period_end,
-      currentPeriodEnd: new Date(subscription.current_period_end * 1000)
+      currentPeriodEnd: new Date((subscription as any).current_period_end * 1000)
     });
     
     console.log(`✅ Updated subscription for team ${team.id}: status=${status}, cancelAtPeriodEnd=${subscription.cancel_at_period_end}`);
@@ -146,7 +146,7 @@ export async function handleSubscriptionChange(
       planName: null,
       subscriptionStatus: status,
       cancelAtPeriodEnd: false,
-      currentPeriodEnd: null
+      currentPeriodEnd: undefined
     });
     
     console.log(`❌ Canceled subscription for team ${team.id}: status=${status}`);

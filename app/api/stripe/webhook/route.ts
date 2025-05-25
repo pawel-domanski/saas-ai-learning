@@ -63,12 +63,17 @@ export async function POST(request: NextRequest) {
     case 'invoice.payment_succeeded':
       // Handle subscription renewal
       const invoice = event.data.object as Stripe.Invoice;
-      if (invoice.subscription && invoice.billing_reason === 'subscription_cycle') {
+      // Use bracket notation to access subscription property to avoid TypeScript issues
+      const subscriptionRef = (invoice as any).subscription;
+      if (subscriptionRef && invoice.billing_reason === 'subscription_cycle') {
         try {
+          // Get subscription ID (handle both string and expanded object)
+          const subscriptionId = typeof subscriptionRef === 'string' 
+            ? subscriptionRef 
+            : subscriptionRef.id;
+          
           // Fetch the subscription to get updated data
-          const renewedSubscription = await stripe.subscriptions.retrieve(
-            invoice.subscription as string
-          );
+          const renewedSubscription = await stripe.subscriptions.retrieve(subscriptionId);
           await handleSubscriptionChange(renewedSubscription);
           
           // Track renewal with PostHog

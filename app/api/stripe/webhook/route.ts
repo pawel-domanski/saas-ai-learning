@@ -14,8 +14,9 @@ export async function POST(request: NextRequest) {
 
   try {
     event = stripe.webhooks.constructEvent(payload, signature, webhookSecret);
+    console.log(`🎯 Stripe webhook received: ${event.type} (ID: ${event.id})`);
   } catch (err) {
-    console.error('Webhook signature verification failed.', err);
+    console.error('❌ Webhook signature verification failed.', err);
     return NextResponse.json(
       { error: 'Webhook signature verification failed.' },
       { status: 400 }
@@ -25,7 +26,9 @@ export async function POST(request: NextRequest) {
   switch (event.type) {
     case 'customer.subscription.updated':
     case 'customer.subscription.deleted':
+    case 'customer.subscription.created':
       const subscription = event.data.object as Stripe.Subscription;
+      console.log(`📅 Processing subscription event: ${event.type} - Status: ${subscription.status}, Customer: ${subscription.customer}`);
       await handleSubscriptionChange(subscription);
       
       // Track subscription events with PostHog
@@ -63,9 +66,12 @@ export async function POST(request: NextRequest) {
     case 'invoice.payment_succeeded':
       // Handle subscription renewal
       const invoice = event.data.object as Stripe.Invoice;
+      console.log(`💰 Invoice payment succeeded: ${invoice.id}, Customer: ${invoice.customer}, Billing reason: ${invoice.billing_reason}`);
+      
       // Use bracket notation to access subscription property to avoid TypeScript issues
       const subscriptionRef = (invoice as any).subscription;
       if (subscriptionRef && invoice.billing_reason === 'subscription_cycle') {
+        console.log('🔄 Processing subscription renewal...');
         try {
           // Get subscription ID (handle both string and expanded object)
           const subscriptionId = typeof subscriptionRef === 'string' 
@@ -109,8 +115,32 @@ export async function POST(request: NextRequest) {
       }
       break;
 
+    case 'invoice.payment_failed':
+      // Handle failed payments
+      const failedInvoice = event.data.object as Stripe.Invoice;
+      console.log(`❌ Invoice payment failed: ${failedInvoice.id}, Customer: ${failedInvoice.customer}`);
+      
+      // If it's a subscription invoice, we might need to handle the failed payment
+      const failedSubscriptionRef = (failedInvoice as any).subscription;
+      if (failedSubscriptionRef) {
+        try {
+          const subscriptionId = typeof failedSubscriptionRef === 'string' 
+            ? failedSubscriptionRef 
+            : failedSubscriptionRef.id;
+          
+          const failedSubscription = await stripe.subscriptions.retrieve(subscriptionId);
+          console.log(`📋 Subscription status after failed payment: ${failedSubscription.status}`);
+          
+          // Update subscription status in our database
+          await handleSubscriptionChange(failedSubscription);
+        } catch (error) {
+          console.error('❌ Error handling failed payment:', error);
+        }
+      }
+      break;
+
     default:
-      console.log(`Unhandled event type ${event.type}`);
+      console.log(`⚠️ Unhandled event type: ${event.type}`);
   }
 
   return NextResponse.json({ received: true });

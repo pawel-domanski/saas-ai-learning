@@ -7,7 +7,7 @@ import DocumentCompleteButton from '../DocumentCompleteButton';
 import { captureEvent } from '@/lib/posthog-helpers';
 
 interface AiOpItem {
-  id: number;
+  id: string;
   part: string;
   subject: string;
   desc: string;
@@ -26,23 +26,34 @@ export default function AiOpDetailClient({ item, groups }: AiOpDetailClientProps
   const pathname = usePathname();
   const match = pathname.match(/lesson\/(\d+)$/);
   const currentLessonId = match ? match[1] : null;
-  const [completedDocs, setCompletedDocs] = useState<number[]>([]);
+  const [completedDocs, setCompletedDocs] = useState<string[]>([]);
 
-
+  const loadProgress = async () => {
+    try {
+      const res = await fetch(`/api/aiop/progress?aiopId=${item.id}`);
+      if (res.ok) {
+        const json = await res.json();
+        setCompletedDocs(json.docs || []);
+      }
+    } catch (err) {
+      console.error('Failed to load AI-Op progress', err);
+    }
+  };
 
   useEffect(() => {
-    async function loadProgress() {
-      try {
-        const res = await fetch(`/api/aiop/progress?aiopId=${item.id}`);
-        if (res.ok) {
-          const json = await res.json();
-          setCompletedDocs(json.docs || []);
-        }
-      } catch (err) {
-        console.error('Failed to load AI-Op progress', err);
-      }
-    }
     loadProgress();
+  }, [item.id]);
+
+  // Refresh progress when user returns to the page (e.g., after marking a document as read)
+  useEffect(() => {
+    const handleFocus = () => {
+      loadProgress();
+    };
+
+    window.addEventListener('focus', handleFocus);
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+    };
   }, [item.id]);
 
   const handleSectionToggle = (sectionId: string, isOpen: boolean) => {
@@ -61,6 +72,11 @@ export default function AiOpDetailClient({ item, groups }: AiOpDetailClientProps
       documentTitle,
       source: 'aiop_detail_page'
     });
+  };
+
+  // Function to refresh progress when a document is completed
+  const handleDocumentCompleted = () => {
+    loadProgress();
   };
 
   return (

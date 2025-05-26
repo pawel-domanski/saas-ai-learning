@@ -7,7 +7,7 @@ import DocumentCompleteButton from './DocumentCompleteButton';
 import { captureEvent } from '@/lib/posthog-helpers';
 
 interface AiOpItem {
-  id: number;
+  id: string;
   part: string;
   subject: string;
   desc: string;
@@ -24,26 +24,38 @@ interface AiOpDetailClientProps {
 
 export default function AiOpDetailClient({ item, groups }: AiOpDetailClientProps) {
   const pathname = usePathname();
-  const [completedDocs, setCompletedDocs] = useState<number[]>([]);
+  const [completedDocs, setCompletedDocs] = useState<string[]>([]);
   // Extract current lessonId from pathname (if present)
   const match = pathname.match(/lesson\/(\d+)$/);
   const currentLessonId = match ? match[1] : null;
   
 
+  const loadProgress = async () => {
+    try {
+      const res = await fetch(`/api/aiguides/progress?guideId=${item.id}`);
+      if (res.ok) {
+        const json = await res.json();
+        setCompletedDocs(json.docs || []);
+      }
+    } catch (err) {
+      console.error('Failed to load guide progress', err);
+    }
+  };
   
   useEffect(() => {
-    async function loadProgress() {
-      try {
-        const res = await fetch(`/api/aiguides/progress?guideId=${item.id}`);
-        if (res.ok) {
-          const json = await res.json();
-          setCompletedDocs(json.docs || []);
-        }
-      } catch (err) {
-        console.error('Failed to load guide progress', err);
-      }
-    }
     loadProgress();
+  }, [item.id]);
+
+  // Refresh progress when user returns to the page (e.g., after marking a document as read)
+  useEffect(() => {
+    const handleFocus = () => {
+      loadProgress();
+    };
+
+    window.addEventListener('focus', handleFocus);
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+    };
   }, [item.id]);
 
   const trackSectionToggle = (part: string, isOpen: boolean) => {
@@ -54,7 +66,7 @@ export default function AiOpDetailClient({ item, groups }: AiOpDetailClientProps
     });
   };
 
-  const trackDocumentOpen = (documentId: number) => {
+  const trackDocumentOpen = (documentId: string) => {
     captureEvent('aiguide_document_opened', { 
       guideId: item.id, 
       documentId

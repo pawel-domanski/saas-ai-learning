@@ -121,25 +121,53 @@ export async function handleSubscriptionChange(
   const team = await getTeamByStripeCustomerId(customerId);
 
   if (!team) {
-    console.error('Team not found for Stripe customer:', customerId);
+    console.error('❌ Team not found for Stripe customer:', customerId);
     return;
   }
 
-  console.log(`📅 Processing subscription change: ${status}, cancel_at_period_end: ${subscription.cancel_at_period_end}, team: ${team.id}`);
+  console.log(`📅 Processing subscription change for team ${team.id}:`);
+  console.log(`   Status: ${status}`);
+  console.log(`   Subscription ID: ${subscriptionId}`);
+  console.log(`   Cancel at period end: ${subscription.cancel_at_period_end}`);
+  console.log(`   Current period end: ${new Date((subscription as any).current_period_end * 1000).toISOString()}`);
 
   if (status === 'active' || status === 'trialing') {
     const plan = subscription.items.data[0]?.plan;
+    const productName = typeof plan?.product === 'string' 
+      ? 'Unknown' 
+      : (plan?.product as Stripe.Product)?.name || 'Unknown';
+    
     await updateTeamSubscription(team.id, {
       stripeSubscriptionId: subscriptionId,
       stripeProductId: plan?.product as string,
-      planName: (plan?.product as Stripe.Product).name,
+      planName: productName,
       subscriptionStatus: status,
       cancelAtPeriodEnd: subscription.cancel_at_period_end,
       currentPeriodEnd: new Date((subscription as any).current_period_end * 1000)
     });
     
-    console.log(`✅ Updated subscription for team ${team.id}: status=${status}, cancelAtPeriodEnd=${subscription.cancel_at_period_end}`);
-  } else if (status === 'canceled' || status === 'unpaid') {
+    console.log(`✅ Updated active subscription for team ${team.id}:`);
+    console.log(`   Plan: ${productName}`);
+    console.log(`   Status: ${status}`);
+    console.log(`   Cancel at period end: ${subscription.cancel_at_period_end}`);
+  } else if (status === 'past_due' || status === 'incomplete') {
+    // These statuses still maintain the subscription data but with updated status
+    const plan = subscription.items.data[0]?.plan;
+    const productName = typeof plan?.product === 'string' 
+      ? 'Unknown' 
+      : (plan?.product as Stripe.Product)?.name || 'Unknown';
+    
+    await updateTeamSubscription(team.id, {
+      stripeSubscriptionId: subscriptionId,
+      stripeProductId: plan?.product as string,
+      planName: productName,
+      subscriptionStatus: status,
+      cancelAtPeriodEnd: subscription.cancel_at_period_end,
+      currentPeriodEnd: new Date((subscription as any).current_period_end * 1000)
+    });
+    
+    console.log(`⚠️ Updated problematic subscription for team ${team.id}: status=${status}`);
+  } else if (status === 'canceled' || status === 'unpaid' || status === 'incomplete_expired') {
     await updateTeamSubscription(team.id, {
       stripeSubscriptionId: null,
       stripeProductId: null,
@@ -149,7 +177,23 @@ export async function handleSubscriptionChange(
       currentPeriodEnd: undefined
     });
     
-    console.log(`❌ Canceled subscription for team ${team.id}: status=${status}`);
+    console.log(`❌ Terminated subscription for team ${team.id}: status=${status}`);
+  } else {
+    // Unknown status - log and update anyway
+    console.log(`🤔 Unknown subscription status for team ${team.id}: ${status}`);
+    const plan = subscription.items.data[0]?.plan;
+    const productName = typeof plan?.product === 'string' 
+      ? 'Unknown' 
+      : (plan?.product as Stripe.Product)?.name || 'Unknown';
+    
+    await updateTeamSubscription(team.id, {
+      stripeSubscriptionId: subscriptionId,
+      stripeProductId: plan?.product as string,
+      planName: productName,
+      subscriptionStatus: status,
+      cancelAtPeriodEnd: subscription.cancel_at_period_end,
+      currentPeriodEnd: new Date((subscription as any).current_period_end * 1000)
+    });
   }
 }
 

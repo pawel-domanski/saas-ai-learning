@@ -7,9 +7,10 @@ interface DocumentCompleteButtonProps {
   guideId: string;
   documentId: string;
   initialCompleted?: boolean;
+  onComplete?: () => void; // Added callback for when document is completed
 }
 
-export default function DocumentCompleteButton({ guideId, documentId, initialCompleted = false }: DocumentCompleteButtonProps) {
+export default function DocumentCompleteButton({ guideId, documentId, initialCompleted = false, onComplete }: DocumentCompleteButtonProps) {
   const [completed, setCompleted] = useState(initialCompleted);
   const [loading, setLoading] = useState(false);
 
@@ -30,6 +31,11 @@ export default function DocumentCompleteButton({ guideId, documentId, initialCom
           guideId, 
           documentId
         });
+
+        // Notify parent component that document was completed
+        if (onComplete) {
+          onComplete();
+        }
       } else {
         console.error('Failed to mark guide document as read');
       }

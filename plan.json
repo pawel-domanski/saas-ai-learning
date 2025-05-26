@@ -1,88 +1,49 @@
 {
     "data": [
       {
-        "id:": "8a9a88ea-b212-4804-9bb1-766dc17bfe74",
-        "lesson_id": 1,
-        "subject": "Introduction",
-        "desc": "AI Engineering is the process of designing and implementing AI systems using pre-trained models and existing AI tools to solve practical problems. AI Engineers focus on applying AI in real-world scenarios, improving user experiences, and automating tasks, without developing new models from scratch. They work to ensure AI systems are efficient, scalable, and can be seamlessly integrated into business applications, distinguishing their role from AI Researchers and ML Engineers, who concentrate more on creating new models or advancing AI theory.",
+        "id": "8a9a88ea-b212-4804-9bb1-766dc17bfe74",
+        "subject": "AI Basics - What is Artificial Intelligence?",
+        "desc": "Artificial intelligence is no longer science fiction — it's a technology you use every day. But do you really know what AI is? This course, consisting of five short lessons, will take you on a journey from basic definitions to practical applications in your life. Most importantly, you'll understand the difference between what AI can really do today and what movies promise.",
         "part": "fba3699e-791b-4993-ad66-5851fcbe7a59",
         "ocena": true,
-        "image":  "/img/icons8-google.svg",
-        "content": "# Introduction to AI Engineering\n\nAI Engineering is the process of designing and implementing AI systems using pre-trained models and existing AI tools to solve practical problems. This field represents an important evolution in how organizations and developers approach artificial intelligence.\n\n## Key Concepts\n\nAI Engineers focus on applying AI in real-world scenarios, improving user experiences, and automating tasks, without developing new models from scratch. They work at the intersection of software engineering and artificial intelligence, taking theoretical AI concepts and turning them into practical applications.\n\n## The Role of AI Engineers\n\nUnlike researchers who push the boundaries of what's possible with AI, engineers focus on implementation and integration. They work to ensure AI systems are:\n\n- Efficient and performant\n- Scalable for production use\n- Seamlessly integrated into business applications\n- Reliable and maintainable\n- Cost-effective\n\n## Distinction from Other Roles\n\nAI Engineers are distinct from:\n\n- **AI Researchers**: Scientists who develop new algorithms and advance the theoretical understanding of AI\n- **ML Engineers**: Specialists who focus specifically on building and optimizing machine learning models\n- **Data Scientists**: Professionals who extract insights from data and may develop predictive models\n\n## Importance in Today's Tech Landscape\n\nAs pre-trained models become more powerful and accessible, the role of AI Engineers grows increasingly important. They bridge the gap between cutting-edge AI capabilities and practical business problems, making artificial intelligence useful in everyday applications.\n\nIn the following lessons, we'll explore the specific skills, responsibilities, and best practices for successful AI Engineering.",
-        "test": [
-            {
-                "subject": "Quiz 1",
-                "desc": "Quiz 1 description",
-                
-                "ask": [
-                    {
-                        "id": "16b63568-8df8-410d-829e-e58a69f67d5a",
-                        "question": "What is AI Engineering?",
-                        "type": "multi_choice",
-                        "hint": "Focus on the option that represents a ratio or percentage of completed actions relative to total opportunities.",
-                        "if_wrong": " to jest if_wrong",
-                        "explanation": "AI Engineering is the process of designing and implementing AI systems using pre-trained models and existing AI tools to solve practical problems.",
-                        "correctIndexes": [1,2],
-                        "answers": [
-                            "AI Engineering is the process of designing and implementing AI systems using pre-trained models and existing AI tools to solve practical problems.",
-                            "AI Engineering is the process of creating new AI models from scratch.",
-                            "AI Engineering is the process of using AI to solve theoretical problems."
-                        ]
-                    },
-                    {
-                      "id": "47498344-9361-4b05-8a94-4dd1ebc56822",
-                      "question": "What is AI Engineering?",
-                      "type": "single_choice",
-                      "hint": "Focus on the option that represents a ratio or percentage of completed actions relative to total opportunities.",
-                      "if_wrong": " to jest if_wrong",
-                      "explanation": "AI Engineering is the process of designing and implementing AI systems using pre-trained models and existing AI tools to solve practical problems.",
-                      "correct": 1,
-                      "answers": [
-                          "AI Engineering is the process of designing and implementing AI systems using pre-trained models and existing AI tools to solve practical problems.",
-                          "AI Engineering is the process of creating new AI models from scratch.",
-                          "AI Engineering is the process of using AI to solve theoretical problems."
-                      ]
-                  },
-                  {
-                    "id": "3a26b6bd-1d6b-4959-a73a-7dd2424cd60e",
-                    "question": "What is AI Engineering 1 ?",
-                    "type": "single_choice",
-                    "hint": "1 Focus on the option that represents a ratio or percentage of completed actions relative to total opportunities.",
-                    "if_wrong": " to jest if_wrong",
-                    "explanation": "AI Engineering is the process of designing and implementing AI systems using pre-trained models and existing AI tools to solve practical problems.",
-                    "correct": 1,
-                    "answers": [
-                        "AI Engineering is the process of designing and implementing AI systems using pre-trained models and existing AI tools to solve practical problems.",
-                        "AI Engineering is the process of creating new AI models from scratch.",
-                        "AI Engineering is the process of using AI to solve theoretical problems."
-                    ]
-                }
-                ]
-            }
-            
-        ]
-      },
-      {
-        "id:": "adad7a46-e40f-4adc-b90c-f45c3f4838f5",
-        "subject": "What is an AI Engineer?",
-        "desc": "AI engineers are professionals who specialize in designing, developing, and implementing artificial intelligence (AI) systems. Their work is essential in various industries, as they create applications that enable machines to perform tasks that typically require human intelligence, such as problem-solving, learning, and decision-making.",
-        "part": "fba3699e-791b-4993-ad66-5851fcbe7a59",
-        "ocena": true,
-        "content": "# What is an AI Engineer?\n\nAI Engineers are professionals who specialize in building and implementing artificial intelligence solutions. They bridge the gap between theoretical AI research and practical applications in the real world.",
+        "image": "/img/8a9a88ea-b212-4804-9bb1-766dc17bfe74.png",
+        "content": "You'll see that AI isn't just one robot, but a whole family of technologies — from simple systems to advanced machine learning. You'll love learning about the fascinating history from Turing's vision to today's applications. I'm so excited to tell you the most important thing: you'll understand the difference between what AI can do today and what the movies promise.\n\nI'm so excited to tell you that after this course, you'll know:\n\nI'm going to break down what artificial intelligence really is for you, but I'll keep it simple and use plain language.\nYou might be wondering: does AI need to think like a human to be effective? The answer is no!\nYou might already be enjoying the benefits of AI in your phone, at home, and at work.\nI'm curious: What do you think are the real possibilities and limitations of today's technology?\nI'm so excited to see how AI will evolve in the future!\n\nFor whom: If you're interested in learning about AI in a way that's easy to understand, even without getting into the technical details, you've come to the right place!\nLevel: Hey, no worries if you're a beginner! You don't need any prior knowledge, and we'll be there to help you every step of the way.\nFormat: We'll be going through some short, practical lessons together, and we'll use real-life examples to help you understand the material.\nHey, are you ready to embark on a wonderful journey into the fascinating world of artificial intelligence? Let's dive in!",
         "lesson": [
             {
-                "subject": "Definition and Role",
-                "desc": "Understanding the fundamental role of an AI Engineer",
-                "image":  "/img/icons8-google.svg",
-                "content": "Definition and Role that provide real business value."
+                "subject": "AI Basics - What is Artificial Intelligence?",
+                "desc": "The first lesson is like a warm welcome to the wonderful world of artificial intelligence, starting from the very beginning. You'll discover a straightforward and easy-to-understand explanation of AI. You'll learn why it's not just a fictional concept but a real technology that's a part of your everyday life. I'm so excited to start this lesson with you! It's the foundation for all the others to come, and I'm here to make sure it's a gentle and accessible journey for all of us. No stress, no complicated terms — just a space where we can all grow together in comfort and ease.\n\nWhat you'll learn",
+                "image": "/img/19ab75c5-0cd6-42b8-9530-f9c15f9062ab.png",
+                "content": "Here's a simple explanation of what AI is.\nThe main idea behind AI\n\nDefinition:\nArtificial intelligence (AI) is a technology that allows machines to do things that require human intelligence. It's like \"teaching\" computers to think, or at least mimic human thought processes.\nHere's an example:\nWhen you chat with a voice assistant like Siri or Alexa, you're using AI. The system is like your own personal assistant. It understands what you're saying, interprets your questions, and provides you with the answers — all on its own!\nHere are the main points to keep in mind:\n\nI know it might sound like something out of a sci-fi movie, but AI isn't just a concept — it's a real, living technology that's part of our world today.\nIt's not required to think like a human, but it still manages to achieve similar results, which is really impressive!\nYou know, it's funny how this thing is already a part of our everyday lives."
             },
             {
-                "subject": "Education and Career Path",
-                "desc": "How to become an AI Engineer and career prospects"
+                "subject": "The History of AI: From Turing to Today",
+                "desc": "Let's dive into the captivating history of artificial intelligence — from the visionary ideas of Alan Turing in the 1950s to the amazing ways we use it today. You'll learn about the key moments in the development of AI and how our approach to defining machine intelligence has changed over time. This lesson shows that AI isn't just one idea, but a beautiful evolution of our thinking about technology.",
+                "image": "/img/d6709f96-2c94-4a89-a3a5-433a9749f084.png",
+                "content": "### What you will learn:\n- The story of how the term \"artificial intelligence\" came to be\n- All the really important moments in the journey of defining AI\n\n### Origins (1956):\nJohn McCarthy is the brilliant mind behind the term \"artificial intelligence,\" a term he coined at the Dartmouth Conference. At first, AI was defined as the creation of machines that behave intelligently.\n\n### Turing test:\nAlan Turing came up with a simple test: if a person can't tell if they're talking to a human or a computer, then the computer is considered intelligent.\n\nThere are three main approaches we're exploring:\n1. Turing test\nThe question we're exploring today is: can a machine convince a human that it is human?\n2. Rational approach\nI'm wondering if the machine is making the best decisions.\n3. Cognitive approach\nI'm curious: does the machine mimic human thought processes?\n\n### Conclusion:\nThe definition of AI has evolved so much! It used to be just about imitating humans, but now it's all about achieving intelligent results in any way possible."
             },
             {
-                "subject": "Industry Applications",
-                "desc": "How AI Engineers work across different industries"
+                "subject": "Contemporary Understanding of AI",
+                "desc": "We're going to show you how we understand artificial intelligence today and why the modern approach is more practical than ever. You'll be amazed to discover that AI doesn't have to copy the human brain to be really helpful. Let me give you a specific example using Netflix. I'll break down how modern AI systems work in three simple steps that you'll easily understand and remember.",
+                "image": "/img/d302b692-77d9-4de1-bdbe-d4a05c6a3f06.png",
+                "content": "### What you will learn:\nToday, we're going to talk about how we define AI.\nYou'll be happy to know that AI doesn't have to think like a human!\n\nThe modern definition of AI is a system that can:\n1. Let's interpret that external data together! That's information from the environment, and I'm here to help you understand it.\n2. You're going to learn and improve your performance based on your experience, and that's going to be so great!\n3. Goals are so great! They help us move forward and adapt to whatever life throws at us.\n\nHere's an example of how it works in practice:\nNow, Netflix has this really cool recommendation system that helps you find new shows and movies to watch.\nInterprets: takes a look at what you've been watching and breaks it down for you.\n- Learns - understands your preferences, and is always there for you.\nI'm so proud of you for achieving your goal! Now, I'd love to know what movies you like.\n\n### Key shift in thinking:\nAI doesn't have to act like a human brain. It can solve problems in a completely different way, achieving better results than humans."
+            },
+            {
+                "subject": "AI categories – Narrow, general, and machine learning",
+                "desc": "I'm so excited to share with you the most important lesson for understanding the current state of AI. You'll discover the fascinating difference between what we have today (narrow AI) and what researchers dream of (general AI). You'll learn what machine learning is and why it's such a game-changer in technology development. This lesson is designed to help you understand the strengths and weaknesses of today's AI in a realistic way.",
+                "image": "/img/883d8a0c-6d99-45ca-a4b2-5c84df154312.png",
+                "content": "### What you will learn:\nLet's take a look at the differences between narrow and general AI.\n- So, what exactly is machine learning?\n- A look at where we are today in the wonderful world of AI development\n\n### Narrow AI (ANI) vs. General AI (AGI):\n\nI totally get it, narrow AI is the name of the game for all the current systems.\n- Designed with you in mind for those special tasks you need done\nHere are some examples: speech recognition, driving, playing chess.\nIt's really quite good at what it does, but it's just not versatile.\n\nWe're still in the early stages of developing general AI, but we're making great strides!\nYou've got the smarts and the skills to get any job done.\nI'm sure you'll be just as good as a human being, or even better, in all areas.\nWe're all working towards this goal, and we're going to keep working on it together.\n\n### Machine learning:\n- A part of AI\nYou don't have to worry about the system — it's smart. It learns on its own, just like a human, and it does so based on data.\nHey, no worries! You don't have to program every single detail.\nToday, most people are using this approach for AI.\n\n### Deep learning:\nIt's a type of machine learning, just a special part of it.\n- Uses multilayer neural networks\nIt's great for recognizing images and speech.\n\nHere's where things stand:\nAll AI systems are narrow AI. AGI is still a distant future, but I'm excited to see what it will bring."
+            },
+            {
+                "subject": "AI in Everyday Life: Practical Applications",
+                "desc": "Get ready, because you're about to be pleasantly surprised! This lesson is going to be so interesting! We're going to take a look at how often you use AI without even realizing it. From morning to evening, you're surrounded by artificial intelligence. It's in your phone, your computer, your car, and even your home. You'll see some concrete examples, and you'll understand that AI isn't just some future thing — it's something you can experience right now. This is a practical summary of everything you've learned.",
+                "image": "/img/ebc66738-4130-4c6e-b12a-4041efb7b60e.png",
+                "content": "### What you will learn:\nYou'll be happy to know that you won't have to look very far to find AI.\nWe're here to help you understand how AI can make your daily life easier.\n\n### AI around us:\n\nI'm right here with you on the phone.\nHey, let's talk about voice assistants like Siri and Google Assistant!\nHey, just wanted to let you know about the face recognition feature in photos.\nWe've got you covered with automatic text correction!\n\nYou can find more information on the Internet.\nI'd love to suggest some great shows for you to watch on YouTube and Netflix!\nWe all know how annoying it can be when you get a bunch of emails you didn't ask for. That's where email spam filters come in!\nHey, let's use Google Translate for language translation.\n\nWe're here to help with everything from home to transportation.\n- Navigation systems that help you avoid those pesky traffic jams\nWe've got you covered with our smart thermostats!\nWe've got you covered with our automatic vacuum cleaners!\n\nWhen you're out shopping,\nWe're here to help you find the perfect product! Whether you're looking for something special from an online store, we've got you covered.\nI'm happy to help you with your customer service chatbot questions!\nWe're here to help you detect fraud!\n\n### Conclusion:\nAI isn't just some distant future thing — it's right here, right now. You probably use AI more than a dozen times a day without even realizing it."
+            },
+            {
+                "subject": "Summary - What to remember about AI?",
+                "desc": "A brief but key summary of the entire course. The five most important things about AI that you need to remember, presented in a way that will help you understand artificial intelligence on a daily basis. This is your AI download - everything you really need in one place. Plus tips on how to further develop your knowledge.",
+                "image": "/img/62b040ca-0a73-4881-af63-b84a6d1ddc8c.png",
+                "content": "### 5 most important things about AI:\n\n1. **AI is a tool** - it is used to solve problems that require intelligence.\n2. **AI doesn't have to think like a human** - it can achieve goals by other methods\n3. **All current AI is narrow AI** - each system has a specific, limited application\n4. **AI is already everywhere** - you use it every day, often unconsciously\n5. **The definition of AI is changing** - what was once AI is now a mere function of a computer\n\n### What's next?\nThe definition of AI will evolve along with technology. It is worth following the changes and understanding how AI affects our lives."
             }
         ]
       },
@@ -92,80 +53,9 @@
         "subject": "Roles and Responsibilities",
         "desc": "AI Engineers are responsible for designing, developing, and deploying AI systems that solve real-world problems. Their roles include building machine learning models, implementing data processing pipelines, and integrating AI solutions into existing software or platforms. They work on tasks like data collection, cleaning, and labeling, as well as model training, testing, and optimization to ensure high performance and accuracy. AI Engineers also focus on scaling models for production use, monitoring their performance, and troubleshooting issues. Additionally, they collaborate with data scientists, software developers, and other stakeholders to align AI projects with business goals, ensuring that solutions are reliable, efficient, and ethically sound.",
         "part": "fba3699e-791b-4993-ad66-5851fcbe7a59",
+        "image": "/img/ee82390c-0e57-4fea-98f9-72e60973ab3b.png",
         "ocena": true,
         "content": "# Roles and Responsibilities of AI Engineers\n\nAI Engineers are responsible for designing, developing, and deploying AI systems that solve real-world problems. Their comprehensive set of responsibilities spans the entire lifecycle of AI solutions, from conception to production deployment and maintenance.\n\n## Design and Architecture\n\n- Designing AI solutions based on business requirements\n- Selecting appropriate frameworks, tools, and technologies\n- Creating system architectures that integrate AI components with existing infrastructure\n- Ensuring designs consider scalability, performance, and security\n\n## Development and Implementation\n\nAI Engineers' core technical responsibilities include:\n\n- Building and fine-tuning machine learning models\n- Implementing data processing pipelines\n- Developing APIs and interfaces for AI systems\n- Integrating AI solutions into existing software or platforms\n- Writing clean, efficient, maintainable code\n\n## Data Management\n\nWorking with data is a critical aspect of the role:\n\n- Data collection from various sources\n- Data cleaning and preprocessing\n- Feature engineering and selection\n- Data labeling and annotation\n- Creating data pipelines for training and inference\n\n## Model Training and Optimization\n\n- Training machine learning models\n- Testing and validating model performance\n- Optimizing models for accuracy and efficiency\n- Handling model versioning and management\n- Ensuring models meet performance requirements\n\n## Production and Deployment\n\n- Scaling models for production use\n- Implementing monitoring systems\n- Setting up continuous integration and deployment\n- Ensuring reliability in production environments\n- Troubleshooting issues in deployed systems\n\n## Collaboration\n\nAI Engineers rarely work in isolation:\n\n- Collaborating with data scientists on model development\n- Working with software developers on integration\n- Communicating with stakeholders to understand requirements\n- Aligning AI projects with business goals\n- Presenting results and explaining AI systems to non-technical audiences\n\n## Ethical Considerations\n\nIncreasingly important responsibilities include:\n\n- Ensuring AI systems are fair and unbiased\n- Addressing privacy concerns\n- Following responsible AI practices\n- Documenting AI systems for transparency\n- Considering the societal impact of AI solutions\n\nBy fulfilling these varied responsibilities, AI Engineers ensure that solutions are not only technically sound but also reliable, efficient, and ethically implemented."
-      },
-      {
-        "id": "5a6b6913-a019-4864-b804-8e38e4981ccd",
-        "lesson_id": 3,
-        "subject": "AI Engineer vs ML Engineer",
-        "desc": "An AI Engineer uses pre-trained models and existing AI tools to improve user experiences. They focus on applying AI in practical ways, without building models from scratch. This is different from AI Researchers and ML Engineers, who focus more on creating new models or developing AI theory.",
-        "part": "fba3699e-791b-4993-ad66-5851fcbe7a59",
-        "ocena": true,
-        "content": "ala ma kota",
-        "lesson": [
-            {
-                "subject": "What is an AI Engineer?",
-                "desc": "część 1 lekcji"
-            },
-            {
-                "subject": "What is an AI Engineer?",
-                "desc": "część 2 lekcji"
-            },
-            {
-                "subject": "What is an AI Engineer?",
-                "desc": "część 3 lekcji"
-            }
-        ],
-        "questions": [
-            {
-                "subject": "Test Quiz",
-                "desc": "Test quiz description",
-                "questions": [
-                    {
-                        "id": "4a76975d-1412-4ede-9ddf-06474fc2b2a5",
-                        "question": "What is the main focus of an AI Engineer?",
-                        "type": "single_choice",
-                        "hint": "Focus on practical applications.",
-                        "if_wrong": "That's not correct.",
-                        "explanation": "AI Engineers focus on applying AI in practical ways.",
-                        "correct": 0,
-                        "answers": [
-                            "Applying AI in practical ways",
-                            "Creating new AI models from scratch",
-                            "Developing AI theory"
-                        ]
-                    }
-                ]
-            }
-        ]
-      },
-      {
-        "id": "88a0f761-30b5-4def-b35f-37f6c2d1ef90",
-        "lesson_id": 4,
-        "subject": "AI vs AGI",
-        "desc": "AI (Artificial Intelligence) refers to systems designed to perform specific tasks by mimicking aspects of human intelligence, such as pattern recognition, decision-making, and language processing. These systems, known as \"narrow AI,\" are highly specialized, excelling in defined areas like image classification or recommendation algorithms but lacking broader cognitive abilities. In contrast, AGI (Artificial General Intelligence) represents a theoretical form of intelligence that possesses the ability to understand, learn, and apply knowledge across a wide range of tasks at a human-like level. AGI would have the capacity for abstract thinking, reasoning, and adaptability similar to human cognitive abilities, making it far more versatile than today's AI systems. While current AI technology is powerful, AGI remains a distant goal and presents complex challenges in safety, ethics, and technical feasibility.",
-        "part": "b1b86cc5-6f84-45b4-a759-5243d20daa13",
-        "ocena": true,
-        "content": "# AI vs AGI: Understanding the Difference\n\nArtificial Intelligence (AI) is a rapidly evolving field with different levels of capability. Two terms that are often discussed are AI (in its current form) and AGI (Artificial General Intelligence). Understanding the distinction between these concepts is crucial for anyone working in the field.\n\n## Narrow AI (Today's AI)\n\nToday's AI systems are classified as \"narrow\" or \"weak\" AI:\n\n- **Specialized Focus**: Designed to perform specific tasks by mimicking aspects of human intelligence\n- **Limited Scope**: Excels in defined areas like image classification, language processing, or recommendation algorithms\n- **Domain Restriction**: Cannot transfer knowledge or skills between different domains\n- **Human Oversight**: Requires human design, training, and maintenance\n- **Examples**: Virtual assistants, image recognition systems, recommendation engines, and language models\n\n## Artificial General Intelligence (AGI)\n\nAGI represents a theoretical future form of AI:\n\n- **General Capability**: Possesses the ability to understand, learn, and apply knowledge across a wide range of tasks\n- **Human-Like Intelligence**: Would have cognitive abilities comparable to human intelligence\n- **Flexibility**: Could transfer knowledge between domains and learn new skills without explicit programming\n- **Examples**: Currently no true AGI exists; it remains a theoretical concept and research goal\n\n## Key Differences\n\n| Aspect | Narrow AI | AGI |\n|--------|-----------|-----|\n| Scope | Task-specific | Universal |\n| Learning | Domain-specific | Cross-domain |\n| Reasoning | Limited to programmed parameters | Abstract thinking and reasoning |\n| Problem-solving | Effective within defined boundaries | Creative problem-solving across domains |\n| Autonomy | Requires human guidance | Could potentially be self-directing |\n| Current status | Widely deployed | Theoretical concept |\n\n## Challenges of AGI\n\nMany obstacles stand between current AI and true AGI:\n\n- **Technical Complexity**: Creating systems that think like humans is extraordinarily difficult\n- **Computing Requirements**: May require computing resources beyond current capabilities\n- **Knowledge Integration**: Linking different types of knowledge and reasoning is unsolved\n- **Safety Concerns**: Ensuring AGI would be aligned with human values poses significant challenges\n- **Ethical Questions**: AGI raises profound questions about consciousness, rights, and humanity's role\n\n## Implications for AI Engineers\n\nAs an AI Engineer, it's important to:\n\n1. Understand the capabilities and limitations of current AI\n2. Set realistic expectations with stakeholders about what AI can achieve\n3. Stay informed about progress toward AGI while focusing on practical applications\n4. Consider the ethical implications of advancing AI capabilities\n\nWhile AGI remains a distant goal, today's narrow AI systems continue to advance rapidly and offer tremendous value when properly designed and implemented."
-      },
-      {
-        "id": "4831e61f-ab67-4c22-b365-eb1e55e0523b",
-        "lesson_id": 5,
-        "subject": "LLMs",
-        "desc": "LLMs, or Large Language Models, are advanced AI models trained on vast datasets to understand and generate human-like text. They can perform a wide range of natural language processing tasks, such as text generation, translation, summarization, and question answering. Examples include GPT-4, BERT, and T5. LLMs are capable of understanding context, handling complex queries, and generating coherent responses, making them useful for applications like chatbots, content creation, and automated support. However, they require significant computational resources and may carry biases from their training data.",
-        "part": "b1b86cc5-6f84-45b4-a759-5243d20daa13",
-        "ocena": true,
-        "content": "# Understanding Large Language Models (LLMs)\n\nLarge Language Models (LLMs) represent one of the most significant recent advances in artificial intelligence. As an AI Engineer, understanding these powerful tools is essential for leveraging their capabilities in applications.\n\n## What Are LLMs?\n\nLLMs are advanced AI models trained on vast datasets to understand and generate human-like text. Key characteristics include:\n\n- **Scale**: Trained on billions or trillions of parameters\n- **Data**: Learn from diverse text sources across the internet and books\n- **Architecture**: Based on transformer neural networks with attention mechanisms\n- **Capabilities**: Able to process, understand, and generate natural language\n\n## Popular LLM Examples\n\nSeveral prominent LLMs have emerged in recent years:\n\n- **GPT Series (OpenAI)**: GPT-3, GPT-4, etc.\n- **BERT and T5 (Google)**: Focused on understanding context\n- **LLaMA (Meta)**: Open weights model for research\n- **Claude (Anthropic)**: Designed with a focus on helpful, harmless outputs\n- **Mistral and Mixtral**: Open models with strong performance\n- **PaLM and Gemini (Google)**: Large models with multimodal capabilities\n\n## Key Capabilities\n\nModern LLMs can perform a wide range of natural language processing tasks:\n\n- Text generation and completion\n- Translation between languages\n- Summarization of long documents\n- Question answering from context\n- Code generation and explanation\n- Reasoning about problems\n- Creative writing and content creation\n\n## Technical Considerations\n\nWhen working with LLMs, AI Engineers must consider:\n\n- **Computational Requirements**: LLMs need significant resources to run\n- **Latency Issues**: Response time can be critical for user experience\n- **API vs. Local Deployment**: Trade-offs between control and convenience\n- **Fine-tuning vs. Prompting**: Different approaches to customization\n- **Context Window Limitations**: Constraints on how much text the model can process\n\n## Limitations and Challenges\n\nDespite their power, LLMs have important limitations:\n\n- **Hallucinations**: Can generate plausible-sounding but incorrect information\n- **Bias**: May reflect or amplify biases present in training data\n- **Contextual Understanding**: Sometimes miss nuance or context\n- **Reasoning Capabilities**: Limited logical reasoning compared to humans\n- **Knowledge Cutoff**: Knowledge limited to training data up to a certain date\n\n## Applications in AI Engineering\n\nAI Engineers can use LLMs in various ways:\n\n- Building intelligent chatbots and virtual assistants\n- Creating content generation tools\n- Developing semantic search and information retrieval systems\n- Automating content moderation\n- Enhancing accessibility through text transformation\n- Supporting code generation and documentation\n\nBy understanding both the capabilities and limitations of LLMs, AI Engineers can effectively integrate these powerful tools into applications while mitigating their risks."
-      },
-      {
-        "id": "2171af54-565c-4afb-89be-8987c51315b4",
-        "lesson_id": 6,
-        "subject": "LLMs1",
-        "desc": "LLMs, or Large Language Models, are advanced AI models trained on vast datasets to understand and generate human-like text. They can perform a wide range of natural language processing tasks, such as text generation, translation, summarization, and question answering. Examples include GPT-4, BERT, and T5. LLMs are capable of understanding context, handling complex queries, and generating coherent responses, making them useful for applications like chatbots, content creation, and automated support. However, they require significant computational resources and may carry biases from their training data.",
-        "part": "4ec2bd6b-fd41-4f2d-ac45-621db133eb5b",
-        "ocena": false,
-        "content": "# Understanding Large Language Models (LLMs)\n\nLarge Language Models (LLMs) represent one of the most significant recent advances in artificial intelligence. As an AI Engineer, understanding these powerful tools is essential for leveraging their capabilities in applications.\n\n## What Are LLMs?\n\nLLMs are advanced AI models trained on vast datasets to understand and generate human-like text. Key characteristics include:\n\n- **Scale**: Trained on billions or trillions of parameters\n- **Data**: Learn from diverse text sources across the internet and books\n- **Architecture**: Based on transformer neural networks with attention mechanisms\n- **Capabilities**: Able to process, understand, and generate natural language\n\n## Popular LLM Examples\n\nSeveral prominent LLMs have emerged in recent years:\n\n- **GPT Series (OpenAI)**: GPT-3, GPT-4, etc.\n- **BERT and T5 (Google)**: Focused on understanding context\n- **LLaMA (Meta)**: Open weights model for research\n- **Claude (Anthropic)**: Designed with a focus on helpful, harmless outputs\n- **Mistral and Mixtral**: Open models with strong performance\n- **PaLM and Gemini (Google)**: Large models with multimodal capabilities\n\n## Key Capabilities\n\nModern LLMs can perform a wide range of natural language processing tasks:\n\n- Text generation and completion\n- Translation between languages\n- Summarization of long documents\n- Question answering from context\n- Code generation and explanation\n- Reasoning about problems\n- Creative writing and content creation\n\n## Technical Considerations\n\nWhen working with LLMs, AI Engineers must consider:\n\n- **Computational Requirements**: LLMs need significant resources to run\n- **Latency Issues**: Response time can be critical for user experience\n- **API vs. Local Deployment**: Trade-offs between control and convenience\n- **Fine-tuning vs. Prompting**: Different approaches to customization\n- **Context Window Limitations**: Constraints on how much text the model can process\n\n## Limitations and Challenges\n\nDespite their power, LLMs have important limitations:\n\n- **Hallucinations**: Can generate plausible-sounding but incorrect information\n- **Bias**: May reflect or amplify biases present in training data\n- **Contextual Understanding**: Sometimes miss nuance or context\n- **Reasoning Capabilities**: Limited logical reasoning compared to humans\n- **Knowledge Cutoff**: Knowledge limited to training data up to a certain date\n\n## Applications in AI Engineering\n\nAI Engineers can use LLMs in various ways:\n\n- Building intelligent chatbots and virtual assistants\n- Creating content generation tools\n- Developing semantic search and information retrieval systems\n- Automating content moderation\n- Enhancing accessibility through text transformation\n- Supporting code generation and documentation\n\nBy understanding both the capabilities and limitations of LLMs, AI Engineers can effectively integrate these powerful tools into applications while mitigating their risks."
       }
     ]
   }

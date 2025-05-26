@@ -125,11 +125,33 @@ export default async function LessonPage({
   // Determine if this lesson has rating enabled in plan.json
   const shouldRate = lesson.ocena === true;
   
-  // Get lesson content directly from plan.json
-  const content = lesson.content;
+  // Helper function to process content (load from .md file if needed)
+  const processContent = (contentValue: string): string => {
+    if (typeof contentValue === 'string' && contentValue.endsWith('.md')) {
+      try {
+        const mdFilePath = path.join(process.cwd(), 'docs', contentValue);
+        return fs.readFileSync(mdFilePath, 'utf8');
+      } catch (error) {
+        console.error(`Failed to load markdown file: ${contentValue}`, error);
+        return ''; // Return empty string on error
+      }
+    }
+    return contentValue;
+  };
+
+  // Get lesson content - check if it's a reference to a .md file
+  let content = lesson.content;
   if (!content) {
     return notFound();
   }
+  
+  content = processContent(content);
+  
+  // Process sub-lessons content if they exist
+  const processedSubLessons = lesson.lesson?.map((subLesson: any) => ({
+    ...subLesson,
+    content: subLesson.content ? processContent(subLesson.content) : subLesson.content
+  }));
   
   // Get the course part number/ID
   const part = lesson.part || "1";
@@ -409,16 +431,16 @@ export default async function LessonPage({
             />
           </div>
         )}
-        {lesson.lesson ? (
+        {processedSubLessons ? (
           <div>
             {/* Display main content first if available */}
             {content && <Markdown>{content}</Markdown>}
             
             {/* Display sub-lessons as slides */}
-            {lesson.lesson.length > 0 && (
+            {processedSubLessons.length > 0 && (
               <div>
                 {/* Import the client component for the slideshow */}
-                <SlideshowClient subLessons={lesson.lesson} />
+                <SlideshowClient subLessons={processedSubLessons} />
               </div>
             )}
           </div>

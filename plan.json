@@ -1,60 +1,364 @@
 {
     "data": [
-      {
-        "id": "8a9a88ea-b212-4804-9bb1-766dc17bfe74",
-        "subject": "AI Basics - What is Artificial Intelligence?",
-        "desc": "Artificial intelligence is no longer science fiction — it's a technology you use every day. But do you really know what AI is? This course, consisting of five short lessons, will take you on a journey from basic definitions to practical applications in your life. Most importantly, you'll understand the difference between what AI can really do today and what movies promise.",
-        "part": "fba3699e-791b-4993-ad66-5851fcbe7a59",
-        "ocena": true,
-        "image": "/img/8a9a88ea-b212-4804-9bb1-766dc17bfe74.png",
-        "content": "177a813b-8dde-4eda-947d-55722a84985d.md",
-        "lesson": [
-            {
-                "subject": "AI Basics - What is Artificial Intelligence?",
-                "desc": "The first lesson is like a warm welcome to the wonderful world of artificial intelligence, starting from the very beginning. You'll discover a straightforward and easy-to-understand explanation of AI. You'll learn why it's not just a fictional concept but a real technology that's a part of your everyday life. I'm so excited to start this lesson with you! It's the foundation for all the others to come, and I'm here to make sure it's a gentle and accessible journey for all of us. No stress, no complicated terms — just a space where we can all grow together in comfort and ease.\n\nWhat you'll learn",
-                "image": "/img/19ab75c5-0cd6-42b8-9530-f9c15f9062ab.png",
-                "content": "31e84d83-9bb4-4948-90dd-d1bd67e0ba3e.md"
-            },
-            {
-                "subject": "The History of AI: From Turing to Today",
-                "desc": "Let's dive into the captivating history of artificial intelligence — from the visionary ideas of Alan Turing in the 1950s to the amazing ways we use it today. You'll learn about the key moments in the development of AI and how our approach to defining machine intelligence has changed over time. This lesson shows that AI isn't just one idea, but a beautiful evolution of our thinking about technology.",
-                "image": "/img/d6709f96-2c94-4a89-a3a5-433a9749f084.png",
-                "content": "56cee669-0dc1-4311-b1bf-fa31c2263357.md"
-            },
-            {
-                "subject": "Contemporary Understanding of AI",
-                "desc": "We're going to show you how we understand artificial intelligence today and why the modern approach is more practical than ever. You'll be amazed to discover that AI doesn't have to copy the human brain to be really helpful. Let me give you a specific example using Netflix. I'll break down how modern AI systems work in three simple steps that you'll easily understand and remember.",
-                "image": "/img/d302b692-77d9-4de1-bdbe-d4a05c6a3f06.png",
-                "content": "e64cd02a-0196-4378-a936-a878eb4f000e.md"
-            },
-            {
-                "subject": "AI categories – Narrow, general, and machine learning",
-                "desc": "I'm so excited to share with you the most important lesson for understanding the current state of AI. You'll discover the fascinating difference between what we have today (narrow AI) and what researchers dream of (general AI). You'll learn what machine learning is and why it's such a game-changer in technology development. This lesson is designed to help you understand the strengths and weaknesses of today's AI in a realistic way.",
-                "image": "/img/883d8a0c-6d99-45ca-a4b2-5c84df154312.png",
-                "content": "86ff3956-05cc-4df0-ac5c-26016c7b8c18.md"
-            },
-            {
-                "subject": "AI in Everyday Life: Practical Applications",
-                "desc": "Get ready, because you're about to be pleasantly surprised! This lesson is going to be so interesting! We're going to take a look at how often you use AI without even realizing it. From morning to evening, you're surrounded by artificial intelligence. It's in your phone, your computer, your car, and even your home. You'll see some concrete examples, and you'll understand that AI isn't just some future thing — it's something you can experience right now. This is a practical summary of everything you've learned.",
-                "image": "/img/ebc66738-4130-4c6e-b12a-4041efb7b60e.png",
-                "content": "a74fd756-b9de-4173-8330-c5f5584d974a.md"            },
-            {
-                "subject": "Summary - What to remember about AI?",
-                "desc": "A brief but key summary of the entire course. The five most important things about AI that you need to remember, presented in a way that will help you understand artificial intelligence on a daily basis. This is your AI download - everything you really need in one place. Plus tips on how to further develop your knowledge.",
-                "image": "/img/62b040ca-0a73-4881-af63-b84a6d1ddc8c.png",
-                "content": "15fc04c2-fcf3-4aaf-9ea7-bcc92e41498b.md"
-            }
-        ]
-      },
-      {
-        "id": "5bd05eac-3fea-4ec6-81d8-2f80977f0770",
-        "lesson_id": 2,
-        "subject": "Roles and Responsibilities",
-        "desc": "AI Engineers are responsible for designing, developing, and deploying AI systems that solve real-world problems. Their roles include building machine learning models, implementing data processing pipelines, and integrating AI solutions into existing software or platforms. They work on tasks like data collection, cleaning, and labeling, as well as model training, testing, and optimization to ensure high performance and accuracy. AI Engineers also focus on scaling models for production use, monitoring their performance, and troubleshooting issues. Additionally, they collaborate with data scientists, software developers, and other stakeholders to align AI projects with business goals, ensuring that solutions are reliable, efficient, and ethically sound.",
-        "part": "fba3699e-791b-4993-ad66-5851fcbe7a59",
-        "image": "/img/ee82390c-0e57-4fea-98f9-72e60973ab3b.png",
-        "ocena": true,
-        "content": "test-content.md"
-      }
+        {
+            "id": "8a9a88ea-b212-4804-9bb1-766dc17bfe74",
+            "subject": "AI Basics - What is Artificial Intelligence?",
+            "desc": "Artificial intelligence is no longer science fiction — it's a technology you use every day. But do you really know what AI is? This course, consisting of five short lessons, will take you on a journey from basic definitions to practical applications in your life. Most importantly, you'll understand the difference between what AI can really do today and what movies promise.",
+            "part": "fba3699e-791b-4993-ad66-5851fcbe7a59",
+            "ocena": true,
+            "image": "/img/8a9a88ea-b212-4804-9bb1-766dc17bfe74.png",
+            "content": "177a813b-8dde-4eda-947d-55722a84985d.md",
+            "lesson": [
+                {
+                    "subject": "AI Basics - What is Artificial Intelligence?",
+                    "desc": "The first lesson is like a warm welcome to the wonderful world of artificial intelligence, starting from the very beginning. You'll discover a straightforward and easy-to-understand explanation of AI. You'll learn why it's not just a fictional concept but a real technology that's a part of your everyday life. I'm so excited to start this lesson with you! It's the foundation for all the others to come, and I'm here to make sure it's a gentle and accessible journey for all of us. No stress, no complicated terms — just a space where we can all grow together in comfort and ease.\n\nWhat you'll learn",
+                    "image": "/img/19ab75c5-0cd6-42b8-9530-f9c15f9062ab.png",
+                    "content": "31e84d83-9bb4-4948-90dd-d1bd67e0ba3e.md"
+                },
+                {
+                    "subject": "The History of AI: From Turing to Today",
+                    "desc": "Let's dive into the captivating history of artificial intelligence — from the visionary ideas of Alan Turing in the 1950s to the amazing ways we use it today. You'll learn about the key moments in the development of AI and how our approach to defining machine intelligence has changed over time. This lesson shows that AI isn't just one idea, but a beautiful evolution of our thinking about technology.",
+                    "image": "/img/d6709f96-2c94-4a89-a3a5-433a9749f084.png",
+                    "content": "56cee669-0dc1-4311-b1bf-fa31c2263357.md"
+                },
+                {
+                    "subject": "Contemporary Understanding of AI",
+                    "desc": "We're going to show you how we understand artificial intelligence today and why the modern approach is more practical than ever. You'll be amazed to discover that AI doesn't have to copy the human brain to be really helpful. Let me give you a specific example using Netflix. I'll break down how modern AI systems work in three simple steps that you'll easily understand and remember.",
+                    "image": "/img/d302b692-77d9-4de1-bdbe-d4a05c6a3f06.png",
+                    "content": "e64cd02a-0196-4378-a936-a878eb4f000e.md"
+                },
+                {
+                    "subject": "AI categories – Narrow, general, and machine learning",
+                    "desc": "I'm so excited to share with you the most important lesson for understanding the current state of AI. You'll discover the fascinating difference between what we have today (narrow AI) and what researchers dream of (general AI). You'll learn what machine learning is and why it's such a game-changer in technology development. This lesson is designed to help you understand the strengths and weaknesses of today's AI in a realistic way.",
+                    "image": "/img/883d8a0c-6d99-45ca-a4b2-5c84df154312.png",
+                    "content": "86ff3956-05cc-4df0-ac5c-26016c7b8c18.md"
+                },
+                {
+                    "subject": "AI in Everyday Life: Practical Applications",
+                    "desc": "Get ready, because you're about to be pleasantly surprised! This lesson is going to be so interesting! We're going to take a look at how often you use AI without even realizing it. From morning to evening, you're surrounded by artificial intelligence. It's in your phone, your computer, your car, and even your home. You'll see some concrete examples, and you'll understand that AI isn't just some future thing — it's something you can experience right now. This is a practical summary of everything you've learned.",
+                    "image": "/img/ebc66738-4130-4c6e-b12a-4041efb7b60e.png",
+                    "content": "a74fd756-b9de-4173-8330-c5f5584d974a.md"
+                },
+                {
+                    "subject": "Summary - What to remember about AI?",
+                    "desc": "A brief but key summary of the entire course. The five most important things about AI that you need to remember, presented in a way that will help you understand artificial intelligence on a daily basis. This is your AI download - everything you really need in one place. Plus tips on how to further develop your knowledge.",
+                    "image": "/img/62b040ca-0a73-4881-af63-b84a6d1ddc8c.png",
+                    "content": "15fc04c2-fcf3-4aaf-9ea7-bcc92e41498b.md"
+                }
+            ]
+        },
+        {
+            "id": "5bd05eac-3fea-4ec6-81d8-2f80977f0771",
+            "subject": "AI vs Machine Learning vs Deep Learning",
+            "part": "fba3699e-791b-4993-ad66-5851fcbe7a59",
+            "image": "/img/ee82390c-0e57-4fea-98f9-72e60973ab3b.png",
+            "ocena": true,
+            "content": "6b22e685-11a8-49a3-80f5-dd3e9e67a92e.md",
+            "lesson": [
+                {
+                    "subject": "How do you connect the dots between all the different tech toys?",
+                    "desc": "Let's start with the basics, my friend. In this lesson, you're going to learn an analogy that's so brilliant, it'll help you understand the relationship between AI, machine learning, and deep learning forever. You might be surprised to learn that they're not competing technologies, but elements of one larger whole — each contained in the previous one. It's a bit like Russian matryoshkas, you know?",
+                    "image": "/img/f0130378-a8d6-4f47-9c16-218d15a99af8.png",
+                    "content": "f0130378-a8d6-4f47-9c16-218d15a99af8.md"
+                },
+                {
+                    "subject": "Artificial Intelligence - the broadest umbrella term",
+                    "desc": "Meet artificial intelligence as the broadest concept in the world of intelligent technologies. In this lesson, you'll learn that AI isn't just robots from movies, but an entire field encompassing different approaches to mimicking human intelligence - from simple rule-based systems to the most advanced algorithms. You'll understand why AI is like 'sport' - a very broad concept.",
+                    "image": "/img/242986ce-57e9-4e34-ab19-f996470d1a2c.png",
+                    "content": "242986ce-57e9-4e34-ab19-f996470d1a2c.md"
+                },
+                {
+                    "subject": "Machine Learning - when computers learn by themselves",
+                    "desc": "We're entering the world of machine learning - the technology that revolutionized AI. Instead of programming every rule, we let the computer learn from examples, like a small child. In this lesson, you'll understand why ML is a breakthrough and learn concrete examples from your daily life, from spam filters to Netflix recommendations.",
+                    "image": "/img/7ace7826-a0d7-4d62-a818-5df9126a5b34.png",
+                    "content": "7ace7826-a0d7-4d62-a818-5df9126a5b34.md"
+                },
+                {
+                    "subject": "Deep Learning - when computers learn like humans",
+                    "desc": "We're entering the world of deep learning - the technology that's taking AI to the next level. Instead of learning from examples, computers can now understand and even generate human language. In this lesson, you'll learn how deep learning works and why it's so powerful.",
+                    "image": "/img/06c99398-21ee-4f28-b4a2-639258f71958.png",
+                    "content": "06c99398-21ee-4f28-b4a2-639258f71958.md"
+                },
+                {
+                    "subject": "Narrow AI - when computers learn like humans",
+                    "desc": "We're entering the world of narrow AI - the technology that's taking AI to the next level. Instead of learning from examples, computers can now understand and even generate human language. In this lesson, you'll learn how deep learning works and why it's so powerful.",
+                    "image": "/img/42191ee8-9ab7-4ae4-a5b2-4264074a3603.png",
+                    "content": "42191ee8-9ab7-4ae4-a5b2-4264074a3603.md"
+                }
+            ]
+        },
+        {
+            "id": "5bd05eac-3fea-4ec6-81d8-2f80977f0770",
+            "subject": "The History of Artificial Intelligence Development",
+            "part": "fba3699e-791b-4993-ad66-5851fcbe7a59",
+            "ocena": true,
+            "content": "9e0b030b-6826-4a9a-8ca9-c7c3a016d203.md",
+            "lesson": [
+                {
+                    "subject": "How do you connect the dots between all the different tech toys?",
+                    "desc": "Let's start with the basics, my friend. In this lesson, you're going to learn an analogy that's so brilliant, it'll help you understand the relationship between AI, machine learning, and deep learning forever. You might be surprised to learn that they're not competing technologies, but elements of one larger whole — each contained in the previous one. It's a bit like Russian matryoshkas, you know?",
+                    "image": "/img/f0130378-a8d6-4f47-9c16-218d15a99af8.png",
+                    "content": "f0130378-a8d6-4f47-9c16-218d15a99af8.md"
+                }
+            ]
+        },
+        {
+            "id:": "5b7f4910-2ce8-45b5-899e-5073295b8d5d",
+            "subject": "Types of Artificial Intelligence - Narrow AI vs General AI",
+            "desc": "Understaniding of basics",
+            "part": "fba3699e-791b-4993-ad66-5851fcbe7a59",
+            "image": "",
+            "ocena": false,
+            "content": "A comprehensive introductory course on the fundamental differences between narrow AI (specialized) and general AI. The course consists of 6 practical lessons that explain in an accessible way the differences between current AI systems and hypothetical future general AI.",
+            "lesson": [
+                {
+                    "subject": "Introduction - Two Paths of Intelligence",
+                    "desc": "Have you ever wondered why your phone is great at recognizing music but can't help you cook dinner? This lesson will explain the fundamental difference between two types of artificial intelligence through a simple analogy of a house full of machines.",
+                    "image": "/img/ae4e38be-5887-4697-ad04-d5f0c45a0f25.png",
+                    "content": "ae4e38be-5887-4697-ad04-d5f0c45a0f25.md"
+                },
+                {
+                    "subject": "Narrow AI - Specialist in One Domain",
+                    "desc": "You probably use narrow AI every day without even knowing it. This lesson will show you how to recognize narrow AI systems around you and understand why they're so effective in their specializations.",
+                    "image": "/img/d868c048-7ad8-4418-b50a-7fdbb41e5e3c.png",
+                    "content": "d868c048-7ad8-4418-b50a-7fdbb41e5e3c.md"
+                },
+                {
+                    "subject": "Practical Comparison - When Specialist, When Generalist?",
+                    "desc": "The best way to understand the difference between narrow and general AI is to compare them in specific situations. This lesson shows how differently they would approach the same tasks.",
+                    "image": "/img/2260879b-f0b6-4650-a46f-21bb6e796695.png",
+                    "content": "2260879b-f0b6-4650-a46f-21bb6e796695.md"
+                },
+                {
+                    "subject": "Current State and Future - Where We Are and Where We're Heading?",
+                    "desc": "Will AGI emerge in 10 years or 100? This lesson presents the current state of AI development and various future scenarios painted by experts from around the world.",
+                    "image": "/img/d0025815-b9a5-4d48-8fee-ea973e00af8f.png",
+                    "content": "d0025815-b9a5-4d48-8fee-ea973e00af8f.md"
+                },
+                {
+                    "subject": "Myths and Reality - Debunking Popular Misconceptions",
+                    "desc": "The internet is full of myths about artificial intelligence. This final lesson will help you distinguish facts from fiction and understand what AI progress really means.",
+                    "image": "/img/db2e421e-f4c6-4e0e-a196-312451577586.png",
+                    "content": "db2e421e-f4c6-4e0e-a196-312451577586.md"
+                }
+            ]
+        },
+        {
+            "id:": "7487efe7-f931-480f-8a00-8c28329f5cda",
+            "subject": " Rule-based Systems vs Learning Systems",
+            "desc": "Understanding the differences between rule-based and learning systems in AI",
+            "part": "fba3699e-791b-4993-ad66-5851fcbe7a59",
+            "image": "/img/d2f811d2-11dd-4e53-a62d-a616aa02b4c9.png",
+            "ocena": true,
+            "content": "A comprehensive introductory course on the differences between two fundamental approaches to creating artificial intelligence. The course consists of 6 practical lessons that explain how rule-based and learning systems work, when to apply each approach, and how they impact our daily lives.",
+            "lesson": [
+                {
+                    "subject": "Introduction - Two Paths to Intelligence",
+                    "desc": "Did you know there are two fundamentally different ways to create intelligent systems? This lesson will introduce you to the world of AI through a simple analogy of teaching chess - you'll discover that the difference in approach can be crucial.",
+                    "image": "/img/abe38ee5-51da-4d51-ad2e-a778a2454b9e.png",
+                    "content": "abe38ee5-51da-4d51-ad2e-a778a2454b9e.md"
+                },
+                {
+                    "subject": "Rule-based Systems - \"Do Exactly What I Told You\"",
+                    "desc": "Rule-based systems are digital perfectionists - they do exactly what you tell them, no more, no less. This lesson will show you how these predictable but sometimes limited helpers work, which you probably use every day.",
+                    "image": "/img/6b26eba4-ce9f-4c33-827a-2b8277a4eb48.png",
+                    "content": "6b26eba4-ce9f-4c33-827a-2b8277a4eb48.md"
+                },
+                {
+                    "subject": "Learning Systems - \"Show Me Examples, and I'll Learn Myself\"",
+                    "desc": "Learning systems are digital students - they can observe thousands of examples and independently discover patterns that humans might not notice. This lesson shows how these fascinating systems work, continuously improving themselves every day.",
+                    "image": "/img/d0064f26-71e9-43c8-8b9d-92e302cbfd32.png",
+                    "content": "d0064f26-71e9-43c8-8b9d-92e302cbfd32.md"
+                },
+                {
+                    "subject": "Battle of Systems - Comparison in Action",
+                    "desc": "The best way to understand the differences is to see both systems in action on the same task. This lesson is an exciting duel - you'll see when the logical perfectionist wins, and when the flexible learner triumphs.",
+                    "image": "/img/4aade23e-daf5-4e85-a000-fdea2ec5f928.png",
+                    "content": "4aade23e-daf5-4e85-a000-fdea2ec5f928.md"
+                },
+                {
+                    "subject": "When to Choose Which? - Strategic Guide",
+                    "desc": "Choosing between a rule-based or learning system is like choosing a tool - a hammer is great for driving nails, but a knife is better for cutting bread. This lesson will teach you when to reach for which solution.",
+                    "image": "/img/f7d02082-eda7-4d61-b91a-925a3b3af6b7.png",
+                    "content": "f7d02082-eda7-4d61-b91a-925a3b3af6b7.md"
+                },
+                {
+                    "subject": "Evolution and Future - From Rules to Intelligence",
+                    "desc": "The history of AI is a fascinating journey from simple rules to advanced learning systems. This lesson will take you on a journey through time and show how different approaches influenced today's technology and what awaits us in the future.",
+                    "image": "/img/7a59ec3b-5733-40c0-9b07-6a6496883762.png",
+                    "content": "7a59ec3b-5733-40c0-9b07-6a6496883762.md"
+                }
+            ]
+        },
+        {
+            "id:": "34ca7a43-1cbb-4525-ad77-0c870f6507e5",
+            "subject": "Three Paths to Machine Intelligence - Types of Machine Learning",
+            "desc": "For anyone who wants to understand the basics of artificial intelligence without technical jargon. No programming or mathematical knowledge required.",
+            "part": "fba3699e-791b-4993-ad66-5851fcbe7a59",
+            "image": "",
+            "ocena": true,
+            "content": "This course introduces you to the fascinating world of machine learning, presenting three fundamental approaches: supervised, unsupervised, and reinforcement learning. You'll discover how machines learn to solve problems, discover patterns, and make decisions. The course uses simple analogies and real-life examples, making complex concepts understandable for everyone.",
+            "lesson": [
+                {
+                    "subject": "Three Paths to Machine Learning",
+                    "desc": "Have you ever wondered how machines learn to recognize faces, play games, or predict weather? In this lesson, we'll discover three fundamental ways artificial intelligence acquires knowledge - each mimicking a different aspect of human learning.",
+                    "image": "/img/f44b5663-8e59-4332-b5b8-7df95eb1caca.png",
+                    "content": "f44b5663-8e59-4332-b5b8-7df95eb1caca.md"
+                },
+                {
+                    "subject": "Supervised Learning - Learning with a Teacher",
+                    "desc": "Remember how in school the teacher showed you example math problems along with solutions? Supervised learning works exactly the same way - the AI system learns from examples with provided correct answers.\n\n",
+                    "image": "/img/55fe5a6c-d32c-4693-b5f1-4dbf16435ed2.png",
+                    "content": "55fe5a6c-d32c-4693-b5f1-4dbf16435ed2.md"
+                },
+                {
+                    "subject": "Supervised Learning - Advantages, Disadvantages, and Applications",
+                    "desc": "Supervised learning is like a diligent student who excellently solves problems similar to those in the textbook but might struggle with something completely new. Let's explore its strengths and weaknesses and practical applications.",
+                    "image": "/img/0b91f6f5-dabf-485c-a853-f8f257f0bbf5.png",
+                    "content": "0b91f6f5-dabf-485c-a853-f8f257f0bbf5.md"
+                },
+                {
+                    "subject": "Unsupervised Learning - Discovering Hidden Patterns",
+                    "desc": "What if you received thousands of animal photos without any captions and had to sort them somehow? You'd probably start grouping similar ones - all cats together, dogs together, birds together. That's exactly how unsupervised learning works!",
+                    "image": "/img/11d94632-0587-4369-9d97-adfc87f7af02.png",
+                    "content": "11d94632-0587-4369-9d97-adfc87f7af02.md"
+                },
+                {
+                    "subject": "Unsupervised Learning - Advantages, Disadvantages, and When to Use",
+                    "desc": "Unsupervised learning is like an archaeologist discovering unknown civilizations - they don't know what they're looking for, but can recognize something significant. This flexibility is both a strength and weakness of this approach.",
+                    "image": "/img/b66a938c-d62e-4016-85c0-55695c58cdbe.png",
+                    "content": "b66a938c-d62e-4016-85c0-55695c58cdbe.md"
+                },
+                {
+                    "subject": "Reinforcement Learning - Learning Through Experience",
+                    "desc": "Remember how you learned to ride a bicycle? Nobody could explain exactly how to maintain balance - you had to try yourself, fall, and learn from mistakes. That's exactly how reinforcement learning works!",
+                    "image": "/img/60203c69-daf2-4837-9239-1ffeedb26475.png",
+                    "content": "60203c69-daf2-4837-9239-1ffeedb26475.md"
+                },
+                {
+                    "subject": "Reinforcement Learning - Challenges and Applications",
+                    "desc": "Reinforcement learning can achieve amazing results - like AI playing games better than humans. But the road to success can be long and full of challenges. Let's explore what makes this method both powerful and difficult.",
+                    "image": "/img/08f45d79-78fa-46f9-ac14-9e8181200b15.png",
+                    "content": "08f45d79-78fa-46f9-ac14-9e8181200b15.md"
+                },
+                {
+                    "subject": "Comparing Three Approaches - Which to Choose?",
+                    "desc": "We now have three powerful tools in the AI toolbox. But which one to choose for a specific task? It's like choosing between a hammer, screwdriver, and glue - each has its ideal application. Let's compare them with practical examples!",
+                    "image": "/img/40fba4af-f824-4b96-8323-ef1081eae6a4.png",
+                    "content": "40fba4af-f824-4b96-8323-ef1081eae6a4.md"
+                },
+                {
+                    "subject": "Future of Machine Learning - Combining Worlds",
+                    "desc": "The most exciting discoveries in AI happen at the intersection of different approaches. It's like fusion cuisine - you combine the best elements of different cuisines, creating something completely new. Let's see where the future of machine learning is heading!\n\n",
+                    "image": "/img/3f19a45d-89af-4545-8c27-c784067adda1.png",
+                    "content": "3f19a45d-89af-4545-8c27-c784067adda1.md"
+                }
+            ]
+        },
+        {
+            "id:": "b94822ec-fc88-4961-b946-e8b555c6012a",
+            "subject": "Electronic Brains - Neural Networks in a Nutshell",
+            "desc": "For anyone curious about the world of AI who wants to understand the basics of neural networks without technical jargon.",
+            "part": "fba3699e-791b-4993-ad66-5851fcbe7a59",
+            "image": "",
+            "ocena": true,
+            "content": "This course unveils the mysteries of neural networks - technology inspired by the human brain that powers face recognition, language translation, and music recommendations. You'll learn how artificial neurons work, how networks learn to recognize patterns, and where you encounter them in daily life. Everything explained in plain language, using real-life analogies and without complicated mathematics.",
+            "lesson": [
+                {
+                    "subject": "What Are Neural Networks?",
+                    "desc": "Facebook recognizes faces in photos, Google translates texts, and Spotify matches music to your taste. What connects all these \"magical\" features? Neural networks - fascinating technology inspired by the human brain. Let's discover what these electronic brains really are!",
+                    "image": "/img/44c558d2-482f-4f95-bb3f-b851fff23cb2.png",
+                    "content": "44c558d2-482f-4f95-bb3f-b851fff23cb2.md"
+                },
+                {
+                    "subject": "From Biological to Artificial Neuron",
+                    "desc": "From Biological to Artificial Neuron",
+                    "image": "/img/aa28f5ed-ddf9-4f82-b63b-360e995bdd2a.png",
+                    "content": "aa28f5ed-ddf9-4f82-b63b-360e995bdd2a.md"
+                },
+                {
+                    "subject": "Network Architecture - Layers and Connections",
+                    "desc": "If a single neuron is an employee, then a whole neural network is a well-organized corporation. Each layer has its role, and information flows through them like documents through different departments. Let's see how such a \"neural company\" is built!",
+                    "image": "/img/c5345a8c-30cf-4819-85c1-19e9e012e181.png",
+                    "content": "c5345a8c-30cf-4819-85c1-19e9e012e181.md"
+                },
+                {
+                    "subject": "How Does a Neural Network Learn?",
+                    "desc": "Imagine teaching a small child to recognize animals. You show a picture, the child guesses, you correct. After many attempts, the child starts recognizing flawlessly. That's exactly how a neural network learns - through trials, errors, and corrections!",
+                    "image": "/img/8dcb4765-706f-4907-bdf6-d35720bc8308.md",
+                    "content": "8dcb4765-706f-4907-bdf6-d35720bc8308.md"
+                },
+                {
+                    "subject": "Types of Neural Networks",
+                    "desc": "Just as different tools serve different tasks, different neural network architectures specialize in different problems. Let's meet the most popular types of networks and their superpowers!",
+                    "image": "",
+                    "content": "759f1102-acc5-43e9-9a40-7f28ffb9b663.md"
+                },
+                {
+                    "subject": "Neural Networks in Daily Life",
+                    "desc": "Neural networks are like electricity - everywhere around us, but we rarely think about them. From the moment you wake up until you go to sleep, you use dozens of systems based on neural networks. Let's discover these invisible helpers!",
+                    "image": "/img/0a50ea0d-3cff-4e52-9e65-420c1aa8e237.png",
+                    "content": "0a50ea0d-3cff-4e52-9e65-420c1aa8e237.md"
+                },
+                {
+                    "subject": "Strengths and Weaknesses of Neural Networks\n",
+                    "desc": "Neural networks are powerful tools, but like any tool - they're not perfect for everything. Just as a hammer is great for nails but poor for screws, neural networks have their superpowers and weaknesses. Let's explore them honestly!",
+                    "image": "/img/bc9e021c-b22b-41e2-8da3-aa9f79ee55e0.png",
+                    "content": "bc9e021c-b22b-41e2-8da3-aa9f79ee55e0.md"
+                },
+                {
+                    "subject": "Fun Facts and Future of Neural Networks",
+                    "desc": "The world of neural networks is full of fascinating phenomena that sound like science fiction. From AI dreaming of electric sheep to networks learning to play games better than world champions. Let's discover the most interesting phenomena and peek into the future!",
+                    "image": "/img/0b48d868-2f40-4ef8-939a-9954f72396c8.png",
+                    "content": "0b48d868-2f40-4ef8-939a-9954f72396c8.md"
+                }
+            ]
+        },
+        {
+            "id:": "20f6313f-2e15-46e2-bcab-4bb7e37f0565",
+            "subject": "Language Models and Natural Language Processing",
+            "desc": "People without a technical background who want to understand how tools like ChatGPT, Google Translate, and other AI systems work.",
+            "part": "fba3699e-791b-4993-ad66-5851fcbe7a59",
+            "image": "",
+            "ocena": true,
+            "content": "This course will guide you through the fascinating world of language-based artificial intelligence. You'll learn how computers are taught to understand and generate human language, discover the history behind these technologies, and explore their practical applications in everyday life.",
+            "lesson": [
+                {
+                    "id": "609a60fc-6245-49da-86ee-203e58099f9f",
+                    "subject": "Introduction – How do computers learn to understand language?",
+                    "desc": "Have you ever wondered how Siri understands your commands or how Google Translate manages to translate entire texts? In this lesson, you'll uncover the basics behind this incredible technology.",
+                    "image": "/img/609a60fc-6245-49da-86ee-203e58099f9f.png",
+                    "content": "609a60fc-6245-49da-86ee-203e58099f9f.md"
+                },
+                {
+                    "id": "07e6f31c-e519-4f53-a100-2879c665ac31",
+                    "subject": "The History of NLP – From Rules to Intelligence",
+                    "desc": "How did computers learn to understand language? This journey spans over 70 years of breakthroughs. Discover the key milestones in this technological revolution.",
+                    "image": "/img/07e6f31c-e519-4f53-a100-2879c665ac31.png",
+                    "content": "07e6f31c-e519-4f53-a100-2879c665ac31.md"
+                },
+                {
+                    "id": "14fb9015-c933-4347-acfb-01067b0692d2",
+                    "subject": "How Language Models Work – Core Mechanisms",
+                    "desc": "Let’s look under the hood! How do computers turn words into numbers and predict what comes next? These mechanisms are simpler than they seem.",
+                    "image": "/img/14fb9015-c933-4347-acfb-01067b0692d2.png",
+                    "content": "14fb9015-c933-4347-acfb-01067b0692d2.md"
+                },
+                {
+                    "id": "479a4a07-69fc-497e-82a8-6c8def9b0fc8",
+                    "subject": "Types of Language Models – From Simple to Advanced",
+                    "desc": "Not all language models are the same! Get to know the main types—from basic statistical systems to cutting-edge multimodal AIs that combine text with images.",
+                    "image": "/img/479a4a07-69fc-497e-82a8-6c8def9b0fc8.png",
+                    "content": "479a4a07-69fc-497e-82a8-6c8def9b0fc8.md"
+                },
+                {
+                    "id": "037eae77-ba36-4020-a3cb-7cdc40ded3e7",
+                    "subject": "How Models Learn Language – Training and Fine-Tuning",
+                    "desc": "How do models know how to answer questions? Their training is much like human learning—from basics, through practice, to specialization. Learn how AI is “raised.”",
+                    "image": "/img/037eae77-ba36-4020-a3cb-7cdc40ded3e7.png",
+                    "content": "037eae77-ba36-4020-a3cb-7cdc40ded3e7.md"
+                }
+            ]
+        }
     ]
-  }
+}

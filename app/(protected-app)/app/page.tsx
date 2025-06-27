@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
 import fs from 'fs';
 import path from 'path';
-import { Book, LockIcon, BookType, ChevronDown, ChevronRight, Brain, Code, Lightbulb, FileText, Puzzle, DollarSign, Tag, Calendar, RefreshCw, Music } from 'lucide-react';
+import { Book, LockIcon, ChevronDown, ChevronRight, DollarSign, Tag, Calendar, RefreshCw, Music } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cookies } from 'next/headers';
 import { CollapsibleText } from './components/CollapsibleText';
@@ -46,26 +46,16 @@ async function getPartDetails() {
   const data = JSON.parse(fileContents);
   
   // Przekształć tablicę w obiekt, gdzie kluczem jest id części
-  const partMap: {[key: number]: {name: string, icon: string}} = {};
-  data.parts.forEach((part: {id: number, name: string, icon?: string}) => {
+  const partMap: {[key: string]: {name: string, icon: string}} = {};
+  data.parts.forEach((part: {id: string, name: string, icon?: string}) => {
     partMap[part.id] = {
       name: part.name,
-      icon: part.icon || 'BookType' // Default icon if not specified
+      icon: part.icon || 'fas fa-book' // Default Font Awesome icon if not specified
     };
   });
   
   return partMap;
 }
-
-// Map string icons to actual icon components
-const iconMap = {
-  'BookType': BookType,
-  'Brain': Brain,
-  'Code': Code,
-  'Lightbulb': Lightbulb,
-  'FileText': FileText,
-  'Puzzle': Puzzle
-};
 
 // Struktura dla części kursu
 interface PartInfo {
@@ -267,7 +257,7 @@ export default async function AppPage() {
       parts[part] = {
         id: part,
         name: partDetails[part]?.name || `Część ${part}`,
-        icon: partDetails[part]?.icon || 'BookType',
+        icon: partDetails[part]?.icon || 'fas fa-book',
         lessons: []
       };
     }

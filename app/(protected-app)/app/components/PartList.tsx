@@ -52,7 +52,6 @@ export default function PartList({
     <div className="space-y-6 mb-8 w-full">
       {sortedParts.map((part) => {
         const isOpen = part.id === openPartId;
-        const IconComponent = part.icon && typeof part.icon === 'string' ? require('lucide-react')[part.icon] : null;
         return (
           <div key={part.id} className="rounded-lg overflow-hidden shadow-md border border-gray-200 w-full">
             <button
@@ -63,7 +62,9 @@ export default function PartList({
               <div className="flex items-center justify-between p-4 hover:opacity-90 duration-200 w-full">
                 <div className="flex items-center flex-1 min-w-0">
                   <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-blue-500 flex items-center justify-center mr-4">
-                    {IconComponent && <IconComponent className="text-white" size={24} />}
+                    {part.icon && (
+                      <i className={`${part.icon} text-white text-2xl`} aria-hidden="true"></i>
+                    )}
                   </div>
                   <div className="min-w-0 flex-1">
                     <h2 className="text-lg font-semibold text-blue-700 truncate">{part.name}</h2>
